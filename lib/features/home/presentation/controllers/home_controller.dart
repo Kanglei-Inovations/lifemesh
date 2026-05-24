@@ -281,8 +281,10 @@ class HomeController extends GetxController {
     final legacyUserIds = users
         .where(
           (user) =>
-              user.connectedAt == null &&
-              (user.avatar?.contains('i.pravatar.cc') ?? false),
+              user.endpointId == null ||
+              user.meshId == null ||
+              (user.avatar?.contains('i.pravatar.cc') ?? false) ||
+              (user.name?.startsWith('Mesh User ') ?? false),
         )
         .map((user) => user.id)
         .toList();
@@ -328,109 +330,6 @@ class HomeController extends GetxController {
           ..lastUpdated = DateTime.now();
         await _db.isar.dashboardStatModels.put(stats);
       }
-    });
-  }
-
-  void _startRealtimeNearbySimulation() {
-    _simulationTimer?.cancel();
-    _simulationTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _simulateNearbyTick();
-    });
-  }
-
-  Future<void> _simulateNearbyTick() async {
-    if (_isSimulatingTick || isNearbyLoading.value) return;
-
-    _isSimulatingTick = true;
-    try {
-      final roll = _random.nextDouble();
-      if (nearbyUsers.isEmpty || roll < 0.35) {
-        await _addRealtimeNearbyUser();
-      } else if (nearbyUsers.length > 1 && roll < 0.55) {
-        await _removeRealtimeNearbyUser();
-      } else {
-        await _updateRealtimeSignal();
-      }
-
-      await _syncDashboardStatsToIsar();
-    } catch (error) {
-      Get.log('Nearby simulation error: $error');
-    } finally {
-      _isSimulatingTick = false;
-    }
-  }
-
-  Future<void> _addRealtimeNearbyUser() async {
-    final now = DateTime.now();
-    final user = NearbyUserModel()
-      ..name = 'Mesh User ${100 + _random.nextInt(900)}'
-      ..avatar = ''
-      ..distance = '${20 + _random.nextInt(280)} m'
-      ..signalStrength = double.parse(
-        (0.45 + _random.nextDouble() * 0.5).toStringAsFixed(2),
-      )
-      ..connectedAt = now;
-
-    await _db.isar.writeTxn(() async {
-      await _db.isar.nearbyUserModels.put(user);
-      await _db.isar.activityModels.put(
-        ActivityModel()
-          ..title = '${user.name} joined the nearby mesh'
-          ..subtitle = 'Nearby discovery update'
-          ..timeAgo = 'just now'
-          ..iconType = 'user',
-      );
-    });
-  }
-
-  Future<void> _removeRealtimeNearbyUser() async {
-    final user = nearbyUsers[_random.nextInt(nearbyUsers.length)];
-
-    await _db.isar.writeTxn(() async {
-      await _db.isar.nearbyUserModels.delete(user.id);
-      await _db.isar.activityModels.put(
-        ActivityModel()
-          ..title = '${user.name ?? 'A nearby user'} left the mesh'
-          ..subtitle = 'Connection count updated'
-          ..timeAgo = 'just now'
-          ..iconType = 'mesh',
-      );
-    });
-  }
-
-  Future<void> _updateRealtimeSignal() async {
-    if (nearbyUsers.isEmpty) return;
-
-    final user = nearbyUsers[_random.nextInt(nearbyUsers.length)];
-    final currentSignal = user.signalStrength ?? 0.5;
-    final nextSignal = (currentSignal + ((_random.nextDouble() - 0.5) * 0.22))
-        .clamp(0.25, 0.98)
-        .toDouble();
-
-    user
-      ..signalStrength = double.parse(nextSignal.toStringAsFixed(2))
-      ..distance = '${18 + _random.nextInt(300)} m'
-      ..connectedAt = DateTime.now();
-
-    await _db.isar.writeTxn(() async {
-      await _db.isar.nearbyUserModels.put(user);
-    });
-  }
-
-  Future<void> _syncDashboardStatsToIsar() async {
-    final users = await _db.isar.nearbyUserModels.where().findAll();
-    final stats =
-        await _db.isar.dashboardStatModels.where().findFirst() ??
-        DashboardStatModel();
-    final signal = _averageSignal(users).round();
-
-    await _db.isar.writeTxn(() async {
-      stats
-        ..isMeshActive = users.isNotEmpty
-        ..connectedNodes = users.length
-        ..signalStrength = signal
-        ..lastUpdated = DateTime.now();
-      await _db.isar.dashboardStatModels.put(stats);
     });
   }
 }
