@@ -1,31 +1,106 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import '../../../../core/database_service.dart';
+import '../../../../models/onboarding_user_model.dart';
+import 'onboarding_controller.dart';
 
 /// Controller responsible for managing the "Personal Info" onboarding step.
 class PersonalInfoController extends GetxController {
-  // Text Controllers for input fields
+  final DatabaseService _db = Get.find<DatabaseService>();
+  final OnboardingController onboardingController = Get.find<OnboardingController>();
+
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
+  final TextEditingController gpsController = TextEditingController(); // New field requested
 
-  // Reactive state variables
   final RxString selectedGender = 'Male'.obs;
   final RxString selectedDate = ''.obs;
   final RxBool isLoading = false.obs;
 
+  double? _latitude;
+  double? _longitude;
+  
+  Timer? _debounceTimer;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _restoreData();
+
+    // Auto-save listeners
+    fullNameController.addListener(_debouncedSave);
+    occupationController.addListener(_debouncedSave);
+    emailController.addListener(_debouncedSave);
+    phoneController.addListener(_debouncedSave);
+    locationController.addListener(_debouncedSave);
+    gpsController.addListener(_debouncedSave);
+  }
+
   @override
   void onClose() {
+    _debounceTimer?.cancel();
     fullNameController.dispose();
     occupationController.dispose();
     emailController.dispose();
     phoneController.dispose();
     locationController.dispose();
+    gpsController.dispose();
     super.onClose();
   }
 
-  /// Triggers a date picker dialog for Date of Birth selection.
+  Future<void> _restoreData() async {
+    final user = await _db.isar.onboardingUserModels.where().findFirst();
+    if (user != null) {
+      fullNameController.text = user.fullName ?? '';
+      occupationController.text = user.occupation ?? '';
+      emailController.text = user.email ?? '';
+      phoneController.text = user.phone ?? '';
+      locationController.text = user.locationName ?? '';
+      selectedGender.value = user.gender ?? 'Male';
+      selectedDate.value = user.dob ?? '';
+      _latitude = user.latitude;
+      _longitude = user.longitude;
+      if (_latitude != null && _longitude != null) {
+        gpsController.text = '$_latitude, $_longitude';
+      }
+    }
+  }
+
+  void _debouncedSave() {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _saveToIsar();
+    });
+  }
+
+  Future<void> _saveToIsar() async {
+    try {
+      final user = await _db.isar.onboardingUserModels.where().findFirst() ?? OnboardingUserModel();
+      user.fullName = fullNameController.text.trim();
+      user.occupation = occupationController.text.trim();
+      user.email = emailController.text.trim();
+      user.phone = phoneController.text.trim();
+      user.locationName = locationController.text.trim();
+      user.gender = selectedGender.value;
+      user.dob = selectedDate.value;
+      user.latitude = _latitude;
+      user.longitude = _longitude;
+      
+      await _db.isar.writeTxn(() async {
+        await _db.isar.onboardingUserModels.put(user);
+      });
+    } catch (e) {
+      Get.log("Auto-save error: $e");
+    }
+  }
+
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -36,42 +111,65 @@ class PersonalInfoController extends GetxController {
     
     if (picked != null) {
       selectedDate.value = "${picked.day} ${_getMonth(picked.month)} ${picked.year}";
-      Get.log("Date of birth selected: ${selectedDate.value}");
+      _saveToIsar();
     }
   }
 
-  /// Helper to convert month integer to abbreviated string.
   String _getMonth(int month) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[month - 1];
   }
 
-  /// Updates the selected gender value.
   void selectGender(String gender) {
     if (['Male', 'Female', 'Other'].contains(gender)) {
       selectedGender.value = gender;
-      Get.log("Gender selected: $gender");
+      _saveToIsar();
     }
   }
 
-  /// Mocks a location detection feature.
   Future<void> detectLocation() async {
     isLoading.value = true;
     
     try {
-      // Simulate GPS location lookup delay
-      await Future.delayed(const Duration(seconds: 1));
-      locationController.text = 'Bengaluru, Karnataka, India';
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        Get.snackbar('Error', 'Location services are disabled.');
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          Get.snackbar('Error', 'Location permissions are denied');
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        Get.snackbar('Error', 'Location permissions are permanently denied.');
+        return;
+      } 
+
+      Position position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high));
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+      gpsController.text = '$_latitude, $_longitude';
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        locationController.text = '${place.locality}, ${place.administrativeArea}, ${place.country}';
+      }
+      _saveToIsar();
       Get.log("Location successfully detected.");
     } catch (e) {
-      Get.snackbar('Location Error', 'Unable to detect location.');
-      Get.log("Error detecting location: $e");
+      Get.snackbar('Location Error', 'Unable to detect location: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Validates all necessary personal information fields.
   bool validatePersonalInfo() {
     final fullName = fullNameController.text.trim();
     final email = emailController.text.trim();
@@ -82,13 +180,11 @@ class PersonalInfoController extends GetxController {
       return false;
     }
     
-    // Optional field, but validate formatting if provided
     if (email.isNotEmpty && !GetUtils.isEmail(email)) {
       Get.snackbar('Validation Error', 'Please enter a valid email address');
       return false;
     }
     
-    // Optional field, but validate formatting if provided
     if (phone.isNotEmpty && !GetUtils.isPhoneNumber(phone)) {
       Get.snackbar('Validation Error', 'Please enter a valid phone number');
       return false;
@@ -97,18 +193,14 @@ class PersonalInfoController extends GetxController {
     return true;
   }
 
-  /// Finalizes the Personal Info step and simulates saving the data.
   Future<void> savePersonalInfo() async {
     if (!validatePersonalInfo()) return;
 
     isLoading.value = true;
     
     try {
-      // Simulate saving user personal info data
-      await Future.delayed(const Duration(seconds: 1));
-      Get.log("Personal Info saved successfully.");
-      
-      // Logic complete, ready to proceed via OnboardingController
+      await _saveToIsar();
+      onboardingController.nextStep();
     } catch (e) {
       Get.snackbar('Error', 'Failed to save personal info. Try again.');
       Get.log("Error saving personal info: $e");

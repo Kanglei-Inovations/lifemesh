@@ -1,32 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:io';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
+import '../controllers/create_id_controller.dart';
+import '../controllers/onboarding_controller.dart';
 
-class IdentityScreen extends StatefulWidget {
+class IdentityScreen extends StatelessWidget {
   const IdentityScreen({super.key});
 
   @override
-  State<IdentityScreen> createState() => _IdentityScreenState();
-}
-
-class _IdentityScreenState extends State<IdentityScreen> {
-  String selectedPrivacy = 'private'; // 'private' or 'discoverable'
-  final TextEditingController idController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController bioController = TextEditingController();
-
-  @override
-  void dispose() {
-    idController.dispose();
-    nameController.dispose();
-    bioController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Ensuring OnboardingController is available
+    if (!Get.isRegistered<OnboardingController>()) {
+      Get.put(OnboardingController());
+    }
+    final controller = Get.put(CreateIdController());
+
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
       body: Stack(
@@ -48,7 +39,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(controller.onboardingController),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -72,9 +63,12 @@ class _IdentityScreenState extends State<IdentityScreen> {
                         const SizedBox(height: 32),
                         
                         // Avatar Upload
-                        _buildAvatarUpload().animate().scale(delay: 400.ms, curve: Curves.easeOutBack),
+                        GestureDetector(
+                          onTap: controller.pickProfileImage,
+                          child: Obx(() => _buildAvatarUpload(controller.selectedImage.value)),
+                        ).animate().scale(delay: 400.ms, curve: Curves.easeOutBack),
                         const SizedBox(height: 8),
-                        Text(
+                        const Text(
                           'Add a profile photo',
                           style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
                         ).animate().fadeIn(delay: 500.ms),
@@ -85,13 +79,15 @@ class _IdentityScreenState extends State<IdentityScreen> {
                         ).animate().fadeIn(delay: 500.ms),
                         const SizedBox(height: 32),
                         
-                        _buildInputField(
+                        Obx(() => _buildInputField(
                           title: 'Choose Your ID',
                           hint: 'rahulkumar',
                           icon: '@',
                           isIdField: true,
-                          controller: idController,
-                        ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
+                          controller: controller.usernameController,
+                          isValid: controller.isUsernameAvailable.value,
+                          suggestions: controller.usernameSuggestions,
+                        )).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
                         
                         _buildInputField(
@@ -99,14 +95,14 @@ class _IdentityScreenState extends State<IdentityScreen> {
                           hint: 'Rahul Kumar',
                           icon: Icons.person_outline,
                           description: 'This is how others will see you.',
-                          controller: nameController,
+                          controller: controller.displayNameController,
                         ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
                         
-                        _buildBioField().animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0),
+                        _buildBioField(controller.bioController).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
                         
-                        _buildPrivacySection().animate().fadeIn(delay: 900.ms).slideY(begin: 0.1, end: 0),
+                        Obx(() => _buildPrivacySection(controller)).animate().fadeIn(delay: 900.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 40),
                         
                         // Continue Button
@@ -118,33 +114,33 @@ class _IdentityScreenState extends State<IdentityScreen> {
                             borderRadius: BorderRadius.circular(28),
                           ),
                           child: ElevatedButton(
-                            onPressed: () {
-                              Get.toNamed('/personal-info');
-                            },
+                            onPressed: controller.saveCreateIdData,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Continue',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-                                ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
-                                  ),
-                                  child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
-                                ),
-                              ],
-                            ),
+                            child: Obx(() => controller.isLoading.value 
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Continue',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
+                                      ),
+                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                    ),
+                                  ],
+                                )),
                           ),
                         ).animate().fadeIn(delay: 1000.ms),
                         const SizedBox(height: 40),
@@ -160,7 +156,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OnboardingController onboardingController) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -173,7 +169,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Get.back(),
+              onPressed: onboardingController.previousStep,
             ),
           ),
           Expanded(
@@ -188,7 +184,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 48), // Balance for back button
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -244,7 +240,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
     );
   }
 
-  Widget _buildAvatarUpload() {
+  Widget _buildAvatarUpload(String imagePath) {
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
@@ -265,14 +261,18 @@ class _IdentityScreenState extends State<IdentityScreen> {
           child: Padding(
             padding: const EdgeInsets.all(3.0),
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.deepNavy,
-                image: DecorationImage(
-                  // Placeholder user image
-                  image: NetworkImage('https://i.pravatar.cc/300?img=11'),
-                  fit: BoxFit.cover,
-                ),
+                image: imagePath.isNotEmpty 
+                  ? DecorationImage(
+                      image: imagePath.startsWith('http') ? NetworkImage(imagePath) as ImageProvider : FileImage(File(imagePath)),
+                      fit: BoxFit.cover,
+                    )
+                  : const DecorationImage(
+                      image: NetworkImage('https://i.pravatar.cc/300?img=11'),
+                      fit: BoxFit.cover,
+                    ),
               ),
             ),
           ),
@@ -298,6 +298,8 @@ class _IdentityScreenState extends State<IdentityScreen> {
     bool isIdField = false,
     String? description,
     required TextEditingController controller,
+    bool isValid = false,
+    List<String>? suggestions,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,7 +313,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(color: isValid ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.1)),
           ),
           child: TextField(
             controller: controller,
@@ -326,7 +328,9 @@ class _IdentityScreenState extends State<IdentityScreen> {
                       child: Text(icon, style: const TextStyle(color: Colors.white54, fontSize: 18)),
                     )
                   : Icon(icon as IconData, color: Colors.white54),
-              suffixIcon: const Icon(Icons.check_circle_outline, color: AppColors.cyanBlue),
+              suffixIcon: isIdField && isValid 
+                ? const Icon(Icons.check_circle, color: AppColors.cyanBlue)
+                : const Icon(Icons.check_circle_outline, color: Colors.white38),
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),
@@ -338,7 +342,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
             style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
           ),
         ],
-        if (isIdField) ...[
+        if (isIdField && suggestions != null && suggestions.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
             'This will be your unique LifeMesh ID.',
@@ -353,12 +357,10 @@ class _IdentityScreenState extends State<IdentityScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: [
-                _buildSuggestionChip('rahul.kumar'),
-                _buildSuggestionChip('rahul_mesh'),
-                _buildSuggestionChip('rk_lifemesh'),
-                _buildSuggestionChip('kumar.rahul'),
-              ],
+              children: suggestions.map((s) => GestureDetector(
+                onTap: () => controller.text = s,
+                child: _buildSuggestionChip(s),
+              )).toList(),
             ),
           ),
         ],
@@ -382,7 +384,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
     );
   }
 
-  Widget _buildBioField() {
+  Widget _buildBioField(TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -398,30 +400,24 @@ class _IdentityScreenState extends State<IdentityScreen> {
             border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: TextField(
-            controller: bioController,
+            controller: controller,
             style: const TextStyle(color: Colors.white),
             maxLines: 3,
+            maxLength: 100,
             decoration: InputDecoration(
               hintText: 'Exploring the world, one connection at a time.',
               hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16),
+              counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
             ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            '48/100',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPrivacySection() {
+  Widget _buildPrivacySection(CreateIdController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -432,9 +428,9 @@ class _IdentityScreenState extends State<IdentityScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildPrivacyCard('private', 'Private', 'Only people you connect\nwith can find you.', Icons.lock_outline)),
+            Expanded(child: _buildPrivacyCard(true, 'Private', 'Only people you connect\nwith can find you.', Icons.lock_outline, controller)),
             const SizedBox(width: 12),
-            Expanded(child: _buildPrivacyCard('discoverable', 'Discoverable', 'Anyone nearby can\nfind you.', Icons.language)),
+            Expanded(child: _buildPrivacyCard(false, 'Discoverable', 'Anyone nearby can\nfind you.', Icons.language, controller)),
           ],
         ),
         const SizedBox(height: 12),
@@ -446,15 +442,11 @@ class _IdentityScreenState extends State<IdentityScreen> {
     );
   }
 
-  Widget _buildPrivacyCard(String type, String title, String desc, IconData icon) {
-    final isSelected = selectedPrivacy == type;
+  Widget _buildPrivacyCard(bool isPrivateType, String title, String desc, IconData icon, CreateIdController controller) {
+    final isSelected = controller.isPrivate.value == isPrivateType;
     
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedPrivacy = type;
-        });
-      },
+      onTap: () => controller.togglePrivacy(isPrivateType),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(

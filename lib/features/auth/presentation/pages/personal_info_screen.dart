@@ -3,37 +3,19 @@ import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
+import '../controllers/personal_info_controller.dart';
+import '../controllers/onboarding_controller.dart';
 
-class PersonalInfoScreen extends StatefulWidget {
+class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});
 
   @override
-  State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
-}
-
-class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
-  String selectedGender = 'Male';
-
-  final TextEditingController nameController = TextEditingController(text: 'Rahul Kumar');
-  final TextEditingController dobController = TextEditingController(text: '12 Sep 1995');
-  final TextEditingController locationController = TextEditingController(text: 'Bengaluru, Karnataka, India');
-  final TextEditingController occupationController = TextEditingController(text: 'Product Designer');
-  final TextEditingController emailController = TextEditingController(text: 'rahul.kumar95@gmail.com');
-  final TextEditingController phoneController = TextEditingController(text: '+91 98765 43210');
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    dobController.dispose();
-    locationController.dispose();
-    occupationController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<OnboardingController>()) {
+      Get.put(OnboardingController());
+    }
+    final controller = Get.put(PersonalInfoController());
+
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
       body: Stack(
@@ -55,7 +37,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(controller.onboardingController),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -77,55 +59,76 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
                         ).animate().fadeIn(delay: 300.ms),
-                        const SizedBox(height: 32),
-                        
-                        // Avatar Upload
-                        _buildAvatarUpload().animate().scale(delay: 400.ms, curve: Curves.easeOutBack),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Add a profile photo',
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-                        ).animate().fadeIn(delay: 500.ms),
-                        const SizedBox(height: 4),
-                        Text(
-                          'JPG, PNG • Max 5MB',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
-                        ).animate().fadeIn(delay: 500.ms),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 40),
                         
                         _buildInputField(
                           title: 'Full Name',
-                          controller: nameController,
+                          controller: controller.fullNameController,
                           icon: Icons.person_outline,
                           suffixIcon: Icons.check_circle_outline,
                           suffixColor: AppColors.cyanBlue,
                         ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
                         
-                        _buildInputField(
-                          title: 'Date of Birth',
-                          controller: dobController,
-                          icon: Icons.calendar_today_outlined,
-                          suffixIcon: Icons.calendar_month_outlined,
-                          suffixColor: AppColors.neonPurple,
+                        GestureDetector(
+                          onTap: () => controller.selectDate(context),
+                          child: AbsorbPointer(
+                            child: Obx(() => _buildInputField(
+                              title: 'Date of Birth',
+                              controller: TextEditingController(text: controller.selectedDate.value),
+                              icon: Icons.calendar_today_outlined,
+                              suffixIcon: Icons.calendar_month_outlined,
+                              suffixColor: AppColors.neonPurple,
+                            )),
+                          ),
                         ).animate().fadeIn(delay: 650.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
                         
-                        _buildGenderSelector().animate().fadeIn(delay: 700.ms).slideY(begin: 0.1, end: 0),
+                        Obx(() => _buildGenderSelector(controller)).animate().fadeIn(delay: 700.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
                         
                         _buildInputField(
                           title: 'Location',
-                          controller: locationController,
+                          controller: controller.locationController,
                           icon: Icons.location_on_outlined,
                           suffixIcon: Icons.my_location_outlined,
                           suffixColor: AppColors.neonPurple,
                         ).animate().fadeIn(delay: 750.ms).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
+
+                        // GPS Location field added
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: _buildInputField(
+                                title: 'GPS Location',
+                                controller: controller.gpsController,
+                                icon: Icons.gps_fixed,
+                                suffixIcon: Icons.check_circle_outline,
+                                suffixColor: AppColors.cyanBlue,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: AppColors.neonPurple.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.neonPurple),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.my_location, color: Colors.white),
+                                onPressed: controller.detectLocation,
+                              ),
+                            ),
+                          ],
+                        ).animate().fadeIn(delay: 780.ms).slideY(begin: 0.1, end: 0),
+                        const SizedBox(height: 20),
                         
                         _buildInputField(
                           title: 'Occupation',
-                          controller: occupationController,
+                          controller: controller.occupationController,
                           icon: Icons.work_outline,
                           suffixIcon: Icons.check_circle_outline,
                           suffixColor: AppColors.cyanBlue,
@@ -134,7 +137,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                         _buildInputField(
                           title: 'Email Address',
-                          controller: emailController,
+                          controller: controller.emailController,
                           icon: Icons.mail_outline,
                           suffixIcon: Icons.check_circle_outline,
                           suffixColor: AppColors.cyanBlue,
@@ -143,7 +146,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                         _buildInputField(
                           title: 'Phone Number (Optional)',
-                          controller: phoneController,
+                          controller: controller.phoneController,
                           icon: Icons.phone_outlined,
                           suffixIcon: Icons.check_circle_outline,
                           suffixColor: AppColors.cyanBlue,
@@ -159,33 +162,33 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             borderRadius: BorderRadius.circular(28),
                           ),
                           child: ElevatedButton(
-                            onPressed: () {
-                              Get.toNamed('/review');
-                            },
+                            onPressed: controller.savePersonalInfo,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Next',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-                                ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
-                                  ),
-                                  child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
-                                ),
-                              ],
-                            ),
+                            child: Obx(() => controller.isLoading.value 
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Next',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
+                                      ),
+                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                    ),
+                                  ],
+                                )),
                           ),
                         ).animate().fadeIn(delay: 1000.ms),
                         const SizedBox(height: 40),
@@ -201,7 +204,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OnboardingController onboardingController) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -214,7 +217,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Get.back(),
+              onPressed: onboardingController.previousStep,
             ),
           ),
           Expanded(
@@ -322,48 +325,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 
-  Widget _buildAvatarUpload() {
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: AppColors.primaryGradient,
-            boxShadow: [
-              BoxShadow(color: AppColors.neonPurple.withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 2)
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.deepNavy,
-                image: DecorationImage(
-                  image: NetworkImage('https://i.pravatar.cc/300?img=11'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(8),
-          margin: const EdgeInsets.only(bottom: 4, right: 4),
-          decoration: BoxDecoration(
-            color: AppColors.deepNavy,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.neonPurple, width: 1.5),
-          ),
-          child: const Icon(Icons.camera_alt_outlined, size: 20, color: Colors.white),
-        ),
-      ],
-    );
-  }
-
   Widget _buildInputField({
     required String title,
     required TextEditingController controller,
@@ -400,7 +361,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 
-  Widget _buildGenderSelector() {
+  Widget _buildGenderSelector(PersonalInfoController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -418,11 +379,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
           child: Row(
             children: [
-              _buildGenderOption('Male', Icons.male, Colors.blueAccent),
+              _buildGenderOption('Male', Icons.male, Colors.blueAccent, controller),
               Container(width: 1, color: Colors.white.withValues(alpha: 0.1)),
-              _buildGenderOption('Female', Icons.female, Colors.pinkAccent),
+              _buildGenderOption('Female', Icons.female, Colors.pinkAccent, controller),
               Container(width: 1, color: Colors.white.withValues(alpha: 0.1)),
-              _buildGenderOption('Other', Icons.transgender, AppColors.neonPurple),
+              _buildGenderOption('Other', Icons.transgender, AppColors.neonPurple, controller),
             ],
           ),
         ),
@@ -430,11 +391,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 
-  Widget _buildGenderOption(String title, IconData icon, Color iconColor) {
-    final isSelected = selectedGender == title;
+  Widget _buildGenderOption(String title, IconData icon, Color iconColor, PersonalInfoController controller) {
+    final isSelected = controller.selectedGender.value == title;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => selectedGender = title),
+        onTap: () => controller.selectGender(title),
         child: Container(
           decoration: isSelected
               ? BoxDecoration(
