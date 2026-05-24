@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:glassmorphism/glassmorphism.dart';
@@ -67,6 +68,10 @@ class HomeScreen extends StatelessWidget {
           _buildSearchBar(),
           SizedBox(height: compactGap),
           _buildMeshNetworkCard(controller),
+          if (kDebugMode) ...[
+            const SizedBox(height: 12),
+            _buildDiscoveryDebugPanel(controller),
+          ],
           SizedBox(height: sectionGap),
           _buildSectionTitle('QUICK ACTIONS', hasViewAll: true),
           const SizedBox(height: 8), 
