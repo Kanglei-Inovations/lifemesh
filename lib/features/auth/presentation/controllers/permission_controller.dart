@@ -56,9 +56,10 @@ class PermissionController extends GetxController {
 
   Future<void> checkPermissionStatus() async {
     try {
-      bluetoothGranted.value = await Permission.bluetooth.isGranted && 
-                               await Permission.bluetoothConnect.isGranted && 
-                               await Permission.bluetoothScan.isGranted;
+      bluetoothGranted.value = await Permission.bluetooth.isGranted &&
+          await Permission.bluetoothAdvertise.isGranted &&
+          await Permission.bluetoothConnect.isGranted &&
+          await Permission.bluetoothScan.isGranted;
       locationGranted.value = await Permission.location.isGranted;
       notificationGranted.value = await Permission.notification.isGranted;
       
@@ -98,6 +99,7 @@ class PermissionController extends GetxController {
   Future<void> requestBluetoothPermission() async {
     final status = await [
       Permission.bluetooth,
+      Permission.bluetoothAdvertise,
       Permission.bluetoothConnect,
       Permission.bluetoothScan,
       Permission.nearbyWifiDevices,

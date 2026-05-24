@@ -2,17 +2,17 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import '../../../../core/database_service.dart';
 import '../../../../models/onboarding_state_model.dart';
+import '../../../../models/onboarding_user_model.dart';
 
 /// Controller responsible for managing the overall onboarding flow and step navigation.
 class OnboardingController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
-  
+
   // Reactive variable to track the current step in the onboarding flow.
   final RxInt currentStep = 1.obs;
-  
-  // Total steps in the onboarding process
-  // 1: Create ID, 2: Personal Info, 3: Review, 4: Permissions, 5: Discovering, 6: Welcome
-  final int totalSteps = 6;
+
+  // 1: Create ID, 2: Personal Info, 3: Review, 4: Permissions, 5: Discovering
+  final int totalSteps = 5;
 
   @override
   void onInit() {
@@ -24,12 +24,22 @@ class OnboardingController extends GetxController {
   Future<void> _restoreOnboardingState() async {
     try {
       final state = await _db.isar.onboardingStateModels.where().findFirst();
+      final user = await _db.isar.onboardingUserModels.where().findFirst();
       if (state != null) {
-        if (state.onboardingCompleted) {
-          Get.offAllNamed('/home');
+        if (state.onboardingCompleted && user != null) {
+          if (!user.onboardingCompleted) {
+            await _db.isar.writeTxn(() async {
+              user.onboardingCompleted = true;
+              user.createdAt ??= DateTime.now();
+              await _db.isar.onboardingUserModels.put(user);
+            });
+          }
+          if (Get.currentRoute != '/discovering') {
+            Get.offAllNamed('/discovering');
+          }
           return;
         }
-        
+
         // Restore step if app was closed
         if (state.currentStep > 1) {
           currentStep.value = state.currentStep;
@@ -104,9 +114,6 @@ class OnboardingController extends GetxController {
       case 5:
         Get.toNamed('/discovering');
         break;
-      case 6:
-        Get.toNamed('/welcome');
-        break;
     }
   }
 
@@ -116,15 +123,24 @@ class OnboardingController extends GetxController {
       final state = await _db.isar.onboardingStateModels.where().findFirst();
       if (state != null) {
         state.onboardingCompleted = true;
+        state.currentStep = totalSteps;
         state.lastUpdated = DateTime.now();
         await _db.isar.writeTxn(() async {
           await _db.isar.onboardingStateModels.put(state);
         });
       }
-      Get.offAllNamed('/home');
+      final user =
+          await _db.isar.onboardingUserModels.where().findFirst() ??
+          OnboardingUserModel();
+      user.onboardingCompleted = true;
+      user.createdAt ??= DateTime.now();
+      await _db.isar.writeTxn(() async {
+        await _db.isar.onboardingUserModels.put(user);
+      });
+      Get.offAllNamed('/discovering');
     } catch (e) {
       Get.log("Error saving onboarding completion state: $e");
-      Get.offAllNamed('/home');
+      Get.offAllNamed('/discovering');
     }
   }
 }

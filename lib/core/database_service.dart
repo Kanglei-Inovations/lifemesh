@@ -6,6 +6,8 @@ import '../models/onboarding_user_model.dart';
 import '../models/permission_model.dart';
 import '../models/nearby_user_model.dart';
 import '../models/onboarding_state_model.dart';
+import '../models/activity_model.dart';
+import '../models/dashboard_stat_model.dart';
 
 class DatabaseService extends GetxService {
   late Isar isar;
@@ -13,29 +15,22 @@ class DatabaseService extends GetxService {
   Future<DatabaseService> init() async {
     await GetStorage.init();
     final dir = await getApplicationDocumentsDirectory();
-    isar = await Isar.open(
-      [
-        OnboardingUserModelSchema,
-        PermissionModelSchema,
-        NearbyUserModelSchema,
-        OnboardingStateModelSchema,
-      ],
-      directory: dir.path,
-    );
-    
+    isar = await Isar.open([
+      OnboardingUserModelSchema,
+      PermissionModelSchema,
+      NearbyUserModelSchema,
+      OnboardingStateModelSchema,
+      ActivityModelSchema,
+      DashboardStatModelSchema,
+    ], directory: dir.path);
+
     // Initialize default state if not exists
     if (await isar.onboardingStateModels.count() == 0) {
       await isar.writeTxn(() async {
         await isar.onboardingStateModels.put(OnboardingStateModel());
       });
     }
-    
-    if (await isar.onboardingUserModels.count() == 0) {
-      await isar.writeTxn(() async {
-        await isar.onboardingUserModels.put(OnboardingUserModel());
-      });
-    }
-    
+
     return this;
   }
 }

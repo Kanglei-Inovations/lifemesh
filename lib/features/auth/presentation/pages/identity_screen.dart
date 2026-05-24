@@ -58,53 +58,85 @@ class IdentityScreen extends StatelessWidget {
                         Text(
                           'This is your unique identity in the LifeMesh network.\nYou can change it later in settings.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
                         ).animate().fadeIn(delay: 300.ms),
                         const SizedBox(height: 32),
-                        
+
                         // Avatar Upload
                         GestureDetector(
                           onTap: controller.pickProfileImage,
-                          child: Obx(() => _buildAvatarUpload(controller.selectedImage.value)),
-                        ).animate().scale(delay: 400.ms, curve: Curves.easeOutBack),
+                          child: Obx(
+                            () => _buildAvatarUpload(
+                              controller.selectedImage.value,
+                            ),
+                          ),
+                        ).animate().scale(
+                          delay: 400.ms,
+                          curve: Curves.easeOutBack,
+                        ),
                         const SizedBox(height: 8),
                         const Text(
                           'Add a profile photo',
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ).animate().fadeIn(delay: 500.ms),
                         const SizedBox(height: 4),
                         Text(
                           'JPG, PNG • Max 5MB',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.4),
+                            fontSize: 12,
+                          ),
                         ).animate().fadeIn(delay: 500.ms),
                         const SizedBox(height: 32),
-                        
-                        Obx(() => _buildInputField(
-                          title: 'Choose Your ID',
-                          hint: 'rahulkumar',
-                          icon: '@',
-                          isIdField: true,
-                          controller: controller.usernameController,
-                          isValid: controller.isUsernameAvailable.value,
-                          suggestions: controller.usernameSuggestions,
-                        )).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
+
+                        Obx(
+                              () => _buildInputField(
+                                title: 'Choose Your ID',
+                                hint: 'rahulkumar',
+                                icon: '@',
+                                isIdField: true,
+                                controller: controller.usernameController,
+                                isValid: controller.isUsernameAvailable.value,
+                                suggestions: controller.usernameSuggestions,
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(delay: 600.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
-                        
+
                         _buildInputField(
-                          title: 'Set a Display Name',
-                          hint: 'Rahul Kumar',
-                          icon: Icons.person_outline,
-                          description: 'This is how others will see you.',
-                          controller: controller.displayNameController,
-                        ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.1, end: 0),
+                              title: 'Set a Display Name',
+                              hint: 'Rahul Kumar',
+                              icon: Icons.person_outline,
+                              description: 'This is how others will see you.',
+                              controller: controller.displayNameController,
+                            )
+                            .animate()
+                            .fadeIn(delay: 700.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
-                        
-                        _buildBioField(controller.bioController).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0),
+
+                        _buildBioField(controller.bioController)
+                            .animate()
+                            .fadeIn(delay: 800.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
-                        
-                        Obx(() => _buildPrivacySection(controller)).animate().fadeIn(delay: 900.ms).slideY(begin: 0.1, end: 0),
+
+                        Obx(() => _buildPrivacySection(controller))
+                            .animate()
+                            .fadeIn(delay: 900.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 40),
-                        
+
                         // Continue Button
                         Container(
                           width: double.infinity,
@@ -119,28 +151,48 @@ class IdentityScreen extends StatelessWidget {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
                             ),
-                            child: Obx(() => controller.isLoading.value 
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      'Continue',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                            child: Obx(
+                              () => controller.isLoading.value
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'Continue',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.arrow_forward,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 12),
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
-                                      ),
-                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
-                                    ),
-                                  ],
-                                )),
+                            ),
                           ),
                         ).animate().fadeIn(delay: 1000.ms),
                         const SizedBox(height: 40),
@@ -200,16 +252,25 @@ class IdentityScreen extends StatelessWidget {
             shape: BoxShape.circle,
             color: isActive ? null : Colors.transparent,
             gradient: isActive ? AppColors.primaryGradient : null,
-            border: isActive ? null : Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            border: isActive
+                ? null
+                : Border.all(color: Colors.white.withValues(alpha: 0.3)),
             boxShadow: isActive
-                ? [BoxShadow(color: AppColors.cyanBlue.withValues(alpha: 0.5), blurRadius: 10)]
+                ? [
+                    BoxShadow(
+                      color: AppColors.cyanBlue.withValues(alpha: 0.5),
+                      blurRadius: 10,
+                    ),
+                  ]
                 : null,
           ),
           alignment: Alignment.center,
           child: Text(
             step.toString(),
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.5),
+              color: isActive
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.5),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -218,7 +279,9 @@ class IdentityScreen extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: isActive ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.5),
+            color: isActive
+                ? AppColors.cyanBlue
+                : Colors.white.withValues(alpha: 0.5),
             fontSize: 10,
           ),
         ),
@@ -232,7 +295,9 @@ class IdentityScreen extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.3),
+        color: isActive
+            ? AppColors.cyanBlue
+            : Colors.white.withValues(alpha: 0.3),
         boxShadow: isActive
             ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)]
             : null,
@@ -255,7 +320,7 @@ class IdentityScreen extends StatelessWidget {
                 color: AppColors.neonPurple.withValues(alpha: 0.4),
                 blurRadius: 20,
                 spreadRadius: 2,
-              )
+              ),
             ],
           ),
           child: Padding(
@@ -264,16 +329,23 @@ class IdentityScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.deepNavy,
-                image: imagePath.isNotEmpty 
-                  ? DecorationImage(
-                      image: imagePath.startsWith('http') ? NetworkImage(imagePath) as ImageProvider : FileImage(File(imagePath)),
-                      fit: BoxFit.cover,
-                    )
-                  : const DecorationImage(
-                      image: NetworkImage('https://i.pravatar.cc/300?img=11'),
-                      fit: BoxFit.cover,
-                    ),
+                image: imagePath.isNotEmpty
+                    ? DecorationImage(
+                        image: imagePath.startsWith('http')
+                            ? NetworkImage(imagePath) as ImageProvider
+                            : FileImage(File(imagePath)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
+              alignment: Alignment.center,
+              child: imagePath.isEmpty
+                  ? const Icon(
+                      Icons.person_outline,
+                      color: Colors.white70,
+                      size: 42,
+                    )
+                  : null,
             ),
           ),
         ),
@@ -285,7 +357,11 @@ class IdentityScreen extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.neonPurple, width: 1.5),
           ),
-          child: const Icon(Icons.camera_alt_outlined, size: 20, color: Colors.white),
+          child: const Icon(
+            Icons.camera_alt_outlined,
+            size: 20,
+            color: Colors.white,
+          ),
         ),
       ],
     );
@@ -306,14 +382,22 @@ class IdentityScreen extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isValid ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: isValid
+                  ? AppColors.cyanBlue
+                  : Colors.white.withValues(alpha: 0.1),
+            ),
           ),
           child: TextField(
             controller: controller,
@@ -325,12 +409,21 @@ class IdentityScreen extends StatelessWidget {
               prefixIcon: icon is String
                   ? Padding(
                       padding: const EdgeInsets.all(14.0),
-                      child: Text(icon, style: const TextStyle(color: Colors.white54, fontSize: 18)),
+                      child: Text(
+                        icon,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 18,
+                        ),
+                      ),
                     )
                   : Icon(icon as IconData, color: Colors.white54),
-              suffixIcon: isIdField && isValid 
-                ? const Icon(Icons.check_circle, color: AppColors.cyanBlue)
-                : const Icon(Icons.check_circle_outline, color: Colors.white38),
+              suffixIcon: isIdField && isValid
+                  ? const Icon(Icons.check_circle, color: AppColors.cyanBlue)
+                  : const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.white38,
+                    ),
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),
@@ -339,28 +432,41 @@ class IdentityScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             description,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 12,
+            ),
           ),
         ],
         if (isIdField && suggestions != null && suggestions.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
             'This will be your unique LifeMesh ID.',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             'Suggestions',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: suggestions.map((s) => GestureDetector(
-                onTap: () => controller.text = s,
-                child: _buildSuggestionChip(s),
-              )).toList(),
+              children: suggestions
+                  .map(
+                    (s) => GestureDetector(
+                      onTap: () => controller.text = s,
+                      child: _buildSuggestionChip(s),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ],
@@ -379,7 +485,10 @@ class IdentityScreen extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.7),
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -390,7 +499,11 @@ class IdentityScreen extends StatelessWidget {
       children: [
         const Text(
           'Add a Short Bio (Optional)',
-          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -409,7 +522,10 @@ class IdentityScreen extends StatelessWidget {
               hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16),
-              counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
+              counterStyle: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 12,
+              ),
             ),
           ),
         ),
@@ -423,37 +539,70 @@ class IdentityScreen extends StatelessWidget {
       children: [
         const Text(
           'Privacy Preference',
-          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildPrivacyCard(true, 'Private', 'Only people you connect\nwith can find you.', Icons.lock_outline, controller)),
+            Expanded(
+              child: _buildPrivacyCard(
+                true,
+                'Private',
+                'Only people you connect\nwith can find you.',
+                Icons.lock_outline,
+                controller,
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _buildPrivacyCard(false, 'Discoverable', 'Anyone nearby can\nfind you.', Icons.language, controller)),
+            Expanded(
+              child: _buildPrivacyCard(
+                false,
+                'Discoverable',
+                'Anyone nearby can\nfind you.',
+                Icons.language,
+                controller,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 12),
         Text(
           'You can change this later in settings.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.4),
+            fontSize: 12,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildPrivacyCard(bool isPrivateType, String title, String desc, IconData icon, CreateIdController controller) {
+  Widget _buildPrivacyCard(
+    bool isPrivateType,
+    String title,
+    String desc,
+    IconData icon,
+    CreateIdController controller,
+  ) {
     final isSelected = controller.isPrivate.value == isPrivateType;
-    
+
     return GestureDetector(
       onTap: () => controller.togglePrivacy(isPrivateType),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.neonPurple.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.03),
+          color: isSelected
+              ? AppColors.neonPurple.withValues(alpha: 0.1)
+              : Colors.white.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.neonPurple : Colors.white.withValues(alpha: 0.1),
+            color: isSelected
+                ? AppColors.neonPurple
+                : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -465,16 +614,26 @@ class IdentityScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.neonPurple.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+                    color: isSelected
+                        ? AppColors.neonPurple.withValues(alpha: 0.2)
+                        : Colors.white.withValues(alpha: 0.05),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 16, color: isSelected ? AppColors.neonPurple : Colors.white54),
+                  child: Icon(
+                    icon,
+                    size: 16,
+                    color: isSelected ? AppColors.neonPurple : Colors.white54,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Icon(
@@ -487,7 +646,11 @@ class IdentityScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               desc,
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 10, height: 1.3),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 10,
+                height: 1.3,
+              ),
             ),
           ],
         ),

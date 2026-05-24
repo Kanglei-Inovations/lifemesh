@@ -7,7 +7,6 @@ import 'features/auth/presentation/pages/personal_info_screen.dart';
 import 'features/auth/presentation/pages/permissions_screen.dart';
 import 'features/auth/presentation/pages/discovering_nearby_screen.dart';
 import 'features/auth/presentation/pages/review_screen.dart';
-import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/home/presentation/pages/home_screen.dart';
 import 'features/files/presentation/pages/file_sharing_screen.dart';
 import 'features/disaster/presentation/pages/disaster_screen.dart';
@@ -16,10 +15,12 @@ import 'features/marketplace/presentation/pages/marketplace_screen.dart';
 import 'features/games/presentation/pages/games_screen.dart';
 
 import 'package:lifemesh/core/database_service.dart';
+import 'package:lifemesh/core/services/nearby_discovery_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => DatabaseService().init());
+  await Get.putAsync(() => NearbyDiscoveryService().init(), permanent: true);
   runApp(const LifeMeshApp());
 }
 
@@ -39,8 +40,10 @@ class LifeMeshApp extends StatelessWidget {
         GetPage(name: '/personal-info', page: () => const PersonalInfoScreen()),
         GetPage(name: '/review', page: () => const ReviewScreen()),
         GetPage(name: '/permissions', page: () => const PermissionsScreen()),
-        GetPage(name: '/discovering', page: () => const DiscoveringNearbyScreen()),
-        GetPage(name: '/welcome', page: () => const WelcomeScreen()),
+        GetPage(
+          name: '/discovering',
+          page: () => const DiscoveringNearbyScreen(),
+        ),
         GetPage(name: '/home', page: () => const HomeScreen()),
         GetPage(name: '/file-sharing', page: () => const FileSharingScreen()),
         GetPage(name: '/disaster', page: () => const DisasterScreen()),

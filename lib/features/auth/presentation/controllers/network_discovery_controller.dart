@@ -1,127 +1,217 @@
 import 'dart:async';
-import 'package:get/get.dart';
 
-/// Data class representing a mock nearby discovered user.
+import 'package:get/get.dart';
+import 'package:isar/isar.dart';
+
+import '../../../../core/constants/mesh_states.dart';
+import '../../../../core/database_service.dart';
+import '../../../../core/services/nearby_discovery_service.dart';
+import '../../../../models/nearby_user_model.dart';
+import '../../../../models/onboarding_state_model.dart';
+import '../../../../models/onboarding_user_model.dart';
+
 class DiscoveredUser {
   final String name;
   final String avatarUrl;
+  final String distance;
+  final double signalStrength;
 
-  DiscoveredUser({required this.name, required this.avatarUrl});
+  const DiscoveredUser({
+    required this.name,
+    required this.avatarUrl,
+    required this.distance,
+    required this.signalStrength,
+  });
 }
 
-/// Controller responsible for handling the onboarding mock mesh network discovery.
 class NetworkDiscoveryController extends GetxController {
-  // Reactive state variables tracking discovery progress
+  final DatabaseService dbService = Get.find<DatabaseService>();
+  final NearbyDiscoveryService nearbyDiscovery =
+      Get.find<NearbyDiscoveryService>();
+
   final RxDouble discoveryProgress = 0.0.obs;
   final RxInt nearbyUsersCount = 0.obs;
-  final RxString scanningStatus = 'Scanning nearby users'.obs;
+  final RxString scanningStatus = 'Preparing nearby scan'.obs;
   final RxBool isDiscoveryCompleted = false.obs;
   final RxBool isScanning = false.obs;
-
-  // List holding the simulated discovered users
   final RxList<DiscoveredUser> discoveredUsers = <DiscoveredUser>[].obs;
 
-  // Internal timer to drive fake progress
-  Timer? _progressTimer;
+  final List<Worker> _workers = <Worker>[];
+  StreamSubscription<List<NearbyUserModel>>? _nearbySubscription;
+  Timer? _homeTimer;
+  bool _hasStarted = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _watchRealNearbyUsers();
+    _bindDiscoveryState();
+  }
 
   @override
   void onClose() {
-    stopDiscovery();
+    _homeTimer?.cancel();
+    _nearbySubscription?.cancel();
+    for (final worker in _workers) {
+      worker.dispose();
+    }
     super.onClose();
   }
 
-  /// Initiates the mock discovery process sequence.
-  void startDiscovery() {
+  Future<void> startDiscovery() async {
+    if (_hasStarted) return;
+
+    _hasStarted = true;
     isScanning.value = true;
     isDiscoveryCompleted.value = false;
-    discoveryProgress.value = 0.0;
-    nearbyUsersCount.value = 0;
-    discoveredUsers.clear();
-    
-    scanningStatus.value = 'Scanning nearby users';
-    
-    // Timer running for approximately 4 seconds to animate progress bar
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (discoveryProgress.value >= 1.0) {
-        completeDiscovery();
-        timer.cancel();
-      } else {
-        discoveryProgress.value += 0.025; // Completes 100% in ~4 seconds
-        _updateScanningStatus();
-      }
-    });
+    discoveryProgress.value = 0.08;
+    scanningStatus.value = 'Starting nearby discovery...';
 
-    simulateNearbyDiscovery();
+    print('Starting nearby discovery...');
+    await nearbyDiscovery.start();
+    _scheduleHomeTransition();
   }
 
-  /// Halts the current discovery session.
   void stopDiscovery() {
     isScanning.value = false;
-    _progressTimer?.cancel();
+    _homeTimer?.cancel();
   }
 
-  /// Dynamically updates the scanning phase messaging based on completion percentage.
-  void _updateScanningStatus() {
-    final progress = discoveryProgress.value;
-    if (progress < 0.33) {
-      scanningStatus.value = 'Scanning nearby users...';
-    } else if (progress < 0.66) {
-      scanningStatus.value = 'Connecting securely...';
-    } else if (progress < 0.95) {
-      scanningStatus.value = 'Verifying connections...';
-    } else {
-      scanningStatus.value = 'Building LifeMesh network...';
+  void _watchRealNearbyUsers() {
+    _nearbySubscription = dbService.isar.nearbyUserModels
+        .where()
+        .watch(fireImmediately: true)
+        .listen(
+          (users) {
+            final activeUsers = users.where(_isActiveNearbyUser).toList()
+              ..sort((a, b) {
+                final aSeen =
+                    a.lastSeen ?? DateTime.fromMillisecondsSinceEpoch(0);
+                final bSeen =
+                    b.lastSeen ?? DateTime.fromMillisecondsSinceEpoch(0);
+                return bSeen.compareTo(aSeen);
+              });
+
+            discoveredUsers.assignAll(
+              activeUsers.map(_discoveredUserFromModel),
+            );
+            nearbyUsersCount.value = discoveredUsers.length;
+
+            if (discoveredUsers.isNotEmpty &&
+                nearbyDiscovery.connectionState.value !=
+                    MeshConnectionState.connected) {
+              discoveryProgress.value = 0.78;
+              scanningStatus.value = 'Nearby LifeMesh device found...';
+            }
+          },
+          onError: (error) {
+            print('Discovery error: $error');
+          },
+        );
+  }
+
+  void _bindDiscoveryState() {
+    _workers.add(
+      ever<MeshConnectionState>(nearbyDiscovery.connectionState, (state) {
+        _applyMeshState(state);
+        if (state == MeshConnectionState.connected) {
+          _scheduleHomeTransition(delay: const Duration(milliseconds: 1200));
+        }
+      }),
+    );
+    _workers.add(
+      ever<String>(nearbyDiscovery.lastError, (error) {
+        if (error.isNotEmpty) {
+          scanningStatus.value = 'Discovery error: $error';
+        }
+      }),
+    );
+  }
+
+  void _applyMeshState(MeshConnectionState state) {
+    switch (state) {
+      case MeshConnectionState.idle:
+        discoveryProgress.value = 0.08;
+        scanningStatus.value = 'Preparing nearby scan...';
+        break;
+      case MeshConnectionState.advertising:
+        discoveryProgress.value = 0.32;
+        scanningStatus.value = 'Advertising your LifeMesh identity...';
+        break;
+      case MeshConnectionState.discovering:
+        discoveryProgress.value = discoveredUsers.isEmpty ? 0.58 : 0.78;
+        scanningStatus.value = 'Scanning for nearby LifeMesh devices...';
+        break;
+      case MeshConnectionState.connecting:
+        discoveryProgress.value = 0.88;
+        scanningStatus.value = 'Connection initiated...';
+        break;
+      case MeshConnectionState.connected:
+        discoveryProgress.value = 1.0;
+        scanningStatus.value = 'Nearby mesh connection established.';
+        break;
+      case MeshConnectionState.failed:
+        discoveryProgress.value = 0.0;
+        scanningStatus.value = 'Discovery failed. Check Bluetooth and Wi-Fi.';
+        break;
     }
   }
 
-  /// Populates the discovered network list over intervals to simulate radar sweeps.
-  void simulateNearbyDiscovery() {
-    Future.delayed(const Duration(seconds: 1), () {
-      if (!isScanning.value) return;
-      discoveredUsers.add(DiscoveredUser(name: 'Rahul', avatarUrl: 'https://i.pravatar.cc/100?img=12'));
-      nearbyUsersCount.value++;
-    });
-    
-    Future.delayed(const Duration(milliseconds: 1800), () {
-      if (!isScanning.value) return;
-      discoveredUsers.add(DiscoveredUser(name: 'Priya', avatarUrl: 'https://i.pravatar.cc/100?img=13'));
-      nearbyUsersCount.value++;
-    });
-    
-    Future.delayed(const Duration(milliseconds: 2600), () {
-      if (!isScanning.value) return;
-      discoveredUsers.add(DiscoveredUser(name: 'Arjun', avatarUrl: 'https://i.pravatar.cc/100?img=14'));
-      nearbyUsersCount.value++;
-    });
-    
-    Future.delayed(const Duration(milliseconds: 3200), () {
-      if (!isScanning.value) return;
-      discoveredUsers.add(DiscoveredUser(name: 'Neha', avatarUrl: 'https://i.pravatar.cc/100?img=15'));
-      nearbyUsersCount.value++;
-    });
-    
-    simulateConnectionVerification();
+  void _scheduleHomeTransition({Duration delay = const Duration(seconds: 5)}) {
+    if (isDiscoveryCompleted.value) return;
+
+    _homeTimer?.cancel();
+    _homeTimer = Timer(delay, completeDiscovery);
   }
 
-  /// Simulates background cryptographic handshakes.
-  void simulateConnectionVerification() {
-    // Mock logic: Future cryptographic verification steps can be implemented here.
-    Get.log("Mock connection verification passed.");
-  }
+  Future<void> completeDiscovery() async {
+    if (isDiscoveryCompleted.value) return;
 
-  /// Finalizes the discovery process and signals a routing event.
-  void completeDiscovery() {
-    stopDiscovery();
     isDiscoveryCompleted.value = true;
-    discoveryProgress.value = 1.0;
-    scanningStatus.value = 'Network built successfully!';
-    
-    Get.log("Onboarding mesh discovery fully simulated and complete.");
-    
-    // Automatically transition to final Welcome screen after brief delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      // NOTE: Usually handled by OnboardingController or direct routing
-      Get.offAllNamed('/welcome');
+    isScanning.value = false;
+    discoveryProgress.value = nearbyUsersCount.value > 0 ? 1.0 : 0.72;
+    scanningStatus.value = nearbyUsersCount.value > 0
+        ? 'Network built successfully!'
+        : 'Discovery active. Continuing in the dashboard...';
+
+    final isar = dbService.isar;
+    final state = await isar.onboardingStateModels.where().findFirst();
+    final user =
+        await isar.onboardingUserModels.where().findFirst() ??
+        OnboardingUserModel();
+    final now = DateTime.now();
+
+    await isar.writeTxn(() async {
+      final nextState = state ?? OnboardingStateModel();
+      nextState
+        ..onboardingCompleted = true
+        ..currentStep = 5
+        ..lastUpdated = now;
+      await isar.onboardingStateModels.put(nextState);
+
+      user
+        ..onboardingCompleted = true
+        ..createdAt ??= now;
+      await isar.onboardingUserModels.put(user);
     });
+
+    print('Dashboard updated');
+    Get.offAllNamed('/home');
+  }
+
+  DiscoveredUser _discoveredUserFromModel(NearbyUserModel user) {
+    return DiscoveredUser(
+      name: user.name ?? user.deviceName ?? 'LifeMesh Device',
+      avatarUrl: user.avatar ?? '',
+      distance: user.connectionStatus ?? 'nearby',
+      signalStrength: user.signalStrength ?? 0,
+    );
+  }
+
+  bool _isActiveNearbyUser(NearbyUserModel user) {
+    final status = user.connectionStatus ?? '';
+    return status == MeshConnectionState.discovering.name ||
+        status == MeshConnectionState.connecting.name ||
+        status == MeshConnectionState.connected.name;
   }
 }

@@ -26,6 +26,11 @@ dependencies:
   image_picker: ^1.2.2
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  shimmer: ^3.0.0
+  nearby_connections: ^4.3.0
+  uuid: ^4.0.0
+  connectivity_plus: ^5.0.0
+  network_info_plus: ^8.1.0
 
 
 dev_dependencies:

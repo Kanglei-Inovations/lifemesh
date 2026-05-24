@@ -17,7 +17,8 @@ class ReviewScreen extends StatelessWidget {
     if (!Get.isRegistered<OnboardingController>()) {
       Get.put(OnboardingController());
     }
-    final OnboardingController onboardingController = Get.find<OnboardingController>();
+    final OnboardingController onboardingController =
+        Get.find<OnboardingController>();
     final DatabaseService db = Get.find<DatabaseService>();
 
     return Scaffold(
@@ -43,9 +44,11 @@ class ReviewScreen extends StatelessWidget {
               future: db.isar.onboardingUserModels.where().findFirst(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.cyanBlue));
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.cyanBlue),
+                  );
                 }
-                
+
                 final user = snapshot.data;
 
                 return Column(
@@ -70,19 +73,32 @@ class ReviewScreen extends StatelessWidget {
                             Text(
                               'Please review your details before creating\nyour LifeMesh ID.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontSize: 14,
+                                height: 1.4,
+                              ),
                             ).animate().fadeIn(delay: 300.ms),
                             const SizedBox(height: 32),
-                            
-                            _buildProfileSummaryCard(user, onboardingController).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
+
+                            _buildProfileSummaryCard(user, onboardingController)
+                                .animate()
+                                .fadeIn(delay: 400.ms)
+                                .slideY(begin: 0.1, end: 0),
                             const SizedBox(height: 20),
-                            
-                            _buildDetailsCard(user).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0),
+
+                            _buildDetailsCard(user)
+                                .animate()
+                                .fadeIn(delay: 500.ms)
+                                .slideY(begin: 0.1, end: 0),
                             const SizedBox(height: 20),
-                            
-                            _buildTermsCard().animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
+
+                            _buildTermsCard()
+                                .animate()
+                                .fadeIn(delay: 600.ms)
+                                .slideY(begin: 0.1, end: 0),
                             const SizedBox(height: 40),
-                            
+
                             // Create ID Button
                             Container(
                               width: double.infinity,
@@ -97,23 +113,38 @@ class ReviewScreen extends StatelessWidget {
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
                                   padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     const Text(
                                       'Create My LifeMesh ID',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     const SizedBox(width: 12),
                                     Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                          width: 1,
+                                        ),
                                       ),
-                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                      child: const Icon(
+                                        Icons.arrow_forward,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -126,7 +157,7 @@ class ReviewScreen extends StatelessWidget {
                     ),
                   ],
                 );
-              }
+              },
             ),
           ),
         ],
@@ -177,8 +208,15 @@ class ReviewScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.05),
-            border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.5)),
-            boxShadow: [BoxShadow(color: AppColors.neonPurple.withValues(alpha: 0.2), blurRadius: 8)],
+            border: Border.all(
+              color: AppColors.neonPurple.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.neonPurple.withValues(alpha: 0.2),
+                blurRadius: 8,
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: const Icon(Icons.check, color: AppColors.cyanBlue, size: 18),
@@ -186,7 +224,10 @@ class ReviewScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 10,
+          ),
         ),
       ],
     );
@@ -201,12 +242,20 @@ class ReviewScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: AppColors.primaryGradient,
-            boxShadow: [BoxShadow(color: AppColors.cyanBlue.withValues(alpha: 0.5), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cyanBlue.withValues(alpha: 0.5),
+                blurRadius: 10,
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: Text(
             step.toString(),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -224,17 +273,30 @@ class ReviewScreen extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.3),
-        boxShadow: isActive ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)] : null,
+        color: isActive
+            ? AppColors.cyanBlue
+            : Colors.white.withValues(alpha: 0.3),
+        boxShadow: isActive
+            ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)]
+            : null,
       ),
     );
   }
 
-  Widget _buildProfileSummaryCard(OnboardingUserModel? user, OnboardingController controller) {
+  Widget _buildProfileSummaryCard(
+    OnboardingUserModel? user,
+    OnboardingController controller,
+  ) {
     final imagePath = user?.profileImage ?? '';
-    final name = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : 'Rahul Kumar';
-    final username = (user?.username?.isNotEmpty ?? false) ? '@${user!.username}' : '@rahulkumar';
-    final bio = (user?.bio?.isNotEmpty ?? false) ? user!.bio! : 'Exploring the world,\none connection at a time.';
+    final name = (user?.displayName?.isNotEmpty ?? false)
+        ? user!.displayName!
+        : 'Not provided';
+    final username = (user?.username?.isNotEmpty ?? false)
+        ? '@${user!.username}'
+        : 'Not provided';
+    final bio = (user?.bio?.isNotEmpty ?? false)
+        ? user!.bio!
+        : 'No bio added yet.';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -256,7 +318,11 @@ class ReviewScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: AppColors.primaryGradient,
                   boxShadow: [
-                    BoxShadow(color: AppColors.neonPurple.withValues(alpha: 0.4), blurRadius: 15, spreadRadius: 1)
+                    BoxShadow(
+                      color: AppColors.neonPurple.withValues(alpha: 0.4),
+                      blurRadius: 15,
+                      spreadRadius: 1,
+                    ),
                   ],
                 ),
                 child: Padding(
@@ -264,16 +330,23 @@ class ReviewScreen extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      image: imagePath.isNotEmpty 
-                        ? DecorationImage(
-                            image: imagePath.startsWith('http') ? NetworkImage(imagePath) as ImageProvider : FileImage(File(imagePath)),
-                            fit: BoxFit.cover,
-                          )
-                        : const DecorationImage(
-                            image: NetworkImage('https://i.pravatar.cc/300?img=11'),
-                            fit: BoxFit.cover,
-                          ),
+                      image: imagePath.isNotEmpty
+                          ? DecorationImage(
+                              image: imagePath.startsWith('http')
+                                  ? NetworkImage(imagePath) as ImageProvider
+                                  : FileImage(File(imagePath)),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
+                    alignment: Alignment.center,
+                    child: imagePath.isEmpty
+                        ? const Icon(
+                            Icons.person_outline,
+                            color: Colors.white70,
+                            size: 36,
+                          )
+                        : null,
                   ),
                 ),
               ),
@@ -287,7 +360,11 @@ class ReviewScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.neonPurple, width: 1.5),
                   ),
-                  child: const Icon(Icons.edit_outlined, size: 14, color: Colors.white),
+                  child: const Icon(
+                    Icons.edit_outlined,
+                    size: 14,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -299,17 +376,28 @@ class ReviewScreen extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   username,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   bio,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, height: 1.4),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
@@ -322,10 +410,18 @@ class ReviewScreen extends StatelessWidget {
   Widget _buildDetailsCard(OnboardingUserModel? user) {
     final dob = (user?.dob?.isNotEmpty ?? false) ? user!.dob! : 'Not Provided';
     final gender = (user?.gender?.isNotEmpty ?? false) ? user!.gender! : 'Male';
-    final location = (user?.locationName?.isNotEmpty ?? false) ? user!.locationName! : 'Not Provided';
-    final occupation = (user?.occupation?.isNotEmpty ?? false) ? user!.occupation! : 'Not Provided';
-    final email = (user?.email?.isNotEmpty ?? false) ? user!.email! : 'Not Provided';
-    final phone = (user?.phone?.isNotEmpty ?? false) ? user!.phone! : 'Not Provided';
+    final location = (user?.locationName?.isNotEmpty ?? false)
+        ? user!.locationName!
+        : 'Not Provided';
+    final occupation = (user?.occupation?.isNotEmpty ?? false)
+        ? user!.occupation!
+        : 'Not Provided';
+    final email = (user?.email?.isNotEmpty ?? false)
+        ? user!.email!
+        : 'Not Provided';
+    final phone = (user?.phone?.isNotEmpty ?? false)
+        ? user!.phone!
+        : 'Not Provided';
     final isPrivate = user?.isPrivate ?? true;
 
     return Container(
@@ -338,7 +434,12 @@ class ReviewScreen extends StatelessWidget {
         children: [
           _buildDetailRow(Icons.person_outline, 'Date of Birth', dob),
           _buildDivider(),
-          _buildDetailRow(Icons.male, 'Gender', gender, iconColor: Colors.blueAccent),
+          _buildDetailRow(
+            Icons.male,
+            'Gender',
+            gender,
+            iconColor: Colors.blueAccent,
+          ),
           _buildDivider(),
           _buildDetailRow(Icons.location_on_outlined, 'Location', location),
           _buildDivider(),
@@ -360,7 +461,14 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value, {Color? iconColor, IconData? trailingIcon, Color? trailingIconColor}) {
+  Widget _buildDetailRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? iconColor,
+    IconData? trailingIcon,
+    Color? trailingIconColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -371,22 +479,37 @@ class ReviewScreen extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 18, color: iconColor ?? AppColors.neonPurple),
+            child: Icon(
+              icon,
+              size: 18,
+              color: iconColor ?? AppColors.neonPurple,
+            ),
           ),
           const SizedBox(width: 16),
           Text(
             label,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 14,
+            ),
           ),
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
           if (trailingIcon != null) ...[
             const SizedBox(width: 8),
-            Icon(trailingIcon, size: 16, color: trailingIconColor ?? Colors.white54),
+            Icon(
+              trailingIcon,
+              size: 16,
+              color: trailingIconColor ?? Colors.white54,
+            ),
           ],
         ],
       ),
@@ -417,18 +540,38 @@ class ReviewScreen extends StatelessWidget {
               color: AppColors.neonPurple.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.verified_user_outlined, size: 20, color: AppColors.neonPurple),
+            child: const Icon(
+              Icons.verified_user_outlined,
+              size: 20,
+              color: AppColors.neonPurple,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13, height: 1.5),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  height: 1.5,
+                ),
                 children: const [
                   TextSpan(text: 'By creating your ID, you agree to our\n'),
-                  TextSpan(text: 'Terms of Service', style: TextStyle(color: AppColors.neonPurple, fontWeight: FontWeight.w500)),
+                  TextSpan(
+                    text: 'Terms of Service',
+                    style: TextStyle(
+                      color: AppColors.neonPurple,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   TextSpan(text: ' and '),
-                  TextSpan(text: 'Privacy Policy', style: TextStyle(color: AppColors.cyanBlue, fontWeight: FontWeight.w500)),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: TextStyle(
+                      color: AppColors.cyanBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   TextSpan(text: '.'),
                 ],
               ),

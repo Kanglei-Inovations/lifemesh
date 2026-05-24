@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:io';
 import 'dart:math' as math;
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
@@ -15,9 +16,10 @@ class DiscoveringNearbyScreen extends StatelessWidget {
     if (!Get.isRegistered<OnboardingController>()) {
       Get.put(OnboardingController());
     }
-    final OnboardingController onboardingController = Get.find<OnboardingController>();
+    final OnboardingController onboardingController =
+        Get.find<OnboardingController>();
     final controller = Get.put(NetworkDiscoveryController());
-    
+
     // Auto-start discovery upon landing on screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.startDiscovery();
@@ -59,30 +61,47 @@ class DiscoveringNearbyScreen extends StatelessWidget {
                             color: Colors.white,
                           ),
                           textAlign: TextAlign.center,
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
+                        ).animate().fadeIn(
+                          delay: const Duration(milliseconds: 200),
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'Finding people and connections around you\nto build your LifeMesh.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
+                        ).animate().fadeIn(
+                          delay: const Duration(milliseconds: 300),
+                        ),
                         const SizedBox(height: 40),
-                        
+
                         // Mesh Globe with Avatars
                         SizedBox(
                           height: 320,
                           child: _buildMeshGlobe(controller),
-                        ).animate().scale(delay: const Duration(milliseconds: 400), curve: Curves.easeOutBack),
+                        ).animate().scale(
+                          delay: const Duration(milliseconds: 400),
+                          curve: Curves.easeOutBack,
+                        ),
                         const SizedBox(height: 40),
-                        
+
                         // Status List
-                        _buildStatusCards(controller).animate().fadeIn(delay: const Duration(milliseconds: 500)).slideY(begin: 0.1, end: 0),
+                        _buildStatusCards(controller)
+                            .animate()
+                            .fadeIn(delay: const Duration(milliseconds: 500))
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 24),
-                        
+
                         // Progress Section
-                        _buildProgressSection(controller).animate().fadeIn(delay: const Duration(milliseconds: 700)).slideY(begin: 0.1, end: 0),
+                        _buildProgressSection(controller)
+                            .animate()
+                            .fadeIn(delay: const Duration(milliseconds: 700))
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 32),
-                        
+
                         // Privacy Note
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -91,17 +110,30 @@ class DiscoveringNearbyScreen extends StatelessWidget {
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.5)),
+                                border: Border.all(
+                                  color: AppColors.neonPurple.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
                               ),
-                              child: const Icon(Icons.security, size: 14, color: AppColors.neonPurple),
+                              child: const Icon(
+                                Icons.security,
+                                size: 14,
+                                color: AppColors.neonPurple,
+                              ),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'Your data is encrypted and stays 100% secure.',
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontSize: 12,
+                              ),
                             ),
                           ],
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 800)),
+                        ).animate().fadeIn(
+                          delay: const Duration(milliseconds: 800),
+                        ),
                         const SizedBox(height: 40),
                       ],
                     ),
@@ -159,8 +191,15 @@ class DiscoveringNearbyScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.05),
-            border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.5)),
-            boxShadow: [BoxShadow(color: AppColors.neonPurple.withValues(alpha: 0.2), blurRadius: 8)],
+            border: Border.all(
+              color: AppColors.neonPurple.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.neonPurple.withValues(alpha: 0.2),
+                blurRadius: 8,
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: const Icon(Icons.check, color: AppColors.cyanBlue, size: 14),
@@ -168,7 +207,10 @@ class DiscoveringNearbyScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 8),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 8,
+          ),
           maxLines: 1,
           overflow: TextOverflow.visible,
         ),
@@ -185,12 +227,21 @@ class DiscoveringNearbyScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: AppColors.primaryGradient,
-            boxShadow: [BoxShadow(color: AppColors.cyanBlue.withValues(alpha: 0.5), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cyanBlue.withValues(alpha: 0.5),
+                blurRadius: 10,
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: Text(
             step.toString(),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -210,8 +261,12 @@ class DiscoveringNearbyScreen extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: 2).copyWith(bottom: 12),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.3),
-        boxShadow: isActive ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)] : null,
+        color: isActive
+            ? AppColors.cyanBlue
+            : Colors.white.withValues(alpha: 0.3),
+        boxShadow: isActive
+            ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)]
+            : null,
       ),
     );
   }
@@ -228,61 +283,93 @@ class DiscoveringNearbyScreen extends StatelessWidget {
             shape: BoxShape.circle,
             color: AppColors.neonPurple.withValues(alpha: 0.05),
             boxShadow: [
-              BoxShadow(color: AppColors.cyanBlue.withValues(alpha: 0.2), blurRadius: 40, spreadRadius: 5),
+              BoxShadow(
+                color: AppColors.cyanBlue.withValues(alpha: 0.2),
+                blurRadius: 40,
+                spreadRadius: 5,
+              ),
             ],
-            border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.2), width: 1),
+            border: Border.all(
+              color: AppColors.neonPurple.withValues(alpha: 0.2),
+              width: 1,
+            ),
           ),
         ),
         // Faux Grid Lines (Simplified visual representation of globe)
-        CustomPaint(
-          size: const Size(220, 220),
-          painter: _GlobeGridPainter(),
-        ).animate(onPlay: (controller) => controller.repeat()).rotate(duration: const Duration(seconds: 15)),
-        
+        CustomPaint(size: const Size(220, 220), painter: _GlobeGridPainter())
+            .animate(onPlay: (controller) => controller.repeat())
+            .rotate(duration: const Duration(seconds: 15)),
+
         // Center Core Logo
         Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.deepNavy,
-            boxShadow: [
-              BoxShadow(color: AppColors.cyanBlue.withValues(alpha: 0.6), blurRadius: 20),
-            ],
-          ),
-          child: const Icon(Icons.hub_outlined, size: 50, color: AppColors.cyanBlue),
-        ).animate(onPlay: (controller) => controller.repeat(reverse: true)).scaleXY(begin: 1.0, end: 1.1, duration: const Duration(seconds: 2)),
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.deepNavy,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.cyanBlue.withValues(alpha: 0.6),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.hub_outlined,
+                size: 50,
+                color: AppColors.cyanBlue,
+              ),
+            )
+            .animate(onPlay: (controller) => controller.repeat(reverse: true))
+            .scaleXY(
+              begin: 1.0,
+              end: 1.1,
+              duration: const Duration(seconds: 2),
+            ),
 
-        // Orbiting Avatars - Reveal as progress increases
-        Obx(() => controller.discoveryProgress.value > 0.1 
-          ? _buildOrbitingAvatar(0, 'https://i.pravatar.cc/100?img=1', AppColors.neonPurple, controller)
-          : const SizedBox()),
-        Obx(() => controller.discoveryProgress.value > 0.3
-          ? _buildOrbitingAvatar(math.pi / 3, 'https://i.pravatar.cc/100?img=2', AppColors.cyanBlue, controller)
-          : const SizedBox()),
-        Obx(() => controller.discoveryProgress.value > 0.5
-          ? _buildOrbitingAvatar((2 * math.pi) / 3, 'https://i.pravatar.cc/100?img=3', AppColors.softGlowPink, controller)
-          : const SizedBox()),
-        Obx(() => controller.discoveryProgress.value > 0.7
-          ? _buildOrbitingAvatar(math.pi, 'https://i.pravatar.cc/100?img=4', AppColors.neonPurple, controller)
-          : const SizedBox()),
-        Obx(() => controller.discoveryProgress.value > 0.85
-          ? _buildOrbitingAvatar((4 * math.pi) / 3, 'https://i.pravatar.cc/100?img=5', AppColors.cyanBlue, controller)
-          : const SizedBox()),
-        Obx(() => controller.discoveryProgress.value > 0.95
-          ? _buildOrbitingAvatar((5 * math.pi) / 3, 'https://i.pravatar.cc/100?img=6', AppColors.softGlowPink, controller)
-          : const SizedBox()),
+        Obx(() {
+          final users = controller.discoveredUsers;
+          if (users.isEmpty) return const SizedBox.shrink();
+
+          return Stack(
+            alignment: Alignment.center,
+            children: List.generate(users.length, (index) {
+              final angle = (index * math.pi * 2) / users.length;
+              return _buildOrbitingAvatar(
+                angle,
+                users[index],
+                _discoveryColor(index),
+                controller,
+              );
+            }),
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildOrbitingAvatar(double startAngle, String imgUrl, Color ringColor, NetworkDiscoveryController controller) {
+  Widget _buildOrbitingAvatar(
+    double startAngle,
+    DiscoveredUser user,
+    Color ringColor,
+    NetworkDiscoveryController controller,
+  ) {
     return Obx(() {
-      final currentAngle = startAngle + (controller.discoveryProgress.value * 2 * math.pi);
+      final currentAngle =
+          startAngle + (controller.discoveryProgress.value * 2 * math.pi);
       const radius = 140.0;
-      
+      final avatar = user.avatarUrl;
+      final ImageProvider? imageProvider = avatar.isEmpty
+          ? null
+          : (avatar.startsWith('http')
+                ? NetworkImage(avatar)
+                : FileImage(File(avatar)));
+
       return Transform.translate(
-        offset: Offset(math.cos(currentAngle) * radius, math.sin(currentAngle) * radius),
+        offset: Offset(
+          math.cos(currentAngle) * radius,
+          math.sin(currentAngle) * radius,
+        ),
         child: Container(
           width: 50,
           height: 50,
@@ -291,7 +378,10 @@ class DiscoveringNearbyScreen extends StatelessWidget {
             color: AppColors.deepNavy,
             border: Border.all(color: ringColor, width: 2),
             boxShadow: [
-              BoxShadow(color: ringColor.withValues(alpha: 0.5), blurRadius: 10),
+              BoxShadow(
+                color: ringColor.withValues(alpha: 0.5),
+                blurRadius: 10,
+              ),
             ],
           ),
           child: Padding(
@@ -299,16 +389,49 @@ class DiscoveringNearbyScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(imgUrl),
-                  fit: BoxFit.cover,
-                ),
+                color: ringColor.withValues(alpha: 0.16),
+                image: imageProvider != null
+                    ? DecorationImage(image: imageProvider, fit: BoxFit.cover)
+                    : null,
               ),
+              alignment: Alignment.center,
+              child: imageProvider == null
+                  ? Text(
+                      _initialsFor(user.name),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
             ),
           ),
         ),
       );
     });
+  }
+
+  Color _discoveryColor(int index) {
+    const colors = [
+      AppColors.neonPurple,
+      AppColors.cyanBlue,
+      AppColors.softGlowPink,
+      Colors.greenAccent,
+    ];
+    return colors[index % colors.length];
+  }
+
+  String _initialsFor(String name) {
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}'
+        .toUpperCase();
   }
 
   Widget _buildStatusCards(NetworkDiscoveryController controller) {
@@ -320,32 +443,59 @@ class DiscoveringNearbyScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Obx(() => _buildStatusRow(
-            Icons.people_outline, 
-            'Scanning for nearby users', 
-            AppColors.neonPurple, 
-            controller.discoveryProgress.value < 0.33
-          )),
+          Obx(
+            () => _buildStatusRow(
+              Icons.sensors,
+              'Scanning nearby devices',
+              AppColors.neonPurple,
+              controller.discoveryProgress.value < 0.25,
+              controller.discoveryProgress.value >= 0.25,
+            ),
+          ),
           _buildDivider(),
-          Obx(() => _buildStatusRow(
-            Icons.wifi_tethering, 
-            'Connecting securely', 
-            AppColors.cyanBlue, 
-            controller.discoveryProgress.value >= 0.33 && controller.discoveryProgress.value < 0.66
-          )),
+          Obx(
+            () => _buildStatusRow(
+              Icons.signal_cellular_alt,
+              'Verifying signal signatures',
+              AppColors.cyanBlue,
+              controller.discoveryProgress.value >= 0.25 &&
+                  controller.discoveryProgress.value < 0.50,
+              controller.discoveryProgress.value >= 0.50,
+            ),
+          ),
           _buildDivider(),
-          Obx(() => _buildStatusRow(
-            Icons.security, 
-            'Verifying connections', 
-            AppColors.softGlowPink, 
-            controller.discoveryProgress.value >= 0.66
-          )),
+          Obx(
+            () => _buildStatusRow(
+              Icons.enhanced_encryption_outlined,
+              'Setting up encrypted mesh',
+              AppColors.softGlowPink,
+              controller.discoveryProgress.value >= 0.50 &&
+                  controller.discoveryProgress.value < 0.75,
+              controller.discoveryProgress.value >= 0.75,
+            ),
+          ),
+          _buildDivider(),
+          Obx(
+            () => _buildStatusRow(
+              Icons.people_outline,
+              'Detecting nearby users',
+              Colors.greenAccent,
+              controller.discoveryProgress.value >= 0.75,
+              controller.discoveryProgress.value >= 1.0,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusRow(IconData icon, String text, Color color, bool isActive) {
+  Widget _buildStatusRow(
+    IconData icon,
+    String text,
+    Color color,
+    bool isActive,
+    bool isComplete,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -356,9 +506,9 @@ class DiscoveringNearbyScreen extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                color: isActive ? Colors.white : Colors.white54, 
-                fontSize: 15, 
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal
+                color: isActive ? Colors.white : Colors.white54,
+                fontSize: 15,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ),
@@ -371,18 +521,15 @@ class DiscoveringNearbyScreen extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
             )
-          else if (!isActive && color != AppColors.neonPurple) // Just a hacky way to know if we've passed it
-            Icon(Icons.check_circle, color: color, size: 20)
+          else if (isComplete)
+            Icon(Icons.check_circle, color: color, size: 20),
         ],
       ),
     );
   }
 
   Widget _buildDivider() {
-    return Container(
-      height: 1,
-      color: Colors.white.withValues(alpha: 0.05),
-    );
+    return Container(height: 1, color: Colors.white.withValues(alpha: 0.05));
   }
 
   Widget _buildProgressSection(NetworkDiscoveryController controller) {
@@ -396,29 +543,45 @@ class DiscoveringNearbyScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Obx(() => Text(
-            controller.scanningStatus.value,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-          )),
+          Obx(
+            () => Text(
+              controller.scanningStatus.value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: Obx(() => ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: controller.discoveryProgress.value,
-                    minHeight: 8,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.cyanBlue),
+                child: Obx(
+                  () => ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: controller.discoveryProgress.value,
+                      minHeight: 8,
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.cyanBlue,
+                      ),
+                    ),
                   ),
-                )),
+                ),
               ),
               const SizedBox(width: 12),
-              Obx(() => Text(
-                '${(controller.discoveryProgress.value * 100).toInt()}%',
-                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-              )),
+              Obx(
+                () => Text(
+                  '${(controller.discoveryProgress.value * 100).toInt()}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -441,11 +604,24 @@ class _GlobeGridPainter extends CustomPainter {
     for (int i = 1; i < 6; i++) {
       final yOffset = (radius / 3) * i - radius;
       final xRadius = math.sqrt(math.pow(radius, 2) - math.pow(yOffset, 2));
-      canvas.drawOval(Rect.fromCenter(center: Offset(center.dx, center.dy + yOffset), width: xRadius * 2, height: xRadius * 0.4), paint);
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(center.dx, center.dy + yOffset),
+          width: xRadius * 2,
+          height: xRadius * 0.4,
+        ),
+        paint,
+      );
     }
-    
-    for(int i = 0; i < 6; i++) {
-      canvas.drawArc(Rect.fromCenter(center: center, width: radius * 2, height: radius * 2), 0, math.pi * 2, false, paint);
+
+    for (int i = 0; i < 6; i++) {
+      canvas.drawArc(
+        Rect.fromCenter(center: center, width: radius * 2, height: radius * 2),
+        0,
+        math.pi * 2,
+        false,
+        paint,
+      );
     }
   }
 

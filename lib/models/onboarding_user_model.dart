@@ -5,7 +5,7 @@ part 'onboarding_user_model.g.dart';
 @collection
 class OnboardingUserModel {
   Id id = Isar.autoIncrement;
-  
+
   String? profileImage;
   String? username;
   String? displayName;
@@ -19,8 +19,11 @@ class OnboardingUserModel {
   String? locationName;
   double? latitude;
   double? longitude;
-  
+
   bool isPrivate = true;
   bool onboardingCompleted = false;
   DateTime? createdAt;
+
+  // Mesh network unique identifier
+  String? meshId;
 }

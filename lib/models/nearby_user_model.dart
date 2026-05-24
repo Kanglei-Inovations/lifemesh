@@ -11,4 +11,32 @@ class NearbyUserModel {
   String? distance;
   double? signalStrength;
   DateTime? connectedAt;
+
+  // Real device discovery fields
+  String? endpointId;  // Unique device endpoint ID from nearby_connections
+  String? meshId;      // Device's mesh network ID (UUID)
+  String? deviceName;  // Android device name
+  DateTime? lastSeen;  // Last successful ping
+  String? connectionStatus;  // idle/discovering/connecting/connected/failed
+
+  static NearbyUserModel fromPayload({
+    required String endpointId,
+    required String meshId,
+    required String username,
+    required String profileImage,
+    required double signalStrength,
+    required String? deviceName,
+  }) {
+    return NearbyUserModel()
+      ..endpointId = endpointId
+      ..meshId = meshId
+      ..name = username
+      ..avatar = profileImage
+      ..signalStrength = signalStrength
+      ..deviceName = deviceName
+      ..connectedAt = DateTime.now()
+      ..lastSeen = DateTime.now()
+      ..connectionStatus = 'connected';
+  }
 }
+
