@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:io';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
+import '../../../../core/database_service.dart';
+import '../../../../models/onboarding_user_model.dart';
+import '../controllers/onboarding_controller.dart';
 
 class ReviewScreen extends StatelessWidget {
   const ReviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<OnboardingController>()) {
+      Get.put(OnboardingController());
+    }
+    final OnboardingController onboardingController = Get.find<OnboardingController>();
+    final DatabaseService db = Get.find<DatabaseService>();
+
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
       body: Stack(
@@ -28,85 +38,95 @@ class ReviewScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Review Your Information',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ).animate().fadeIn(delay: 200.ms),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Please review your details before creating\nyour LifeMesh ID.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
-                        ).animate().fadeIn(delay: 300.ms),
-                        const SizedBox(height: 32),
-                        
-                        _buildProfileSummaryCard().animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 20),
-                        
-                        _buildDetailsCard().animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 20),
-                        
-                        _buildTermsCard().animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 40),
-                        
-                        // Create ID Button
-                        Container(
-                          width: double.infinity,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Get.toNamed('/permissions'); // Move to permissions step
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Create My LifeMesh ID',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+            child: FutureBuilder<OnboardingUserModel?>(
+              future: db.isar.onboardingUserModels.where().findFirst(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: AppColors.cyanBlue));
+                }
+                
+                final user = snapshot.data;
+                final bool isPrivate = user?.isPrivate ?? true;
+
+                return Column(
+                  children: [
+                    _buildHeader(onboardingController),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 20),
+                            const Text(
+                              'Review Your Information',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ).animate().fadeIn(delay: 200.ms),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Please review your details before creating\nyour LifeMesh ID.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
+                            ).animate().fadeIn(delay: 300.ms),
+                            const SizedBox(height: 32),
+                            
+                            _buildProfileSummaryCard(user, onboardingController).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
+                            const SizedBox(height: 20),
+                            
+                            _buildDetailsCard(user).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0),
+                            const SizedBox(height: 20),
+                            
+                            _buildTermsCard().animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
+                            const SizedBox(height: 40),
+                            
+                            // Create ID Button
+                            Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                gradient: AppColors.primaryGradient,
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                              child: ElevatedButton(
+                                onPressed: onboardingController.nextStep,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                                 ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
-                                  ),
-                                  child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Create My LifeMesh ID',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
+                                      ),
+                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        ).animate().fadeIn(delay: 700.ms),
-                        const SizedBox(height: 40),
-                      ],
+                              ),
+                            ).animate().fadeIn(delay: 700.ms),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              }
             ),
           ),
         ],
@@ -114,7 +134,7 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OnboardingController onboardingController) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -127,7 +147,7 @@ class ReviewScreen extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Get.back(),
+              onPressed: onboardingController.previousStep,
             ),
           ),
           Expanded(
@@ -210,7 +230,12 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileSummaryCard() {
+  Widget _buildProfileSummaryCard(OnboardingUserModel? user, OnboardingController controller) {
+    final imagePath = user?.profileImage ?? '';
+    final name = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : 'Rahul Kumar';
+    final username = (user?.username?.isNotEmpty ?? false) ? '@${user!.username}' : '@rahulkumar';
+    final bio = (user?.bio?.isNotEmpty ?? false) ? user!.bio! : 'Exploring the world,\none connection at a time.';
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -237,25 +262,33 @@ class ReviewScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/300?img=11'),
-                        fit: BoxFit.cover,
-                      ),
+                      image: imagePath.isNotEmpty 
+                        ? DecorationImage(
+                            image: imagePath.startsWith('http') ? NetworkImage(imagePath) as ImageProvider : FileImage(File(imagePath)),
+                            fit: BoxFit.cover,
+                          )
+                        : const DecorationImage(
+                            image: NetworkImage('https://i.pravatar.cc/300?img=11'),
+                            fit: BoxFit.cover,
+                          ),
                     ),
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                margin: const EdgeInsets.only(bottom: 2, right: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.deepNavy,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.neonPurple, width: 1.5),
+              GestureDetector(
+                onTap: () => controller.goToStep(1),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  margin: const EdgeInsets.only(bottom: 2, right: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.deepNavy,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.neonPurple, width: 1.5),
+                  ),
+                  child: const Icon(Icons.edit_outlined, size: 14, color: Colors.white),
                 ),
-                child: const Icon(Icons.edit_outlined, size: 14, color: Colors.white),
               ),
             ],
           ),
@@ -264,18 +297,18 @@ class ReviewScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Rahul Kumar',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  name,
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '@rahulkumar',
+                  username,
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Exploring the world,\none connection at a time.',
+                  bio,
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, height: 1.4),
                 ),
               ],
@@ -286,7 +319,15 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailsCard() {
+  Widget _buildDetailsCard(OnboardingUserModel? user) {
+    final dob = (user?.dob?.isNotEmpty ?? false) ? user!.dob! : 'Not Provided';
+    final gender = (user?.gender?.isNotEmpty ?? false) ? user!.gender! : 'Male';
+    final location = (user?.locationName?.isNotEmpty ?? false) ? user!.locationName! : 'Not Provided';
+    final occupation = (user?.occupation?.isNotEmpty ?? false) ? user!.occupation! : 'Not Provided';
+    final email = (user?.email?.isNotEmpty ?? false) ? user!.email! : 'Not Provided';
+    final phone = (user?.phone?.isNotEmpty ?? false) ? user!.phone! : 'Not Provided';
+    final isPrivate = user?.isPrivate ?? true;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.03),
@@ -295,22 +336,22 @@ class ReviewScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildDetailRow(Icons.person_outline, 'Date of Birth', '12 Sep 1995'),
+          _buildDetailRow(Icons.person_outline, 'Date of Birth', dob),
           _buildDivider(),
-          _buildDetailRow(Icons.male, 'Gender', 'Male', iconColor: Colors.blueAccent),
+          _buildDetailRow(Icons.male, 'Gender', gender, iconColor: Colors.blueAccent),
           _buildDivider(),
-          _buildDetailRow(Icons.location_on_outlined, 'Location', 'Bengaluru, Karnataka, India'),
+          _buildDetailRow(Icons.location_on_outlined, 'Location', location),
           _buildDivider(),
-          _buildDetailRow(Icons.work_outline, 'Occupation', 'Product Designer'),
+          _buildDetailRow(Icons.work_outline, 'Occupation', occupation),
           _buildDivider(),
-          _buildDetailRow(Icons.mail_outline, 'Email Address', 'rahul.kumar95@gmail.com'),
+          _buildDetailRow(Icons.mail_outline, 'Email Address', email),
           _buildDivider(),
-          _buildDetailRow(Icons.phone_outlined, 'Phone Number', '+91 98765 43210'),
+          _buildDetailRow(Icons.phone_outlined, 'Phone Number', phone),
           _buildDivider(),
           _buildDetailRow(
             Icons.shield_outlined,
             'Privacy Preference',
-            'Private',
+            isPrivate ? 'Private' : 'Discoverable',
             trailingIcon: Icons.lock_outline,
             trailingIconColor: AppColors.neonPurple,
           ),
@@ -341,6 +382,7 @@ class ReviewScreen extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+            overflow: TextOverflow.ellipsis,
           ),
           if (trailingIcon != null) ...[
             const SizedBox(width: 8),
