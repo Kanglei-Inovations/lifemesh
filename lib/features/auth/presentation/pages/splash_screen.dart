@@ -58,7 +58,6 @@ class SplashController extends GetxController {
       await dbService.isar.onboardingStateModels.put(nextState);
     });
   }
-
 }
 
 class SplashScreen extends StatelessWidget {

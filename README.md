@@ -235,33 +235,37 @@ Home Dashboard
 * [ ] Offline Relay Routing
 
 ---
-
 # 📂 Project Structure
 
 ```text
+.
+├── android/             # Android-native configuration and code
+├── ios/                 # iOS-native configuration and code
+├── lib/                 # Core Flutter source code (Dart)
+├── LifeMeshui/          # UI design assets and screenshots
+├── test/                # Unit and widget tests
+└── pubspec.yaml         # Project dependencies and metadata
+
 lib/
-│
-├── auth/
-│   ├── presentation/
-│   │   ├── controllers/
-│   │   ├── pages/
-│   │   └── widgets/
-│
-├── core/
-│   ├── database/
-│   ├── services/
-│   ├── theme/
-│   └── utils/
-│
-├── models/
-│
-├── home/
-├── feed/
-├── mesh/
-├── timeline/
-├── marketplace/
-├── disaster/
-└── games/
+├── core/                # Core configurations, services, and constants
+│   ├── constants/       # App-wide constants (e.g., mesh states)
+│   ├── services/        # Shared services (e.g., database, nearby discovery)
+│   ├── app_colors.dart
+│   └── app_theme.dart
+├── features/            # Feature-based modules (Clean Architecture)
+│   ├── auth/            # Identity setup and onboarding
+│   ├── chat/            # Offline mesh chat
+│   ├── disaster/        # SOS and emergency communication
+│   ├── feed/            # Local social feed
+│   ├── files/           # Peer-to-peer file sharing
+│   ├── games/           # Offline multiplayer games
+│   ├── home/            # Dashboard and main navigation
+│   ├── marketplace/     # Local offline commerce
+│   ├── profile/         # User profile management
+│   ├── settings/        # App settings and configurations
+│   └── timeline/        # AI-powered memory timeline
+├── models/              # Data models and generated files
+└── widgets/             # Reusable UI components
 ```
 
 ---

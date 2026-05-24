@@ -23,25 +23,70 @@ class SettingsScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     children: [
                       _buildSectionHeader('NETWORK SETTINGS'),
-                      _buildSettingTile(Icons.hub_outlined, 'Relay Mode', 'Allow device to relay mesh packets', true),
-                      _buildSettingTile(Icons.bluetooth, 'Bluetooth LE', 'High-efficiency discovery', true),
-                      _buildSettingTile(Icons.wifi_tethering, 'WiFi Direct', 'High-speed file transfers', false),
-                      
+                      _buildSettingTile(
+                        Icons.hub_outlined,
+                        'Relay Mode',
+                        'Allow device to relay mesh packets',
+                        true,
+                      ),
+                      _buildSettingTile(
+                        Icons.bluetooth,
+                        'Bluetooth LE',
+                        'High-efficiency discovery',
+                        true,
+                      ),
+                      _buildSettingTile(
+                        Icons.wifi_tethering,
+                        'WiFi Direct',
+                        'High-speed file transfers',
+                        false,
+                      ),
+
                       const SizedBox(height: 30),
                       _buildSectionHeader('AI & MEMORY'),
-                      _buildSettingTile(Icons.auto_awesome, 'Local AI Processing', 'Enable on-device LLM', true),
-                      _buildSettingTile(Icons.history, 'Timeline Depth', 'Store last 30 days', null),
-                      
+                      _buildSettingTile(
+                        Icons.auto_awesome,
+                        'Local AI Processing',
+                        'Enable on-device LLM',
+                        true,
+                      ),
+                      _buildSettingTile(
+                        Icons.history,
+                        'Timeline Depth',
+                        'Store last 30 days',
+                        null,
+                      ),
+
                       const SizedBox(height: 30),
                       _buildSectionHeader('SECURITY'),
-                      _buildSettingTile(Icons.lock_outline, 'End-to-End Encryption', 'Always active', true),
-                      _buildSettingTile(Icons.key, 'Local Keys', 'Manage mesh identity keys', null),
-                      
+                      _buildSettingTile(
+                        Icons.lock_outline,
+                        'End-to-End Encryption',
+                        'Always active',
+                        true,
+                      ),
+                      _buildSettingTile(
+                        Icons.key,
+                        'Local Keys',
+                        'Manage mesh identity keys',
+                        null,
+                      ),
+
                       const SizedBox(height: 30),
                       _buildSectionHeader('SYSTEM'),
-                      _buildSettingTile(Icons.battery_saver, 'Battery Optimization', 'Balance mesh & power', true),
-                      _buildSettingTile(Icons.storage, 'Clear Mesh Cache', 'Used: 1.2 GB', null),
-                      
+                      _buildSettingTile(
+                        Icons.battery_saver,
+                        'Battery Optimization',
+                        'Balance mesh & power',
+                        true,
+                      ),
+                      _buildSettingTile(
+                        Icons.storage,
+                        'Clear Mesh Cache',
+                        'Used: 1.2 GB',
+                        null,
+                      ),
+
                       const SizedBox(height: 40),
                       Center(
                         child: Text(
@@ -101,7 +146,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingTile(IconData icon, String title, String subtitle, bool? value) {
+  Widget _buildSettingTile(
+    IconData icon,
+    String title,
+    String subtitle,
+    bool? value,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: GlassmorphicContainer(
@@ -112,22 +162,41 @@ class SettingsScreen extends StatelessWidget {
         alignment: Alignment.center,
         border: 1,
         linearGradient: LinearGradient(
-          colors: [Colors.white.withValues(alpha: 0.05), Colors.white.withValues(alpha: 0.02)],
+          colors: [
+            Colors.white.withValues(alpha: 0.05),
+            Colors.white.withValues(alpha: 0.02),
+          ],
         ),
         borderGradient: LinearGradient(
-          colors: [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
+          colors: [
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
         ),
         child: ListTile(
           leading: Icon(icon, color: AppColors.cyanBlue),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-          subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5))),
-          trailing: value != null 
-            ? Switch(
-                value: value, 
-                onChanged: (v) {},
-                activeThumbColor: AppColors.cyanBlue,
-              )
-            : const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white24),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+          ),
+          trailing: value != null
+              ? Switch(
+                  value: value,
+                  onChanged: (v) {},
+                  activeThumbColor: AppColors.cyanBlue,
+                )
+              : const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.white24,
+                ),
         ),
       ),
     ).animate().fadeIn().slideX(begin: 0.1, end: 0);

@@ -11,14 +11,16 @@ import 'onboarding_controller.dart';
 /// Controller responsible for managing the "Personal Info" onboarding step.
 class PersonalInfoController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
-  final OnboardingController onboardingController = Get.find<OnboardingController>();
+  final OnboardingController onboardingController =
+      Get.find<OnboardingController>();
 
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
-  final TextEditingController gpsController = TextEditingController(); // New field requested
+  final TextEditingController gpsController =
+      TextEditingController(); // New field requested
 
   final RxString selectedGender = 'Male'.obs;
   final RxString selectedDate = ''.obs;
@@ -26,7 +28,7 @@ class PersonalInfoController extends GetxController {
 
   double? _latitude;
   double? _longitude;
-  
+
   Timer? _debounceTimer;
 
   @override
@@ -82,7 +84,9 @@ class PersonalInfoController extends GetxController {
 
   Future<void> _saveToIsar() async {
     try {
-      final user = await _db.isar.onboardingUserModels.where().findFirst() ?? OnboardingUserModel();
+      final user =
+          await _db.isar.onboardingUserModels.where().findFirst() ??
+          OnboardingUserModel();
       user.fullName = fullNameController.text.trim();
       user.occupation = occupationController.text.trim();
       user.email = emailController.text.trim();
@@ -92,7 +96,7 @@ class PersonalInfoController extends GetxController {
       user.dob = selectedDate.value;
       user.latitude = _latitude;
       user.longitude = _longitude;
-      
+
       await _db.isar.writeTxn(() async {
         await _db.isar.onboardingUserModels.put(user);
       });
@@ -108,15 +112,29 @@ class PersonalInfoController extends GetxController {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    
+
     if (picked != null) {
-      selectedDate.value = "${picked.day} ${_getMonth(picked.month)} ${picked.year}";
+      selectedDate.value =
+          "${picked.day} ${_getMonth(picked.month)} ${picked.year}";
       _saveToIsar();
     }
   }
 
   String _getMonth(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[month - 1];
   }
 
@@ -129,7 +147,7 @@ class PersonalInfoController extends GetxController {
 
   Future<void> detectLocation() async {
     isLoading.value = true;
-    
+
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -145,21 +163,29 @@ class PersonalInfoController extends GetxController {
           return;
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
         Get.snackbar('Error', 'Location permissions are permanently denied.');
         return;
-      } 
+      }
 
-      Position position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high));
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
       _latitude = position.latitude;
       _longitude = position.longitude;
       gpsController.text = '$_latitude, $_longitude';
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        locationController.text = '${place.locality}, ${place.administrativeArea}, ${place.country}';
+        locationController.text =
+            '${place.locality}, ${place.administrativeArea}, ${place.country}';
       }
       _saveToIsar();
       Get.log("Location successfully detected.");
@@ -179,17 +205,17 @@ class PersonalInfoController extends GetxController {
       Get.snackbar('Validation Error', 'Full name is required');
       return false;
     }
-    
+
     if (email.isNotEmpty && !GetUtils.isEmail(email)) {
       Get.snackbar('Validation Error', 'Please enter a valid email address');
       return false;
     }
-    
+
     if (phone.isNotEmpty && !GetUtils.isPhoneNumber(phone)) {
       Get.snackbar('Validation Error', 'Please enter a valid phone number');
       return false;
     }
-    
+
     return true;
   }
 
@@ -197,7 +223,7 @@ class PersonalInfoController extends GetxController {
     if (!validatePersonalInfo()) return;
 
     isLoading.value = true;
-    
+
     try {
       await _saveToIsar();
       onboardingController.nextStep();

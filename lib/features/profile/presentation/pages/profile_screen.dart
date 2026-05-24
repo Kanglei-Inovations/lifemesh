@@ -55,7 +55,10 @@ class ProfileScreen extends StatelessWidget {
         ),
         Text(
           'Mesh ID: 8f2k-99p1-qx72',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 12,
+          ),
         ),
       ],
     ).animate().fadeIn().scale();
@@ -75,8 +78,21 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.cyanBlue)),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5))),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.cyanBlue,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withValues(alpha: 0.5),
+          ),
+        ),
       ],
     );
   }
@@ -84,10 +100,26 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildActionList() {
     return Column(
       children: [
-        _buildActionTile(Icons.qr_code, 'My Mesh QR', 'Share your identity offline'),
-        _buildActionTile(Icons.security, 'Privacy & Encryption', 'Manage your local keys'),
-        _buildActionTile(Icons.storage, 'Offline Storage', '2.4 GB used / 10 GB'),
-        _buildActionTile(Icons.settings, 'Mesh Settings', 'Relay permissions & protocols'),
+        _buildActionTile(
+          Icons.qr_code,
+          'My Mesh QR',
+          'Share your identity offline',
+        ),
+        _buildActionTile(
+          Icons.security,
+          'Privacy & Encryption',
+          'Manage your local keys',
+        ),
+        _buildActionTile(
+          Icons.storage,
+          'Offline Storage',
+          '2.4 GB used / 10 GB',
+        ),
+        _buildActionTile(
+          Icons.settings,
+          'Mesh Settings',
+          'Relay permissions & protocols',
+        ),
       ],
     ).animate().fadeIn(delay: 400.ms);
   }
@@ -103,16 +135,35 @@ class ProfileScreen extends StatelessWidget {
         alignment: Alignment.center,
         border: 1,
         linearGradient: LinearGradient(
-          colors: [Colors.white.withValues(alpha: 0.05), Colors.white.withValues(alpha: 0.02)],
+          colors: [
+            Colors.white.withValues(alpha: 0.05),
+            Colors.white.withValues(alpha: 0.02),
+          ],
         ),
         borderGradient: LinearGradient(
-          colors: [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
+          colors: [
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
         ),
         child: ListTile(
           leading: Icon(icon, color: AppColors.cyanBlue),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5))),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white24),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+          ),
+          trailing: const Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: Colors.white24,
+          ),
         ),
       ),
     );

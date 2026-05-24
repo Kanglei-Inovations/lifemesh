@@ -13,15 +13,15 @@ extension MeshStateDisplay on MeshConnectionState {
       case MeshConnectionState.idle:
         return 'Idle';
       case MeshConnectionState.advertising:
-        return 'Advertising...';
+        return 'Advertising';
       case MeshConnectionState.discovering:
-        return 'Discovering...';
+        return 'Discovering';
       case MeshConnectionState.connecting:
-        return 'Connecting...';
+        return 'Connecting';
       case MeshConnectionState.connected:
         return 'Connected';
       case MeshConnectionState.failed:
-        return 'Connection Failed';
+        return 'Failed';
     }
   }
 }

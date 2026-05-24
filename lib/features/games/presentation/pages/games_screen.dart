@@ -74,7 +74,10 @@ class GamesScreen extends StatelessWidget {
         alignment: Alignment.center,
         border: 1,
         linearGradient: LinearGradient(
-          colors: [game.color.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
+          colors: [
+            game.color.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
         ),
         borderGradient: LinearGradient(
           colors: [game.color.withValues(alpha: 0.5), Colors.transparent],
@@ -100,12 +103,18 @@ class GamesScreen extends StatelessWidget {
                   children: [
                     Text(
                       game.title,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       game.description,
-                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6)),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -118,7 +127,11 @@ class GamesScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 30),
+              const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
             ],
           ),
         ),
@@ -137,7 +150,10 @@ class GamesScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 12, color: AppColors.cyanBlue),
           const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

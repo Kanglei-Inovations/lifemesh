@@ -30,9 +30,21 @@ class TimelineDetailScreen extends StatelessWidget {
                         _buildHeroSection(event),
                         const SizedBox(height: 30),
                         _buildDetailCard('RECONSTRUCTED DATA', [
-                          _buildDetailRow(Icons.location_on_outlined, 'Location', 'Sector 4 Node Grid'),
-                          _buildDetailRow(Icons.device_hub, 'Hops', '3 nodes traversed'),
-                          _buildDetailRow(Icons.security, 'Encryption', 'AES-256 Mesh-Layer'),
+                          _buildDetailRow(
+                            Icons.location_on_outlined,
+                            'Location',
+                            'Sector 4 Node Grid',
+                          ),
+                          _buildDetailRow(
+                            Icons.device_hub,
+                            'Hops',
+                            '3 nodes traversed',
+                          ),
+                          _buildDetailRow(
+                            Icons.security,
+                            'Encryption',
+                            'AES-256 Mesh-Layer',
+                          ),
                         ]),
                         const SizedBox(height: 24),
                         _buildDetailCard('INTERACTIONS', [
@@ -66,7 +78,11 @@ class TimelineDetailScreen extends StatelessWidget {
           const Spacer(),
           Text(
             event.time,
-            style: const TextStyle(color: AppColors.cyanBlue, fontWeight: FontWeight.bold, letterSpacing: 2),
+            style: const TextStyle(
+              color: AppColors.cyanBlue,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
           ),
           const Spacer(),
           const SizedBox(width: 48),
@@ -91,7 +107,11 @@ class TimelineDetailScreen extends StatelessWidget {
         const SizedBox(height: 24),
         Text(
           event.title,
-          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.1),
+          style: const TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            height: 1.1,
+          ),
         ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.1, end: 0),
       ],
     );
@@ -106,7 +126,10 @@ class TimelineDetailScreen extends StatelessWidget {
       alignment: Alignment.center,
       border: 1,
       linearGradient: LinearGradient(
-        colors: [Colors.white.withValues(alpha: 0.05), Colors.white.withValues(alpha: 0.02)],
+        colors: [
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.02),
+        ],
       ),
       borderGradient: LinearGradient(
         colors: [Colors.white.withValues(alpha: 0.1), Colors.transparent],
@@ -118,7 +141,12 @@ class TimelineDetailScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+              style: TextStyle(
+                color: Colors.white38,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
             ),
             const SizedBox(height: 16),
             ...children,
@@ -135,9 +163,15 @@ class TimelineDetailScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: AppColors.cyanBlue),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
           const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -151,7 +185,10 @@ class TimelineDetailScreen extends StatelessWidget {
           CircleAvatar(
             radius: 14,
             backgroundColor: AppColors.neonPurple.withValues(alpha: 0.2),
-            child: Text(name[0], style: const TextStyle(fontSize: 10, color: AppColors.cyanBlue)),
+            child: Text(
+              name[0],
+              style: const TextStyle(fontSize: 10, color: AppColors.cyanBlue),
+            ),
           ),
           const SizedBox(width: 12),
           Text(name, style: const TextStyle(fontSize: 14)),
@@ -177,13 +214,20 @@ class TimelineDetailScreen extends StatelessWidget {
             children: [
               Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 18),
               SizedBox(width: 8),
-              Text('AI MEMORY RECONSTRUCTION', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(
+                'AI MEMORY RECONSTRUCTION',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             "Based on the local node activity at ${event.time}, your device established a high-bandwidth tunnel with nearby peers. This interaction pattern suggests a collaborative data exchange within the Sector 4 ecosystem. Encryption was verified end-to-end.",
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), height: 1.6, fontSize: 14),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              height: 1.6,
+              fontSize: 14,
+            ),
           ),
         ],
       ),

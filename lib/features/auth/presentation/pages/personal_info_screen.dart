@@ -57,102 +57,141 @@ class PersonalInfoScreen extends StatelessWidget {
                         Text(
                           'This information helps your connections\nknow you better.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.4),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
                         ).animate().fadeIn(delay: 300.ms),
                         const SizedBox(height: 40),
-                        
+
                         _buildInputField(
-                          title: 'Full Name',
-                          controller: controller.fullNameController,
-                          icon: Icons.person_outline,
-                          suffixIcon: Icons.check_circle_outline,
-                          suffixColor: AppColors.cyanBlue,
-                        ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
+                              title: 'Full Name',
+                              controller: controller.fullNameController,
+                              icon: Icons.person_outline,
+                              suffixIcon: Icons.check_circle_outline,
+                              suffixColor: AppColors.cyanBlue,
+                            )
+                            .animate()
+                            .fadeIn(delay: 600.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
-                        
+
                         GestureDetector(
-                          onTap: () => controller.selectDate(context),
-                          child: AbsorbPointer(
-                            child: Obx(() => _buildInputField(
-                              title: 'Date of Birth',
-                              controller: TextEditingController(text: controller.selectedDate.value),
-                              icon: Icons.calendar_today_outlined,
-                              suffixIcon: Icons.calendar_month_outlined,
-                              suffixColor: AppColors.neonPurple,
-                            )),
-                          ),
-                        ).animate().fadeIn(delay: 650.ms).slideY(begin: 0.1, end: 0),
+                              onTap: () => controller.selectDate(context),
+                              child: AbsorbPointer(
+                                child: Obx(
+                                  () => _buildInputField(
+                                    title: 'Date of Birth',
+                                    controller: TextEditingController(
+                                      text: controller.selectedDate.value,
+                                    ),
+                                    icon: Icons.calendar_today_outlined,
+                                    suffixIcon: Icons.calendar_month_outlined,
+                                    suffixColor: AppColors.neonPurple,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(delay: 650.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
-                        
-                        Obx(() => _buildGenderSelector(controller)).animate().fadeIn(delay: 700.ms).slideY(begin: 0.1, end: 0),
+
+                        Obx(() => _buildGenderSelector(controller))
+                            .animate()
+                            .fadeIn(delay: 700.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
-                        
+
                         _buildInputField(
-                          title: 'Location',
-                          controller: controller.locationController,
-                          icon: Icons.location_on_outlined,
-                          suffixIcon: Icons.my_location_outlined,
-                          suffixColor: AppColors.neonPurple,
-                        ).animate().fadeIn(delay: 750.ms).slideY(begin: 0.1, end: 0),
+                              title: 'Location',
+                              controller: controller.locationController,
+                              icon: Icons.location_on_outlined,
+                              suffixIcon: Icons.my_location_outlined,
+                              suffixColor: AppColors.neonPurple,
+                            )
+                            .animate()
+                            .fadeIn(delay: 750.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
 
                         // GPS Location field added
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: _buildInputField(
-                                title: 'GPS Location',
-                                controller: controller.gpsController,
-                                icon: Icons.gps_fixed,
-                                suffixIcon: Icons.check_circle_outline,
-                                suffixColor: AppColors.cyanBlue,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: AppColors.neonPurple.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: AppColors.neonPurple),
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.my_location, color: Colors.white),
-                                onPressed: controller.detectLocation,
-                              ),
-                            ),
-                          ],
-                        ).animate().fadeIn(delay: 780.ms).slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 20),
-                        
-                        _buildInputField(
-                          title: 'Occupation',
-                          controller: controller.occupationController,
-                          icon: Icons.work_outline,
-                          suffixIcon: Icons.check_circle_outline,
-                          suffixColor: AppColors.cyanBlue,
-                        ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 20),
-
-                        _buildInputField(
-                          title: 'Email Address',
-                          controller: controller.emailController,
-                          icon: Icons.mail_outline,
-                          suffixIcon: Icons.check_circle_outline,
-                          suffixColor: AppColors.cyanBlue,
-                        ).animate().fadeIn(delay: 850.ms).slideY(begin: 0.1, end: 0),
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: _buildInputField(
+                                    title: 'GPS Location',
+                                    controller: controller.gpsController,
+                                    icon: Icons.gps_fixed,
+                                    suffixIcon: Icons.check_circle_outline,
+                                    suffixColor: AppColors.cyanBlue,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neonPurple.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: AppColors.neonPurple,
+                                    ),
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.my_location,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: controller.detectLocation,
+                                  ),
+                                ),
+                              ],
+                            )
+                            .animate()
+                            .fadeIn(delay: 780.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 20),
 
                         _buildInputField(
-                          title: 'Phone Number (Optional)',
-                          controller: controller.phoneController,
-                          icon: Icons.phone_outlined,
-                          suffixIcon: Icons.check_circle_outline,
-                          suffixColor: AppColors.cyanBlue,
-                        ).animate().fadeIn(delay: 900.ms).slideY(begin: 0.1, end: 0),
+                              title: 'Occupation',
+                              controller: controller.occupationController,
+                              icon: Icons.work_outline,
+                              suffixIcon: Icons.check_circle_outline,
+                              suffixColor: AppColors.cyanBlue,
+                            )
+                            .animate()
+                            .fadeIn(delay: 800.ms)
+                            .slideY(begin: 0.1, end: 0),
+                        const SizedBox(height: 20),
+
+                        _buildInputField(
+                              title: 'Email Address',
+                              controller: controller.emailController,
+                              icon: Icons.mail_outline,
+                              suffixIcon: Icons.check_circle_outline,
+                              suffixColor: AppColors.cyanBlue,
+                            )
+                            .animate()
+                            .fadeIn(delay: 850.ms)
+                            .slideY(begin: 0.1, end: 0),
+                        const SizedBox(height: 20),
+
+                        _buildInputField(
+                              title: 'Phone Number (Optional)',
+                              controller: controller.phoneController,
+                              icon: Icons.phone_outlined,
+                              suffixIcon: Icons.check_circle_outline,
+                              suffixColor: AppColors.cyanBlue,
+                            )
+                            .animate()
+                            .fadeIn(delay: 900.ms)
+                            .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 40),
-                        
+
                         // Next Button
                         Container(
                           width: double.infinity,
@@ -167,28 +206,48 @@ class PersonalInfoScreen extends StatelessWidget {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
                             ),
-                            child: Obx(() => controller.isLoading.value 
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      'Next',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                            child: Obx(
+                              () => controller.isLoading.value
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'Next',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.arrow_forward,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 12),
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
-                                      ),
-                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
-                                    ),
-                                  ],
-                                )),
+                            ),
                           ),
                         ).animate().fadeIn(delay: 1000.ms),
                         const SizedBox(height: 40),
@@ -247,8 +306,15 @@ class PersonalInfoScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.05),
-            border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.5)),
-            boxShadow: [BoxShadow(color: AppColors.neonPurple.withValues(alpha: 0.2), blurRadius: 8)],
+            border: Border.all(
+              color: AppColors.neonPurple.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.neonPurple.withValues(alpha: 0.2),
+                blurRadius: 8,
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: const Icon(Icons.check, color: AppColors.cyanBlue, size: 18),
@@ -256,7 +322,10 @@ class PersonalInfoScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 10,
+          ),
         ),
       ],
     );
@@ -271,12 +340,20 @@ class PersonalInfoScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: AppColors.primaryGradient,
-            boxShadow: [BoxShadow(color: AppColors.cyanBlue.withValues(alpha: 0.5), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cyanBlue.withValues(alpha: 0.5),
+                blurRadius: 10,
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: Text(
             step.toString(),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -301,13 +378,19 @@ class PersonalInfoScreen extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             step.toString(),
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 10,
+          ),
         ),
       ],
     );
@@ -319,8 +402,12 @@ class PersonalInfoScreen extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.3),
-        boxShadow: isActive ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)] : null,
+        color: isActive
+            ? AppColors.cyanBlue
+            : Colors.white.withValues(alpha: 0.3),
+        boxShadow: isActive
+            ? [BoxShadow(color: AppColors.cyanBlue, blurRadius: 4)]
+            : null,
       ),
     );
   }
@@ -337,7 +424,11 @@ class PersonalInfoScreen extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -367,7 +458,11 @@ class PersonalInfoScreen extends StatelessWidget {
       children: [
         Text(
           'Gender',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -379,11 +474,26 @@ class PersonalInfoScreen extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _buildGenderOption('Male', Icons.male, Colors.blueAccent, controller),
+              _buildGenderOption(
+                'Male',
+                Icons.male,
+                Colors.blueAccent,
+                controller,
+              ),
               Container(width: 1, color: Colors.white.withValues(alpha: 0.1)),
-              _buildGenderOption('Female', Icons.female, Colors.pinkAccent, controller),
+              _buildGenderOption(
+                'Female',
+                Icons.female,
+                Colors.pinkAccent,
+                controller,
+              ),
               Container(width: 1, color: Colors.white.withValues(alpha: 0.1)),
-              _buildGenderOption('Other', Icons.transgender, AppColors.neonPurple, controller),
+              _buildGenderOption(
+                'Other',
+                Icons.transgender,
+                AppColors.neonPurple,
+                controller,
+              ),
             ],
           ),
         ),
@@ -391,7 +501,12 @@ class PersonalInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGenderOption(String title, IconData icon, Color iconColor, PersonalInfoController controller) {
+  Widget _buildGenderOption(
+    String title,
+    IconData icon,
+    Color iconColor,
+    PersonalInfoController controller,
+  ) {
     final isSelected = controller.selectedGender.value == title;
     return Expanded(
       child: GestureDetector(
@@ -403,7 +518,10 @@ class PersonalInfoScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.neonPurple, width: 1.5),
                   boxShadow: [
-                    BoxShadow(color: AppColors.neonPurple.withValues(alpha: 0.15), blurRadius: 8)
+                    BoxShadow(
+                      color: AppColors.neonPurple.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                    ),
                   ],
                 )
               : null,
@@ -411,12 +529,18 @@ class PersonalInfoScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: isSelected ? AppColors.cyanBlue : iconColor, size: 18),
+              Icon(
+                icon,
+                color: isSelected ? AppColors.cyanBlue : iconColor,
+                size: 18,
+              ),
               const SizedBox(width: 6),
               Text(
                 title,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),

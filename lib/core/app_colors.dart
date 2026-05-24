@@ -7,7 +7,7 @@ class AppColors {
   static const Color softGlowPink = Color(0xFFFF4FD8);
   static const Color white = Colors.white;
   static const Color glassWhite = Color(0x1AFFFFFF);
-  
+
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [neonPurple, cyanBlue],
     begin: Alignment.topLeft,

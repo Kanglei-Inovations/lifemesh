@@ -19,12 +19,19 @@ class MarketplaceScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'MESH MARKET',
-          style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            letterSpacing: 2,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.cyanBlue),
+            icon: const Icon(
+              Icons.shopping_cart_outlined,
+              color: AppColors.cyanBlue,
+            ),
           ),
         ],
       ),
@@ -32,20 +39,22 @@ class MarketplaceScreen extends StatelessWidget {
         children: [
           _buildCategoryBar(controller),
           Expanded(
-            child: Obx(() => GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.75,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: controller.items.length,
-                  itemBuilder: (context, index) {
-                    final item = controller.items[index];
-                    return _buildMarketItem(item, index);
-                  },
-                )),
+            child: Obx(
+              () => GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: controller.items.length,
+                itemBuilder: (context, index) {
+                  final item = controller.items[index];
+                  return _buildMarketItem(item, index);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -62,38 +71,44 @@ class MarketplaceScreen extends StatelessWidget {
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Obx(() => ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: controller.categories.length,
-            itemBuilder: (context, index) {
-              final category = controller.categories[index];
-              final isSelected = controller.selectedCategory.value == category;
-              return GestureDetector(
-                onTap: () => controller.selectedCategory.value = category,
-                child: Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.cyanBlue.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? AppColors.cyanBlue : Colors.white10,
-                    ),
+      child: Obx(
+        () => ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: controller.categories.length,
+          itemBuilder: (context, index) {
+            final category = controller.categories[index];
+            final isSelected = controller.selectedCategory.value == category;
+            return GestureDetector(
+              onTap: () => controller.selectedCategory.value = category,
+              child: Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.cyanBlue.withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? AppColors.cyanBlue : Colors.white10,
                   ),
-                  child: Center(
-                    child: Text(
-                      category,
-                      style: TextStyle(
-                        color: isSelected ? AppColors.cyanBlue : Colors.white70,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      color: isSelected ? AppColors.cyanBlue : Colors.white70,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
-              );
-            },
-          )),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -106,10 +121,16 @@ class MarketplaceScreen extends StatelessWidget {
       alignment: Alignment.center,
       border: 1,
       linearGradient: LinearGradient(
-        colors: [Colors.white.withValues(alpha: 0.05), Colors.white.withValues(alpha: 0.02)],
+        colors: [
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.02),
+        ],
       ),
       borderGradient: LinearGradient(
-        colors: [AppColors.cyanBlue.withValues(alpha: 0.2), AppColors.neonPurple.withValues(alpha: 0.2)],
+        colors: [
+          AppColors.cyanBlue.withValues(alpha: 0.2),
+          AppColors.neonPurple.withValues(alpha: 0.2),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,12 +139,21 @@ class MarketplaceScreen extends StatelessWidget {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 gradient: LinearGradient(
-                  colors: [AppColors.neonPurple.withValues(alpha: 0.1), AppColors.cyanBlue.withValues(alpha: 0.1)],
+                  colors: [
+                    AppColors.neonPurple.withValues(alpha: 0.1),
+                    AppColors.cyanBlue.withValues(alpha: 0.1),
+                  ],
                 ),
               ),
-              child: const Icon(Icons.shopping_bag_outlined, size: 40, color: Colors.white24),
+              child: const Icon(
+                Icons.shopping_bag_outlined,
+                size: 40,
+                color: Colors.white24,
+              ),
             ),
           ),
           Padding(
@@ -135,7 +165,10 @@ class MarketplaceScreen extends StatelessWidget {
                   item.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -143,25 +176,38 @@ class MarketplaceScreen extends StatelessWidget {
                   children: [
                     Text(
                       item.price,
-                      style: const TextStyle(color: AppColors.cyanBlue, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: AppColors.cyanBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       item.distance,
-                      style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.4)),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.person_outline, size: 12, color: Colors.white38),
+                    const Icon(
+                      Icons.person_outline,
+                      size: 12,
+                      color: Colors.white38,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         item.seller,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.4)),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
                       ),
                     ),
                   ],

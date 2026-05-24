@@ -8,7 +8,8 @@ import 'onboarding_controller.dart';
 /// Controller responsible for managing app permissions using the permission_handler package.
 class PermissionController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
-  final OnboardingController onboardingController = Get.find<OnboardingController>();
+  final OnboardingController onboardingController =
+      Get.find<OnboardingController>();
 
   final RxBool bluetoothGranted = false.obs;
   final RxBool locationGranted = false.obs;
@@ -16,7 +17,7 @@ class PermissionController extends GetxController {
   final RxBool storageGranted = false.obs;
   final RxBool cameraGranted = false.obs;
   final RxBool microphoneGranted = false.obs;
-  
+
   final RxBool isAllGranted = false.obs;
   final RxBool isLoading = false.obs;
 
@@ -41,7 +42,9 @@ class PermissionController extends GetxController {
   }
 
   Future<void> _savePermissionsToIsar() async {
-    final model = await _db.isar.permissionModels.where().findFirst() ?? PermissionModel();
+    final model =
+        await _db.isar.permissionModels.where().findFirst() ??
+        PermissionModel();
     model.bluetoothGranted = bluetoothGranted.value;
     model.locationGranted = locationGranted.value;
     model.cameraGranted = cameraGranted.value;
@@ -56,14 +59,17 @@ class PermissionController extends GetxController {
 
   Future<void> checkPermissionStatus() async {
     try {
-      bluetoothGranted.value = await Permission.bluetooth.isGranted &&
+      bluetoothGranted.value =
+          await Permission.bluetooth.isGranted &&
           await Permission.bluetoothAdvertise.isGranted &&
           await Permission.bluetoothConnect.isGranted &&
           await Permission.bluetoothScan.isGranted;
       locationGranted.value = await Permission.location.isGranted;
       notificationGranted.value = await Permission.notification.isGranted;
-      
-      storageGranted.value = await Permission.storage.isGranted || await Permission.photos.isGranted;
+
+      storageGranted.value =
+          await Permission.storage.isGranted ||
+          await Permission.photos.isGranted;
       cameraGranted.value = await Permission.camera.isGranted;
       microphoneGranted.value = await Permission.microphone.isGranted;
 
@@ -75,7 +81,8 @@ class PermissionController extends GetxController {
   }
 
   void _updateOverallStatus() {
-    isAllGranted.value = bluetoothGranted.value &&
+    isAllGranted.value =
+        bluetoothGranted.value &&
         locationGranted.value &&
         notificationGranted.value &&
         storageGranted.value &&
@@ -85,14 +92,14 @@ class PermissionController extends GetxController {
 
   Future<void> requestAllPermissions() async {
     isLoading.value = true;
-    
+
     await requestLocationPermission();
     await requestBluetoothPermission();
     await requestNotificationPermission();
     await requestStoragePermission();
     await requestCameraPermission();
     await requestMicrophonePermission();
-    
+
     isLoading.value = false;
   }
 
@@ -104,7 +111,7 @@ class PermissionController extends GetxController {
       Permission.bluetoothScan,
       Permission.nearbyWifiDevices,
     ].request();
-    
+
     bool allGranted = status.values.every((s) => s.isGranted);
     bluetoothGranted.value = allGranted;
     _savePermissionsToIsar();
@@ -127,8 +134,8 @@ class PermissionController extends GetxController {
 
   Future<void> requestStoragePermission() async {
     final status = await Permission.storage.request();
-    final photosStatus = await Permission.photos.request(); 
-    
+    final photosStatus = await Permission.photos.request();
+
     storageGranted.value = status.isGranted || photosStatus.isGranted;
     _savePermissionsToIsar();
     _updateOverallStatus();

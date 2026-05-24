@@ -10,7 +10,8 @@ import 'onboarding_controller.dart';
 /// Controller responsible for managing the "Create ID" step in the onboarding flow.
 class CreateIdController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
-  final OnboardingController onboardingController = Get.find<OnboardingController>();
+  final OnboardingController onboardingController =
+      Get.find<OnboardingController>();
 
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController displayNameController = TextEditingController();
@@ -20,9 +21,9 @@ class CreateIdController extends GetxController {
   final RxString selectedImage = ''.obs;
   final RxBool isUsernameAvailable = false.obs;
   final RxBool isLoading = false.obs;
-  
+
   final RxList<String> usernameSuggestions = <String>[].obs;
-  
+
   // Debounce timer for auto-saving
   Timer? _debounceTimer;
 
@@ -70,13 +71,15 @@ class CreateIdController extends GetxController {
 
   Future<void> _saveToIsar() async {
     try {
-      final user = await _db.isar.onboardingUserModels.where().findFirst() ?? OnboardingUserModel();
+      final user =
+          await _db.isar.onboardingUserModels.where().findFirst() ??
+          OnboardingUserModel();
       user.username = usernameController.text.trim();
       user.displayName = displayNameController.text.trim();
       user.bio = bioController.text.trim();
       user.profileImage = selectedImage.value;
       user.isPrivate = isPrivate.value;
-      
+
       await _db.isar.writeTxn(() async {
         await _db.isar.onboardingUserModels.put(user);
       });
@@ -95,14 +98,14 @@ class CreateIdController extends GetxController {
       '$base.mesh',
       '${base}_lm',
       '${base}123',
-      'real.$base'
+      'real.$base',
     ];
   }
 
   Future<void> pickProfileImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (image != null) {
       selectedImage.value = image.path;
       _saveToIsar();
@@ -116,7 +119,7 @@ class CreateIdController extends GetxController {
       isUsernameAvailable.value = false;
       return;
     }
-    
+
     // Simulate uniqueness check
     isUsernameAvailable.value = true;
   }
@@ -139,7 +142,10 @@ class CreateIdController extends GetxController {
       return false;
     }
     if (username.length < 4) {
-      Get.snackbar('Validation Error', 'Username must be at least 4 characters');
+      Get.snackbar(
+        'Validation Error',
+        'Username must be at least 4 characters',
+      );
       return false;
     }
     if (displayName.isEmpty) {
@@ -150,7 +156,7 @@ class CreateIdController extends GetxController {
       Get.snackbar('Validation Error', 'Username is not available');
       return false;
     }
-    
+
     return true;
   }
 
@@ -158,7 +164,7 @@ class CreateIdController extends GetxController {
     if (!validateCreateId()) return;
 
     isLoading.value = true;
-    
+
     try {
       await _saveToIsar();
       onboardingController.nextStep();

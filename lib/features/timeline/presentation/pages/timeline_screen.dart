@@ -19,12 +19,19 @@ class TimelineScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'AI TIMELINE',
-          style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            letterSpacing: 2,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.calendar_today_outlined, color: AppColors.cyanBlue),
+            icon: const Icon(
+              Icons.calendar_today_outlined,
+              color: AppColors.cyanBlue,
+            ),
           ),
         ],
       ),
@@ -32,14 +39,20 @@ class TimelineScreen extends StatelessWidget {
         children: [
           _buildAIHeader(),
           Expanded(
-            child: Obx(() => ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: controller.events.length,
-                  itemBuilder: (context, index) {
-                    final event = controller.events[index];
-                    return _buildTimelineItem(event, index, index == controller.events.length - 1);
-                  },
-                )),
+            child: Obx(
+              () => ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: controller.events.length,
+                itemBuilder: (context, index) {
+                  final event = controller.events[index];
+                  return _buildTimelineItem(
+                    event,
+                    index,
+                    index == controller.events.length - 1,
+                  );
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -57,16 +70,26 @@ class TimelineScreen extends StatelessWidget {
         alignment: Alignment.center,
         border: 1,
         linearGradient: LinearGradient(
-          colors: [AppColors.cyanBlue.withValues(alpha: 0.1), AppColors.neonPurple.withValues(alpha: 0.1)],
+          colors: [
+            AppColors.cyanBlue.withValues(alpha: 0.1),
+            AppColors.neonPurple.withValues(alpha: 0.1),
+          ],
         ),
         borderGradient: LinearGradient(
-          colors: [AppColors.cyanBlue.withValues(alpha: 0.5), AppColors.neonPurple.withValues(alpha: 0.5)],
+          colors: [
+            AppColors.cyanBlue.withValues(alpha: 0.5),
+            AppColors.neonPurple.withValues(alpha: 0.5),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
-              const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 30),
+              const Icon(
+                Icons.auto_awesome,
+                color: Colors.amberAccent,
+                size: 30,
+              ),
               const SizedBox(width: 16),
               const Expanded(
                 child: Column(
@@ -75,7 +98,11 @@ class TimelineScreen extends StatelessWidget {
                   children: [
                     Text(
                       'AI SUMMARY: MARCH 14',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
                     ),
                     SizedBox(height: 4),
                     Text(
@@ -108,12 +135,7 @@ class TimelineScreen extends StatelessWidget {
                 child: Icon(event.icon, size: 20, color: event.color),
               ),
               if (!isLast)
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: Colors.white10,
-                  ),
-                ),
+                Expanded(child: Container(width: 2, color: Colors.white10)),
             ],
           ),
           const SizedBox(width: 20),
@@ -125,17 +147,27 @@ class TimelineScreen extends StatelessWidget {
                 children: [
                   Text(
                     event.time,
-                    style: const TextStyle(color: AppColors.cyanBlue, fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: AppColors.cyanBlue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     event.title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     event.description,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6), height: 1.4),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),

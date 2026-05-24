@@ -1,7 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
@@ -31,8 +32,7 @@ class NearbyDiscoveryService extends GetxService {
   final Connectivity _connectivity = Connectivity();
   final NetworkInfo _networkInfo = NetworkInfo();
 
-  final Rx<MeshConnectionState> connectionState =
-      MeshConnectionState.idle.obs;
+  final Rx<MeshConnectionState> connectionState = MeshConnectionState.idle.obs;
   final RxBool isAdvertising = false.obs;
   final RxBool isDiscovering = false.obs;
   final RxBool bluetoothEnabled = false.obs;
@@ -58,7 +58,6 @@ class NearbyDiscoveryService extends GetxService {
   bool _isStarted = false;
   bool _isStarting = false;
 
-  OnboardingUserModel? _localUser;
   String _localMeshId = '';
   String _localMeshFingerprint = '';
   String _localUsername = 'LifeMesh User';
@@ -98,8 +97,23 @@ class NearbyDiscoveryService extends GetxService {
     try {
       print('Starting nearby discovery...');
       await _loadLocalIdentity();
-      await _requestNearbyPermissions();
+      
+      final permissionGranted = await _requestNearbyPermissions();
+      if (!permissionGranted) {
+        throw StateError('Necessary permissions were denied by the user');
+      }
+
       await refreshRadioState();
+      
+      if (!bluetoothEnabled.value) {
+        throw StateError('Bluetooth is disabled. Please enable it to use mesh features.');
+      }
+
+      final locationEnabled = await Permission.location.serviceStatus.isEnabled;
+      if (!locationEnabled && Platform.isAndroid) {
+         throw StateError('Location services are disabled. Android requires location for nearby discovery.');
+      }
+
       await _startBleIdentityBeacon();
       await _startAdvertising();
       await _startDiscovery();
@@ -109,6 +123,9 @@ class NearbyDiscoveryService extends GetxService {
       connectionState.value = MeshConnectionState.failed;
       lastError.value = e.toString();
       print('Discovery error: $e');
+      // Ensure states are reset on failure
+      isAdvertising.value = false;
+      isDiscovering.value = false;
     } finally {
       _isStarting = false;
       await _syncDashboardStatsToIsar();
@@ -143,6 +160,7 @@ class NearbyDiscoveryService extends GetxService {
     endpointIds.clear();
     connectedEndpointCount.value = 0;
     connectionState.value = MeshConnectionState.idle;
+    lastError.value = '';
     await _syncDashboardStatsToIsar();
   }
 
@@ -159,6 +177,11 @@ class NearbyDiscoveryService extends GetxService {
             nativeWifiEnabled ||
             connectivity == ConnectivityResult.wifi ||
             (wifiName != null && wifiName.isNotEmpty);
+      } else {
+        // Simple fallback for iOS/others
+        final connectivity = await _connectivity.checkConnectivity();
+        wifiEnabled.value = connectivity == ConnectivityResult.wifi;
+        bluetoothEnabled.value = true; // Placeholder as we don't have a native bridge for iOS yet
       }
     } catch (e) {
       print('Radio state error: $e');
@@ -181,7 +204,9 @@ class NearbyDiscoveryService extends GetxService {
       throw StateError('Cannot start nearby discovery without a local profile');
     }
 
-    final meshId = _validText(user.meshId) ? user.meshId!.trim() : const Uuid().v4();
+    final meshId = _validText(user.meshId)
+        ? user.meshId!.trim()
+        : const Uuid().v4();
     if (user.meshId != meshId) {
       await _db.isar.writeTxn(() async {
         user.meshId = meshId;
@@ -189,7 +214,6 @@ class NearbyDiscoveryService extends GetxService {
       });
     }
 
-    _localUser = user;
     _localMeshId = meshId;
     _localMeshFingerprint = _fingerprintFor(meshId);
     _localUsername = _displayNameFor(user);
@@ -206,24 +230,27 @@ class NearbyDiscoveryService extends GetxService {
     print('Local device name: $_localDeviceName');
   }
 
-  Future<void> _requestNearbyPermissions() async {
+  Future<bool> _requestNearbyPermissions() async {
     final permissions = <Permission>[
       Permission.location,
-      Permission.bluetooth,
-      Permission.bluetoothAdvertise,
-      Permission.bluetoothConnect,
-      Permission.bluetoothScan,
-      Permission.nearbyWifiDevices,
+      if (Platform.isAndroid) ...[
+        Permission.bluetooth,
+        Permission.bluetoothAdvertise,
+        Permission.bluetoothConnect,
+        Permission.bluetoothScan,
+        Permission.nearbyWifiDevices,
+      ],
     ];
 
     final statuses = await permissions.request();
+    final allGranted = statuses.values.every((status) => status.isGranted);
+    
     final summary = statuses.entries
         .map((entry) => '${entry.key}: ${entry.value}')
         .join(', ');
-    print('Nearby permissions: $summary');
+    print('Nearby permissions summary: $summary');
 
-    final locationEnabled = await Permission.location.serviceStatus.isEnabled;
-    print('Location service enabled: $locationEnabled');
+    return allGranted;
   }
 
   Future<void> _startAdvertising() async {
@@ -316,9 +343,7 @@ class NearbyDiscoveryService extends GetxService {
     endpointIds.assignAll(_connectedEndpoints.toList());
     connectedEndpointCount.value = _connectedEndpoints.length;
 
-    unawaited(
-      _updateEndpointStatus(endpointId, MeshConnectionState.idle),
-    );
+    unawaited(_updateEndpointStatus(endpointId, MeshConnectionState.idle));
   }
 
   Future<void> _requestConnection(String endpointId) async {
@@ -524,6 +549,8 @@ class NearbyDiscoveryService extends GetxService {
       }
 
       final isNewUser = existing == null;
+      final wasConnected =
+          existing?.connectionStatus == MeshConnectionState.connected.name;
       final user = existing ?? NearbyUserModel();
       user
         ..endpointId = endpointId
@@ -542,7 +569,8 @@ class NearbyDiscoveryService extends GetxService {
 
       await _db.isar.writeTxn(() async {
         await _db.isar.nearbyUserModels.put(user);
-        if (isNewUser || status == MeshConnectionState.connected) {
+        if (isNewUser ||
+            (status == MeshConnectionState.connected && !wasConnected)) {
           await _db.isar.activityModels.put(
             ActivityModel()
               ..title = '$username joined the nearby mesh'
@@ -785,9 +813,5 @@ class _EndpointIdentity {
   final String? username;
   final String? deviceName;
 
-  const _EndpointIdentity({
-    this.meshId,
-    this.username,
-    this.deviceName,
-  });
+  const _EndpointIdentity({this.meshId, this.username, this.deviceName});
 }

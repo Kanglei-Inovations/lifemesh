@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 
 class ChatDetailController extends GetxController {
   var messages = <ChatMessage>[].obs;
-  var aiSuggestions = <String>["I'll relay that.", "Signal is strong.", "Meeting at the node?"].obs;
+  var aiSuggestions = <String>[
+    "I'll relay that.",
+    "Signal is strong.",
+    "Meeting at the node?",
+  ].obs;
   final TextEditingController textController = TextEditingController();
 
   @override
@@ -37,14 +41,16 @@ class ChatDetailController extends GetxController {
 
   void sendMessage(String text) {
     if (text.isEmpty) return;
-    messages.add(ChatMessage(
-      text: text,
-      isMe: true,
-      time: "Now",
-      status: MessageStatus.sending,
-    ));
+    messages.add(
+      ChatMessage(
+        text: text,
+        isMe: true,
+        time: "Now",
+        status: MessageStatus.sending,
+      ),
+    );
     textController.clear();
-    
+
     // Simulate message sent
     Future.delayed(const Duration(seconds: 1), () {
       final index = messages.length - 1;

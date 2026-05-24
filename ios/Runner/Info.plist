@@ -66,5 +66,21 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- Permissions for Nearby Connections (Offline Mesh) -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>LifeMesh requires Bluetooth to discover and connect with nearby mesh nodes even when offline.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>LifeMesh requires Bluetooth to advertise your presence to nearby mesh nodes.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>LifeMesh requires access to your local network to establish high-speed peer-to-peer connections with nearby devices.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LifeMesh requires location access to discover nearby devices via Bluetooth and WiFi Direct.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_googlecast._tcp</string>
+		<string>_lifemesh._tcp</string>
+		<string>_lifemesh._udp</string>
+	</array>
 </dict>
 </plist>

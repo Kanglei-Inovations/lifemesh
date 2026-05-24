@@ -32,7 +32,7 @@ const OnboardingStateModelSchema = CollectionSchema(
       id: 2,
       name: r'onboardingCompleted',
       type: IsarType.bool,
-    )
+    ),
   },
   estimateSize: _onboardingStateModelEstimateSize,
   serialize: _onboardingStateModelSerialize,
@@ -105,19 +105,23 @@ Id _onboardingStateModelGetId(OnboardingStateModel object) {
 }
 
 List<IsarLinkBase<dynamic>> _onboardingStateModelGetLinks(
-    OnboardingStateModel object) {
+  OnboardingStateModel object,
+) {
   return [];
 }
 
 void _onboardingStateModelAttach(
-    IsarCollection<dynamic> col, Id id, OnboardingStateModel object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  OnboardingStateModel object,
+) {
   object.id = id;
 }
 
 extension OnboardingStateModelQueryWhereSort
     on QueryBuilder<OnboardingStateModel, OnboardingStateModel, QWhere> {
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterWhere>
-      anyId() {
+  anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -127,17 +131,14 @@ extension OnboardingStateModelQueryWhereSort
 extension OnboardingStateModelQueryWhere
     on QueryBuilder<OnboardingStateModel, OnboardingStateModel, QWhereClause> {
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterWhereClause>
-      idEqualTo(Id id) {
+  idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterWhereClause>
-      idNotEqualTo(Id id) {
+  idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -160,7 +161,7 @@ extension OnboardingStateModelQueryWhere
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterWhereClause>
-      idGreaterThan(Id id, {bool include = false}) {
+  idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -169,7 +170,7 @@ extension OnboardingStateModelQueryWhere
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterWhereClause>
-      idLessThan(Id id, {bool include = false}) {
+  idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -178,267 +179,340 @@ extension OnboardingStateModelQueryWhere
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterWhereClause>
-      idBetween(
+  idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
 
-extension OnboardingStateModelQueryFilter on QueryBuilder<OnboardingStateModel,
-    OnboardingStateModel, QFilterCondition> {
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> currentStepEqualTo(int value) {
+extension OnboardingStateModelQueryFilter
+    on
+        QueryBuilder<
+          OnboardingStateModel,
+          OnboardingStateModel,
+          QFilterCondition
+        > {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  currentStepEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'currentStep',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'currentStep', value: value),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> currentStepGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  currentStepGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'currentStep',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'currentStep',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> currentStepLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  currentStepLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'currentStep',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'currentStep',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> currentStepBetween(
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  currentStepBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'currentStep',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'currentStep',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> idBetween(
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> lastUpdatedIsNull() {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  lastUpdatedIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lastUpdated',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lastUpdated'),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> lastUpdatedIsNotNull() {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  lastUpdatedIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lastUpdated',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lastUpdated'),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> lastUpdatedEqualTo(DateTime? value) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  lastUpdatedEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lastUpdated',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastUpdated', value: value),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> lastUpdatedGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  lastUpdatedGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lastUpdated',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastUpdated',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> lastUpdatedLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  lastUpdatedLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lastUpdated',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastUpdated',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> lastUpdatedBetween(
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  lastUpdatedBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lastUpdated',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastUpdated',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<OnboardingStateModel, OnboardingStateModel,
-      QAfterFilterCondition> onboardingCompletedEqualTo(bool value) {
+  QueryBuilder<
+    OnboardingStateModel,
+    OnboardingStateModel,
+    QAfterFilterCondition
+  >
+  onboardingCompletedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'onboardingCompleted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'onboardingCompleted', value: value),
+      );
     });
   }
 }
 
-extension OnboardingStateModelQueryObject on QueryBuilder<OnboardingStateModel,
-    OnboardingStateModel, QFilterCondition> {}
+extension OnboardingStateModelQueryObject
+    on
+        QueryBuilder<
+          OnboardingStateModel,
+          OnboardingStateModel,
+          QFilterCondition
+        > {}
 
-extension OnboardingStateModelQueryLinks on QueryBuilder<OnboardingStateModel,
-    OnboardingStateModel, QFilterCondition> {}
+extension OnboardingStateModelQueryLinks
+    on
+        QueryBuilder<
+          OnboardingStateModel,
+          OnboardingStateModel,
+          QFilterCondition
+        > {}
 
 extension OnboardingStateModelQuerySortBy
     on QueryBuilder<OnboardingStateModel, OnboardingStateModel, QSortBy> {
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      sortByCurrentStep() {
+  sortByCurrentStep() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentStep', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      sortByCurrentStepDesc() {
+  sortByCurrentStepDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentStep', Sort.desc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      sortByLastUpdated() {
+  sortByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      sortByLastUpdatedDesc() {
+  sortByLastUpdatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.desc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      sortByOnboardingCompleted() {
+  sortByOnboardingCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'onboardingCompleted', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      sortByOnboardingCompletedDesc() {
+  sortByOnboardingCompletedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'onboardingCompleted', Sort.desc);
     });
@@ -448,56 +522,56 @@ extension OnboardingStateModelQuerySortBy
 extension OnboardingStateModelQuerySortThenBy
     on QueryBuilder<OnboardingStateModel, OnboardingStateModel, QSortThenBy> {
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByCurrentStep() {
+  thenByCurrentStep() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentStep', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByCurrentStepDesc() {
+  thenByCurrentStepDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentStep', Sort.desc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenById() {
+  thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByIdDesc() {
+  thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByLastUpdated() {
+  thenByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByLastUpdatedDesc() {
+  thenByLastUpdatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.desc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByOnboardingCompleted() {
+  thenByOnboardingCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'onboardingCompleted', Sort.asc);
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QAfterSortBy>
-      thenByOnboardingCompletedDesc() {
+  thenByOnboardingCompletedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'onboardingCompleted', Sort.desc);
     });
@@ -507,29 +581,34 @@ extension OnboardingStateModelQuerySortThenBy
 extension OnboardingStateModelQueryWhereDistinct
     on QueryBuilder<OnboardingStateModel, OnboardingStateModel, QDistinct> {
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QDistinct>
-      distinctByCurrentStep() {
+  distinctByCurrentStep() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentStep');
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QDistinct>
-      distinctByLastUpdated() {
+  distinctByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastUpdated');
     });
   }
 
   QueryBuilder<OnboardingStateModel, OnboardingStateModel, QDistinct>
-      distinctByOnboardingCompleted() {
+  distinctByOnboardingCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'onboardingCompleted');
     });
   }
 }
 
-extension OnboardingStateModelQueryProperty on QueryBuilder<
-    OnboardingStateModel, OnboardingStateModel, QQueryProperty> {
+extension OnboardingStateModelQueryProperty
+    on
+        QueryBuilder<
+          OnboardingStateModel,
+          OnboardingStateModel,
+          QQueryProperty
+        > {
   QueryBuilder<OnboardingStateModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
@@ -537,21 +616,21 @@ extension OnboardingStateModelQueryProperty on QueryBuilder<
   }
 
   QueryBuilder<OnboardingStateModel, int, QQueryOperations>
-      currentStepProperty() {
+  currentStepProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentStep');
     });
   }
 
   QueryBuilder<OnboardingStateModel, DateTime?, QQueryOperations>
-      lastUpdatedProperty() {
+  lastUpdatedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastUpdated');
     });
   }
 
   QueryBuilder<OnboardingStateModel, bool, QQueryOperations>
-      onboardingCompletedProperty() {
+  onboardingCompletedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'onboardingCompleted');
     });

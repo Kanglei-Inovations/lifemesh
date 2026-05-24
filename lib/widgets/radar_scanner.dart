@@ -9,7 +9,8 @@ class RadarScanner extends StatefulWidget {
   State<RadarScanner> createState() => _RadarScannerState();
 }
 
-class _RadarScannerState extends State<RadarScanner> with SingleTickerProviderStateMixin {
+class _RadarScannerState extends State<RadarScanner>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -54,7 +55,7 @@ class RadarPainter extends CustomPainter {
     final bgPaint = Paint()
       ..color = AppColors.cyanBlue.withValues(alpha: 0.05)
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(center, radius, bgPaint);
 
     final linePaint = Paint()
@@ -68,8 +69,16 @@ class RadarPainter extends CustomPainter {
     }
 
     // Draw cross lines
-    canvas.drawLine(Offset(center.dx - radius, center.dy), Offset(center.dx + radius, center.dy), linePaint);
-    canvas.drawLine(Offset(center.dx, center.dy - radius), Offset(center.dx, center.dy + radius), linePaint);
+    canvas.drawLine(
+      Offset(center.dx - radius, center.dy),
+      Offset(center.dx + radius, center.dy),
+      linePaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx, center.dy - radius),
+      Offset(center.dx, center.dy + radius),
+      linePaint,
+    );
 
     // Draw scanning sweep
     final sweepPaint = Paint()
@@ -86,17 +95,20 @@ class RadarPainter extends CustomPainter {
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
     canvas.drawCircle(center, radius, Paint()..shader = sweepPaint as Shader?);
-    
+
     // Draw leading edge
     final edgeAngle = angle * pi * 2;
     final edgePaint = Paint()
       ..color = AppColors.cyanBlue
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
-    
+
     canvas.drawLine(
       center,
-      Offset(center.dx + cos(edgeAngle) * radius, center.dy + sin(edgeAngle) * radius),
+      Offset(
+        center.dx + cos(edgeAngle) * radius,
+        center.dy + sin(edgeAngle) * radius,
+      ),
       edgePaint,
     );
   }

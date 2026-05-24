@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import 'dart:io';
 import 'dart:math' as math;
 import '../../../../core/app_colors.dart';
+import '../../../../core/constants/mesh_states.dart';
 import '../../../../models/nearby_user_model.dart';
 import '../../../../widgets/mesh_background.dart';
 import '../../../chat/presentation/pages/chat_screen.dart';
@@ -36,9 +37,8 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _buildDashboard(context, controller),
                   const ChatScreen(),
-                  const TimelineScreen(),
                   const FeedScreen(),
-
+                  const TimelineScreen(),
                   const ProfileScreen(),
                 ],
               ),
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
           ],
           SizedBox(height: sectionGap),
           _buildSectionTitle('QUICK ACTIONS', hasViewAll: true),
-          const SizedBox(height: 8), 
+          const SizedBox(height: 8),
           _buildQuickActionsGrid(controller),
           const SizedBox(height: 8), // Tighter gap before next section
           _buildSectionTitle('NEARBY USERS', hasViewAll: true),
@@ -221,7 +221,6 @@ class HomeScreen extends StatelessWidget {
                           const Text('👋', style: TextStyle(fontSize: 20)),
                         ],
                       ),
-
                     ],
                   ),
                 ),
@@ -241,7 +240,7 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4, 
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.05),
@@ -274,7 +273,7 @@ class HomeScreen extends StatelessWidget {
                                 controller.meshStatus.value,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 9, 
+                                  fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 maxLines: 1,
@@ -296,7 +295,11 @@ class HomeScreen extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(width: 4),
-                            Icon(Icons.signal_cellular_alt, color: statusColor, size: 10),
+                            Icon(
+                              Icons.signal_cellular_alt,
+                              color: statusColor,
+                              size: 10,
+                            ),
                           ],
                         ),
                       ],
@@ -342,8 +345,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
-
             ],
           ),
         ],
@@ -570,12 +571,16 @@ class HomeScreen extends StatelessWidget {
                             duration: const Duration(seconds: 1),
                           ),
                       const SizedBox(width: 12),
-                      Text(
-                        controller.meshStatus.value,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          controller.meshStatus.value,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -622,6 +627,199 @@ class HomeScreen extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Widget _buildDiscoveryDebugPanel(HomeController controller) {
+    return Obx(() {
+      final endpointText = controller.endpointIds.isEmpty
+          ? 'none'
+          : controller.endpointIds.join(', ');
+      final payload = controller.lastPayload.value;
+      final payloadText = payload.isEmpty
+          ? 'none'
+          : (payload.length > 96 ? '${payload.substring(0, 96)}...' : payload);
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.neonPurple.withValues(alpha: 0.28),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.neonPurple.withValues(alpha: 0.08),
+              blurRadius: 18,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.bug_report_outlined,
+                  color: AppColors.cyanBlue,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'DEBUG MESH',
+                  style: TextStyle(
+                    color: AppColors.cyanBlue.withValues(alpha: 0.9),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildDebugChip(
+                  'Advertising',
+                  controller.isAdvertising.value ? 'on' : 'off',
+                  controller.isAdvertising.value
+                      ? Colors.greenAccent
+                      : Colors.white38,
+                ),
+                _buildDebugChip(
+                  'Discovery',
+                  controller.isDiscovering.value ? 'on' : 'off',
+                  controller.isDiscovering.value
+                      ? AppColors.cyanBlue
+                      : Colors.white38,
+                ),
+                _buildDebugChip(
+                  'Connected',
+                  '${controller.connectedEndpointCount.value}',
+                  Colors.greenAccent,
+                ),
+                _buildDebugChip(
+                  'Bluetooth',
+                  controller.bluetoothEnabled.value ? 'on' : 'off',
+                  controller.bluetoothEnabled.value
+                      ? AppColors.cyanBlue
+                      : Colors.redAccent,
+                ),
+                _buildDebugChip(
+                  'Wi-Fi',
+                  controller.wifiEnabled.value ? 'on' : 'off',
+                  controller.wifiEnabled.value
+                      ? AppColors.cyanBlue
+                      : Colors.orangeAccent,
+                ),
+              ],
+            ),
+            if (controller.lastError.value.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.redAccent.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.redAccent,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        controller.lastError.value,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () => controller.startDiscovery(),
+                  icon: const Icon(Icons.refresh, size: 14),
+                  label: const Text(
+                    'RETRY MESH START',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.cyanBlue,
+                    backgroundColor: AppColors.cyanBlue.withValues(alpha: 0.1),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Text(
+              'State: ${controller.connectionState.value.display}',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 11,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Endpoint IDs: $endpointText',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.58),
+                fontSize: 10,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Last payload: $payloadText',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.58),
+                fontSize: 10,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildDebugChip(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
+      ),
+      child: Text(
+        '$label: $value',
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 
   Widget _buildStatBox(
@@ -781,25 +979,25 @@ class HomeScreen extends StatelessWidget {
           final isCompact = constraints.maxWidth < 340;
           final gridGap = isCompact ? 5.0 : 8.0;
           final iconPadding = isCompact ? 8.0 : 10.0;
-          final iconSize = isCompact ? 26.0 : 30.0; 
+          final iconSize = isCompact ? 26.0 : 30.0;
           final labelSize = isCompact ? 9.0 : 10.0;
 
           return GridView.builder(
             shrinkWrap: true,
-            padding: EdgeInsets.zero, 
+            padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               mainAxisSpacing: gridGap,
               crossAxisSpacing: gridGap,
-              childAspectRatio: isCompact ? 0.85 : 1.05, 
+              childAspectRatio: isCompact ? 0.85 : 1.05,
             ),
             itemCount: actions.length,
             itemBuilder: (context, index) {
               final action = actions[index];
               final color = action['color'] as Color;
               return Column(
-                mainAxisAlignment: MainAxisAlignment.start, 
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
                     padding: EdgeInsets.all(iconPadding),
@@ -889,7 +1087,10 @@ class HomeScreen extends StatelessWidget {
         if (controller.nearbyUsers.isEmpty) {
           return _buildEmptyStateCard(
             icon: Icons.sensors_off_outlined,
-            message: 'No nearby mesh users found.',
+            message:
+                controller.isDiscovering.value || controller.isAdvertising.value
+                ? 'Scanning for real nearby LifeMesh devices.'
+                : 'No nearby mesh users found.',
           );
         }
         return ListView.builder(
@@ -898,6 +1099,11 @@ class HomeScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             final user = controller.nearbyUsers[index];
             final Color userColor = _getUserColor(index);
+            final statusColor = _statusColorFor(user.connectionStatus);
+            final deviceLabel =
+                user.deviceName ??
+                user.connectionStatus ??
+                _shortEndpoint(user.endpointId);
 
             return Container(
               width: 100,
@@ -932,7 +1138,7 @@ class HomeScreen extends StatelessWidget {
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: Colors.greenAccent,
+                          color: statusColor,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: AppColors.deepNavy,
@@ -946,16 +1152,18 @@ class HomeScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_outward, color: userColor, size: 10),
+                      Icon(Icons.devices_other, color: userColor, size: 10),
                       const SizedBox(width: 4),
-                      Text(
-                        user.distance ?? '--',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 9,
+                      Flexible(
+                        child: Text(
+                          deviceLabel,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 9,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -984,7 +1192,9 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '${((user.signalStrength ?? 0) * 100).round()}% signal',
+                      (user.signalStrength ?? 0) > 0
+                          ? '${((user.signalStrength ?? 0) * 100).round()}% signal'
+                          : 'RSSI pending',
                       style: TextStyle(
                         color: userColor,
                         fontSize: 8.5,
@@ -1012,6 +1222,26 @@ class HomeScreen extends StatelessWidget {
       AppColors.softGlowPink,
     ];
     return colors[index % colors.length];
+  }
+
+  Color _statusColorFor(String? status) {
+    if (status == MeshConnectionState.connected.name) {
+      return Colors.greenAccent;
+    }
+    if (status == MeshConnectionState.connecting.name) {
+      return AppColors.cyanBlue;
+    }
+    if (status == MeshConnectionState.discovering.name) {
+      return AppColors.neonPurple;
+    }
+    return Colors.white38;
+  }
+
+  String _shortEndpoint(String? endpointId) {
+    if (endpointId == null || endpointId.isEmpty) return 'Nearby device';
+    return endpointId.length <= 8
+        ? endpointId
+        : '${endpointId.substring(0, 8)}...';
   }
 
   Widget _buildRecentActivity(HomeController controller) {
@@ -1171,7 +1401,7 @@ class HomeScreen extends StatelessWidget {
         return Container(
           width: 100,
           margin: const EdgeInsets.only(right: 16),
-          padding: const EdgeInsets.symmetric(vertical: 8), 
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(20),
@@ -1182,13 +1412,13 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildShimmerBox(width: 46, height: 46, shape: BoxShape.circle), 
-              const SizedBox(height: 5), 
-              _buildShimmerBox(width: 40, height: 8, radius: 4), 
-              const SizedBox(height: 3), 
-              _buildShimmerBox(width: 60, height: 10, radius: 4), 
-              const SizedBox(height: 5), 
-              _buildShimmerBox(width: 64, height: 16, radius: 10), 
+              _buildShimmerBox(width: 46, height: 46, shape: BoxShape.circle),
+              const SizedBox(height: 5),
+              _buildShimmerBox(width: 40, height: 8, radius: 4),
+              const SizedBox(height: 3),
+              _buildShimmerBox(width: 60, height: 10, radius: 4),
+              const SizedBox(height: 5),
+              _buildShimmerBox(width: 64, height: 16, radius: 10),
             ],
           ),
         );

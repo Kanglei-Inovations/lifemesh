@@ -30,7 +30,7 @@ dependencies:
   nearby_connections: ^4.3.0
   uuid: ^4.0.0
   connectivity_plus: ^5.0.0
-  network_info_plus: ^8.1.0
+  network_info_plus: ^7.0.0
 
 
 dev_dependencies:

@@ -15,7 +15,8 @@ class TimelineController extends GetxController {
       TimelineEvent(
         time: "09:42 AM",
         title: "Mesh Connection Established",
-        description: "Connected to 14 nodes in Sector 4. Signal strength: Excellent.",
+        description:
+            "Connected to 14 nodes in Sector 4. Signal strength: Excellent.",
         icon: Icons.hub_outlined,
         color: Colors.cyanAccent,
       ),
@@ -36,7 +37,8 @@ class TimelineController extends GetxController {
       TimelineEvent(
         time: "04:20 PM",
         title: "AI Memory Snapshot",
-        description: "Reconstructed interaction patterns from local node history.",
+        description:
+            "Reconstructed interaction patterns from local node history.",
         icon: Icons.auto_awesome,
         color: Colors.amberAccent,
       ),

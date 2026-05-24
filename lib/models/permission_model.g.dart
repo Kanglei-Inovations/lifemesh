@@ -51,7 +51,7 @@ const PermissionModelSchema = CollectionSchema(
       id: 6,
       name: r'storageGranted',
       type: IsarType.bool,
-    )
+    ),
   },
   estimateSize: _permissionModelEstimateSize,
   serialize: _permissionModelSerialize,
@@ -144,7 +144,10 @@ List<IsarLinkBase<dynamic>> _permissionModelGetLinks(PermissionModel object) {
 }
 
 void _permissionModelAttach(
-    IsarCollection<dynamic> col, Id id, PermissionModel object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  PermissionModel object,
+) {
   object.id = id;
 }
 
@@ -160,17 +163,15 @@ extension PermissionModelQueryWhereSort
 extension PermissionModelQueryWhere
     on QueryBuilder<PermissionModel, PermissionModel, QWhereClause> {
   QueryBuilder<PermissionModel, PermissionModel, QAfterWhereClause> idEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterWhereClause>
-      idNotEqualTo(Id id) {
+  idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -193,7 +194,7 @@ extension PermissionModelQueryWhere
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterWhereClause>
-      idGreaterThan(Id id, {bool include = false}) {
+  idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -202,8 +203,9 @@ extension PermissionModelQueryWhere
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -218,12 +220,14 @@ extension PermissionModelQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -231,128 +235,123 @@ extension PermissionModelQueryWhere
 extension PermissionModelQueryFilter
     on QueryBuilder<PermissionModel, PermissionModel, QFilterCondition> {
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      bluetoothGrantedEqualTo(bool value) {
+  bluetoothGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bluetoothGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'bluetoothGranted', value: value),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      cameraGrantedEqualTo(bool value) {
+  cameraGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cameraGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'cameraGranted', value: value),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      idEqualTo(Id value) {
+  idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      idBetween(
+  idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      locationGrantedEqualTo(bool value) {
+  locationGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'locationGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'locationGranted', value: value),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      microphoneGrantedEqualTo(bool value) {
+  microphoneGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'microphoneGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'microphoneGranted', value: value),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      nearbyDevicesGrantedEqualTo(bool value) {
+  nearbyDevicesGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'nearbyDevicesGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'nearbyDevicesGranted',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      notificationGrantedEqualTo(bool value) {
+  notificationGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'notificationGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'notificationGranted', value: value),
+      );
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterFilterCondition>
-      storageGrantedEqualTo(bool value) {
+  storageGrantedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'storageGranted',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'storageGranted', value: value),
+      );
     });
   }
 }
@@ -366,98 +365,98 @@ extension PermissionModelQueryLinks
 extension PermissionModelQuerySortBy
     on QueryBuilder<PermissionModel, PermissionModel, QSortBy> {
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByBluetoothGranted() {
+  sortByBluetoothGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'bluetoothGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByBluetoothGrantedDesc() {
+  sortByBluetoothGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'bluetoothGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByCameraGranted() {
+  sortByCameraGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'cameraGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByCameraGrantedDesc() {
+  sortByCameraGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'cameraGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByLocationGranted() {
+  sortByLocationGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'locationGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByLocationGrantedDesc() {
+  sortByLocationGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'locationGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByMicrophoneGranted() {
+  sortByMicrophoneGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'microphoneGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByMicrophoneGrantedDesc() {
+  sortByMicrophoneGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'microphoneGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByNearbyDevicesGranted() {
+  sortByNearbyDevicesGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nearbyDevicesGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByNearbyDevicesGrantedDesc() {
+  sortByNearbyDevicesGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nearbyDevicesGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByNotificationGranted() {
+  sortByNotificationGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'notificationGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByNotificationGrantedDesc() {
+  sortByNotificationGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'notificationGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByStorageGranted() {
+  sortByStorageGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'storageGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      sortByStorageGrantedDesc() {
+  sortByStorageGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'storageGranted', Sort.desc);
     });
@@ -467,28 +466,28 @@ extension PermissionModelQuerySortBy
 extension PermissionModelQuerySortThenBy
     on QueryBuilder<PermissionModel, PermissionModel, QSortThenBy> {
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByBluetoothGranted() {
+  thenByBluetoothGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'bluetoothGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByBluetoothGrantedDesc() {
+  thenByBluetoothGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'bluetoothGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByCameraGranted() {
+  thenByCameraGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'cameraGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByCameraGrantedDesc() {
+  thenByCameraGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'cameraGranted', Sort.desc);
     });
@@ -507,70 +506,70 @@ extension PermissionModelQuerySortThenBy
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByLocationGranted() {
+  thenByLocationGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'locationGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByLocationGrantedDesc() {
+  thenByLocationGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'locationGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByMicrophoneGranted() {
+  thenByMicrophoneGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'microphoneGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByMicrophoneGrantedDesc() {
+  thenByMicrophoneGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'microphoneGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByNearbyDevicesGranted() {
+  thenByNearbyDevicesGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nearbyDevicesGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByNearbyDevicesGrantedDesc() {
+  thenByNearbyDevicesGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nearbyDevicesGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByNotificationGranted() {
+  thenByNotificationGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'notificationGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByNotificationGrantedDesc() {
+  thenByNotificationGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'notificationGranted', Sort.desc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByStorageGranted() {
+  thenByStorageGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'storageGranted', Sort.asc);
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QAfterSortBy>
-      thenByStorageGrantedDesc() {
+  thenByStorageGrantedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'storageGranted', Sort.desc);
     });
@@ -580,49 +579,49 @@ extension PermissionModelQuerySortThenBy
 extension PermissionModelQueryWhereDistinct
     on QueryBuilder<PermissionModel, PermissionModel, QDistinct> {
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByBluetoothGranted() {
+  distinctByBluetoothGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'bluetoothGranted');
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByCameraGranted() {
+  distinctByCameraGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'cameraGranted');
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByLocationGranted() {
+  distinctByLocationGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'locationGranted');
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByMicrophoneGranted() {
+  distinctByMicrophoneGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'microphoneGranted');
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByNearbyDevicesGranted() {
+  distinctByNearbyDevicesGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nearbyDevicesGranted');
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByNotificationGranted() {
+  distinctByNotificationGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'notificationGranted');
     });
   }
 
   QueryBuilder<PermissionModel, PermissionModel, QDistinct>
-      distinctByStorageGranted() {
+  distinctByStorageGranted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'storageGranted');
     });
@@ -638,49 +637,49 @@ extension PermissionModelQueryProperty
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      bluetoothGrantedProperty() {
+  bluetoothGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'bluetoothGranted');
     });
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      cameraGrantedProperty() {
+  cameraGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'cameraGranted');
     });
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      locationGrantedProperty() {
+  locationGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'locationGranted');
     });
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      microphoneGrantedProperty() {
+  microphoneGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'microphoneGranted');
     });
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      nearbyDevicesGrantedProperty() {
+  nearbyDevicesGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nearbyDevicesGranted');
     });
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      notificationGrantedProperty() {
+  notificationGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'notificationGranted');
     });
   }
 
   QueryBuilder<PermissionModel, bool, QQueryOperations>
-      storageGrantedProperty() {
+  storageGrantedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'storageGranted');
     });

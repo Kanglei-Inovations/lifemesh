@@ -13,7 +13,8 @@ class FeedController extends GetxController {
     posts.value = [
       Post(
         username: "Nexus-Alpha",
-        content: "Just joined the mesh! The connection is incredibly stable here in the park. 🌐",
+        content:
+            "Just joined the mesh! The connection is incredibly stable here in the park. 🌐",
         time: "2m ago",
         distance: "15m",
         likes: 12,
@@ -21,7 +22,8 @@ class FeedController extends GetxController {
       ),
       Post(
         username: "Cyber_Punk",
-        content: "Anyone have the documentation for the new local node protocol? Looking to relay some data. 💻",
+        content:
+            "Anyone have the documentation for the new local node protocol? Looking to relay some data. 💻",
         time: "15m ago",
         distance: "45m",
         likes: 5,
@@ -29,7 +31,8 @@ class FeedController extends GetxController {
       ),
       Post(
         username: "MeshMaster",
-        content: "Check out this view from the rooftop! No internet needed to share this. 📸",
+        content:
+            "Check out this view from the rooftop! No internet needed to share this. 📸",
         time: "1h ago",
         distance: "120m",
         likes: 42,

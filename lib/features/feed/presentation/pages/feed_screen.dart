@@ -19,7 +19,11 @@ class FeedScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'NEARBY FEED',
-          style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            letterSpacing: 2,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         actions: [
           IconButton(
@@ -28,14 +32,16 @@ class FeedScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Obx(() => ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.posts.length,
-            itemBuilder: (context, index) {
-              final post = controller.posts[index];
-              return _buildPostCard(post, index);
-            },
-          )),
+      body: Obx(
+        () => ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.posts.length,
+          itemBuilder: (context, index) {
+            final post = controller.posts[index];
+            return _buildPostCard(post, index);
+          },
+        ),
+      ),
     );
   }
 
@@ -48,10 +54,16 @@ class FeedScreen extends StatelessWidget {
       alignment: Alignment.center,
       border: 1,
       linearGradient: LinearGradient(
-        colors: [Colors.white.withValues(alpha: 0.05), Colors.white.withValues(alpha: 0.02)],
+        colors: [
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.02),
+        ],
       ),
       borderGradient: LinearGradient(
-        colors: [AppColors.cyanBlue.withValues(alpha: 0.2), AppColors.neonPurple.withValues(alpha: 0.2)],
+        colors: [
+          AppColors.cyanBlue.withValues(alpha: 0.2),
+          AppColors.neonPurple.withValues(alpha: 0.2),
+        ],
       ),
       margin: const EdgeInsets.only(bottom: 20),
       child: Padding(
@@ -63,17 +75,26 @@ class FeedScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: AppColors.neonPurple.withValues(alpha: 0.2),
-                  child: Text(post.username[0], style: const TextStyle(color: AppColors.cyanBlue)),
+                  child: Text(
+                    post.username[0],
+                    style: const TextStyle(color: AppColors.cyanBlue),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(post.username, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        post.username,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       Text(
                         '${post.time} • ${post.distance} away',
-                        style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
                       ),
                     ],
                   ),
@@ -82,7 +103,10 @@ class FeedScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Text(post.content, style: const TextStyle(fontSize: 15, height: 1.4)),
+            Text(
+              post.content,
+              style: const TextStyle(fontSize: 15, height: 1.4),
+            ),
             if (post.hasImage) ...[
               const SizedBox(height: 12),
               Expanded(
@@ -91,10 +115,17 @@ class FeedScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
-                      colors: [AppColors.neonPurple.withValues(alpha: 0.1), AppColors.cyanBlue.withValues(alpha: 0.1)],
+                      colors: [
+                        AppColors.neonPurple.withValues(alpha: 0.1),
+                        AppColors.cyanBlue.withValues(alpha: 0.1),
+                      ],
                     ),
                   ),
-                  child: const Icon(Icons.image_outlined, size: 50, color: Colors.white24),
+                  child: const Icon(
+                    Icons.image_outlined,
+                    size: 50,
+                    color: Colors.white24,
+                  ),
                 ),
               ),
             ],
@@ -105,7 +136,11 @@ class FeedScreen extends StatelessWidget {
                 _buildAction(Icons.favorite_border, '${post.likes}'),
                 _buildAction(Icons.chat_bubble_outline, '${post.comments}'),
                 _buildAction(Icons.share_outlined, 'Relay'),
-                const Icon(Icons.bookmark_border, size: 20, color: Colors.white54),
+                const Icon(
+                  Icons.bookmark_border,
+                  size: 20,
+                  color: Colors.white54,
+                ),
               ],
             ),
           ],
@@ -119,7 +154,10 @@ class FeedScreen extends StatelessWidget {
       children: [
         Icon(icon, size: 20, color: Colors.white70),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 13, color: Colors.white70)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, color: Colors.white70),
+        ),
       ],
     );
   }

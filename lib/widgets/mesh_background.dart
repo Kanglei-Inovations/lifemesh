@@ -9,7 +9,8 @@ class MeshBackground extends StatefulWidget {
   State<MeshBackground> createState() => _MeshBackgroundState();
 }
 
-class _MeshBackgroundState extends State<MeshBackground> with SingleTickerProviderStateMixin {
+class _MeshBackgroundState extends State<MeshBackground>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final List<Node> nodes = List.generate(20, (index) => Node());
 
@@ -81,7 +82,9 @@ class MeshPainter extends CustomPainter {
         final otherPos = Offset(other.x * size.width, other.y * size.height);
         final distance = (pos - otherPos).distance;
         if (distance < 150) {
-          paint.color = AppColors.cyanBlue.withValues(alpha: (1 - distance / 150) * 0.2);
+          paint.color = AppColors.cyanBlue.withValues(
+            alpha: (1 - distance / 150) * 0.2,
+          );
           canvas.drawLine(pos, otherPos, paint);
         }
       }

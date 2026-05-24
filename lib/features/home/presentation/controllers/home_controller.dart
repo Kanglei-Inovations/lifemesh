@@ -7,6 +7,7 @@ import '../../../../core/database_service.dart';
 import '../../../../core/constants/mesh_states.dart';
 import '../../../../core/services/nearby_discovery_service.dart';
 import '../../../../models/activity_model.dart';
+import '../../../../models/dashboard_stat_model.dart';
 import '../../../../models/nearby_user_model.dart';
 import '../../../../models/onboarding_user_model.dart';
 
@@ -47,12 +48,18 @@ class HomeController extends GetxController {
   RxInt get connectedEndpointCount => _nearbyDiscovery.connectedEndpointCount;
   RxList<String> get endpointIds => _nearbyDiscovery.endpointIds;
   RxString get lastPayload => _nearbyDiscovery.lastPayload;
-  Rx<MeshConnectionState> get connectionState => _nearbyDiscovery.connectionState;
+  RxString get lastError => _nearbyDiscovery.lastError;
+  Rx<MeshConnectionState> get connectionState =>
+      _nearbyDiscovery.connectionState;
 
   @override
   void onInit() {
     super.onInit();
     _bootstrap();
+  }
+
+  Future<void> startDiscovery() async {
+    await _nearbyDiscovery.start();
   }
 
   @override
@@ -255,7 +262,8 @@ class HomeController extends GetxController {
   void _updateMeshStatus() {
     final state = _nearbyDiscovery.connectionState.value;
     isMeshActive.value =
-        state != MeshConnectionState.idle && state != MeshConnectionState.failed;
+        state != MeshConnectionState.idle &&
+        state != MeshConnectionState.failed;
     meshStatus.value = state.display;
   }
 

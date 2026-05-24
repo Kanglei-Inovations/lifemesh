@@ -19,7 +19,11 @@ class ChatScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'MESH MESSAGES',
-          style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            letterSpacing: 2,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         actions: [
           IconButton(
@@ -32,14 +36,16 @@ class ChatScreen extends StatelessWidget {
         children: [
           _buildOnlinePeers(),
           Expanded(
-            child: Obx(() => ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: controller.chats.length,
-                  itemBuilder: (context, index) {
-                    final chat = controller.chats[index];
-                    return _buildChatTile(chat, index);
-                  },
-                )),
+            child: Obx(
+              () => ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: controller.chats.length,
+                itemBuilder: (context, index) {
+                  final chat = controller.chats[index];
+                  return _buildChatTile(chat, index);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -82,14 +88,20 @@ class ChatScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.greenAccent,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.deepNavy, width: 2),
+                          border: Border.all(
+                            color: AppColors.deepNavy,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text('Peer', style: TextStyle(fontSize: 10, color: Colors.white70)),
+                const Text(
+                  'Peer',
+                  style: TextStyle(fontSize: 10, color: Colors.white70),
+                ),
               ],
             ),
           );
@@ -109,10 +121,16 @@ class ChatScreen extends StatelessWidget {
         alignment: Alignment.center,
         border: 1,
         linearGradient: LinearGradient(
-          colors: [Colors.white.withValues(alpha: 0.05), Colors.white.withValues(alpha: 0.02)],
+          colors: [
+            Colors.white.withValues(alpha: 0.05),
+            Colors.white.withValues(alpha: 0.02),
+          ],
         ),
         borderGradient: LinearGradient(
-          colors: [AppColors.cyanBlue.withValues(alpha: 0.1), AppColors.neonPurple.withValues(alpha: 0.1)],
+          colors: [
+            AppColors.cyanBlue.withValues(alpha: 0.1),
+            AppColors.neonPurple.withValues(alpha: 0.1),
+          ],
         ),
         child: ListTile(
           onTap: () => Get.toNamed('/chat-detail', arguments: chat),
@@ -120,7 +138,10 @@ class ChatScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundColor: AppColors.cyanBlue.withValues(alpha: 0.1),
-                child: Text(chat.name[0], style: const TextStyle(color: AppColors.cyanBlue)),
+                child: Text(
+                  chat.name[0],
+                  style: const TextStyle(color: AppColors.cyanBlue),
+                ),
               ),
               if (chat.isOnline)
                 Positioned(
@@ -129,31 +150,52 @@ class ChatScreen extends StatelessWidget {
                   child: Container(
                     width: 10,
                     height: 10,
-                    decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: Colors.greenAccent,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
             ],
           ),
-          title: Text(chat.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(
+            chat.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Text(
             chat.lastMessage,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+            ),
           ),
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(chat.time, style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.4))),
+              Text(
+                chat.time,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+              ),
               const SizedBox(height: 4),
               if (chat.unreadCount > 0)
                 Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(color: AppColors.neonPurple, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: AppColors.neonPurple,
+                    shape: BoxShape.circle,
+                  ),
                   child: Text(
                     '${chat.unreadCount}',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
             ],

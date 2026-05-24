@@ -39,7 +39,9 @@ class ChatDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.deepNavy.withValues(alpha: 0.5),
-        border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+        ),
       ),
       child: Row(
         children: [
@@ -51,7 +53,10 @@ class ChatDetailScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundColor: AppColors.cyanBlue.withValues(alpha: 0.1),
-                child: Text(chat.name[0], style: const TextStyle(color: AppColors.cyanBlue)),
+                child: Text(
+                  chat.name[0],
+                  style: const TextStyle(color: AppColors.cyanBlue),
+                ),
               ),
               if (chat.isOnline)
                 Positioned(
@@ -74,7 +79,13 @@ class ChatDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(chat.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  chat.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 Text(
                   chat.isOnline ? 'Mesh Connected' : 'Offline',
                   style: TextStyle(
@@ -96,69 +107,92 @@ class ChatDetailScreen extends StatelessWidget {
 
   Widget _buildMessageList(ChatDetailController controller) {
     return Expanded(
-      child: Obx(() => ListView.builder(
-            padding: const EdgeInsets.all(20),
-            reverse: false,
-            itemCount: controller.messages.length,
-            itemBuilder: (context, index) {
-              final message = controller.messages[index];
-              return _buildMessageBubble(message, index);
-            },
-          )),
+      child: Obx(
+        () => ListView.builder(
+          padding: const EdgeInsets.all(20),
+          reverse: false,
+          itemCount: controller.messages.length,
+          itemBuilder: (context, index) {
+            final message = controller.messages[index];
+            return _buildMessageBubble(message, index);
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildMessageBubble(ChatMessage message, int index) {
     return Align(
       alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        constraints: BoxConstraints(maxWidth: Get.width * 0.75),
-        child: Column(
-          crossAxisAlignment: message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            GlassmorphicContainer(
-              width: double.infinity,
-              height: 0, // Dynamic height fix below
-              borderRadius: 20,
-              blur: 10,
-              alignment: Alignment.center,
-              border: 1,
-              linearGradient: LinearGradient(
-                colors: message.isMe
-                    ? [AppColors.neonPurple.withValues(alpha: 0.2), AppColors.neonPurple.withValues(alpha: 0.1)]
-                    : [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
-              ),
-              borderGradient: LinearGradient(
-                colors: message.isMe
-                    ? [AppColors.neonPurple.withValues(alpha: 0.5), Colors.transparent]
-                    : [AppColors.cyanBlue.withValues(alpha: 0.5), Colors.transparent],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  message.text,
-                  style: const TextStyle(fontSize: 15, height: 1.4),
+      child:
+          Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                constraints: BoxConstraints(maxWidth: Get.width * 0.75),
+                child: Column(
+                  crossAxisAlignment: message.isMe
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    GlassmorphicContainer(
+                      width: double.infinity,
+                      height: 0, // Dynamic height fix below
+                      borderRadius: 20,
+                      blur: 10,
+                      alignment: Alignment.center,
+                      border: 1,
+                      linearGradient: LinearGradient(
+                        colors: message.isMe
+                            ? [
+                                AppColors.neonPurple.withValues(alpha: 0.2),
+                                AppColors.neonPurple.withValues(alpha: 0.1),
+                              ]
+                            : [
+                                Colors.white.withValues(alpha: 0.1),
+                                Colors.white.withValues(alpha: 0.05),
+                              ],
+                      ),
+                      borderGradient: LinearGradient(
+                        colors: message.isMe
+                            ? [
+                                AppColors.neonPurple.withValues(alpha: 0.5),
+                                Colors.transparent,
+                              ]
+                            : [
+                                AppColors.cyanBlue.withValues(alpha: 0.5),
+                                Colors.transparent,
+                              ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          message.text,
+                          style: const TextStyle(fontSize: 15, height: 1.4),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          message.time,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        if (message.isMe) ...[
+                          const SizedBox(width: 4),
+                          _buildStatusIcon(message.status),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  message.time,
-                  style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.3)),
-                ),
-                if (message.isMe) ...[
-                  const SizedBox(width: 4),
-                  _buildStatusIcon(message.status),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: message.isMe ? 0.1 : -0.1, end: 0),
+              )
+              .animate()
+              .fadeIn(delay: (index * 50).ms)
+              .slideX(begin: message.isMe ? 0.1 : -0.1, end: 0),
     );
   }
 
@@ -184,41 +218,53 @@ class ChatDetailScreen extends StatelessWidget {
   }
 
   Widget _buildAISuggestions(ChatDetailController controller) {
-    return Obx(() => Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: controller.aiSuggestions.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => controller.sendMessage(controller.aiSuggestions[index]),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.cyanBlue.withValues(alpha: 0.3)),
-                    color: AppColors.cyanBlue.withValues(alpha: 0.05),
+    return Obx(
+      () => Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: controller.aiSuggestions.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () =>
+                  controller.sendMessage(controller.aiSuggestions[index]),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.cyanBlue.withValues(alpha: 0.3),
                   ),
-                  child: Center(
-                    child: Row(
-                      children: [
-                        const Icon(Icons.auto_awesome, size: 14, color: Colors.amberAccent),
-                        const SizedBox(width: 8),
-                        Text(
-                          controller.aiSuggestions[index],
-                          style: const TextStyle(fontSize: 12, color: AppColors.cyanBlue),
+                  color: AppColors.cyanBlue.withValues(alpha: 0.05),
+                ),
+                child: Center(
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: Colors.amberAccent,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        controller.aiSuggestions[index],
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.cyanBlue,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ).animate().fadeIn(delay: (index * 100).ms).scale();
-            },
-          ),
-        ));
+              ),
+            ).animate().fadeIn(delay: (index * 100).ms).scale();
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildInputArea(ChatDetailController controller) {
@@ -226,7 +272,9 @@ class ChatDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.deepNavy.withValues(alpha: 0.8),
-        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+        border: Border(
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+        ),
       ),
       child: Row(
         children: [
@@ -253,7 +301,8 @@ class ChatDetailScreen extends StatelessWidget {
               gradient: AppColors.primaryGradient,
             ),
             child: IconButton(
-              onPressed: () => controller.sendMessage(controller.textController.text),
+              onPressed: () =>
+                  controller.sendMessage(controller.textController.text),
               icon: const Icon(Icons.send_rounded, color: Colors.white),
             ),
           ),
