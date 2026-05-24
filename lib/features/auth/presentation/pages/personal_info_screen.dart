@@ -283,11 +283,15 @@ class PersonalInfoScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildCompletedStep('Create ID'),
+                _buildCompletedStep('ID'),
                 _buildStepConnector(isActive: true),
-                _buildActiveStep(2, 'Personal Info'),
+                _buildActiveStep(2, 'Info'),
                 _buildStepConnector(),
                 _buildInactiveStep(3, 'Review'),
+                _buildStepConnector(),
+                _buildInactiveStep(4, 'Perms'),
+                _buildStepConnector(),
+                _buildInactiveStep(5, 'Scan'),
               ],
             ),
           ),
@@ -398,9 +402,9 @@ class PersonalInfoScreen extends StatelessWidget {
 
   Widget _buildStepConnector({bool isActive = false}) {
     return Container(
-      width: 30,
+      width: 12,
       height: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
+      margin: const EdgeInsets.symmetric(horizontal: 2).copyWith(bottom: 14),
       decoration: BoxDecoration(
         color: isActive
             ? AppColors.cyanBlue

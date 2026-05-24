@@ -13,4 +13,5 @@ class PermissionModel {
   bool notificationGranted = false;
   bool microphoneGranted = false;
   bool nearbyDevicesGranted = false;
+  bool gpsGranted = false;
 }

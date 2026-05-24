@@ -185,11 +185,15 @@ class ReviewScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildCompletedStep('Create ID'),
+                _buildCompletedStep('ID'),
                 _buildStepConnector(isActive: true),
-                _buildCompletedStep('Personal Info'),
+                _buildCompletedStep('Info'),
                 _buildStepConnector(isActive: true),
                 _buildActiveStep(3, 'Review'),
+                _buildStepConnector(),
+                _buildInactiveStep(4, 'Perms'),
+                _buildStepConnector(),
+                _buildInactiveStep(5, 'Scan'),
               ],
             ),
           ),
@@ -267,11 +271,42 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildInactiveStep(int step, String label) {
+    return Column(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            step.toString(),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildStepConnector({bool isActive = false}) {
     return Container(
-      width: 30,
+      width: 12,
       height: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
+      margin: const EdgeInsets.symmetric(horizontal: 2).copyWith(bottom: 14),
       decoration: BoxDecoration(
         color: isActive
             ? AppColors.cyanBlue

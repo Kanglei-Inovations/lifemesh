@@ -17,6 +17,7 @@ class PermissionController extends GetxController {
   final RxBool storageGranted = false.obs;
   final RxBool cameraGranted = false.obs;
   final RxBool microphoneGranted = false.obs;
+  final RxBool gpsGranted = false.obs;
 
   final RxBool isAllGranted = false.obs;
   final RxBool isLoading = false.obs;
@@ -37,6 +38,7 @@ class PermissionController extends GetxController {
       storageGranted.value = model.storageGranted;
       notificationGranted.value = model.notificationGranted;
       microphoneGranted.value = model.microphoneGranted;
+      gpsGranted.value = model.gpsGranted;
       _updateOverallStatus();
     }
   }
@@ -51,6 +53,7 @@ class PermissionController extends GetxController {
     model.storageGranted = storageGranted.value;
     model.notificationGranted = notificationGranted.value;
     model.microphoneGranted = microphoneGranted.value;
+    model.gpsGranted = gpsGranted.value;
 
     await _db.isar.writeTxn(() async {
       await _db.isar.permissionModels.put(model);
@@ -59,16 +62,21 @@ class PermissionController extends GetxController {
 
   Future<void> checkPermissionStatus() async {
     try {
-      bluetoothGranted.value =
-          await Permission.bluetooth.isGranted &&
-          await Permission.bluetoothAdvertise.isGranted &&
-          await Permission.bluetoothConnect.isGranted &&
-          await Permission.bluetoothScan.isGranted;
-          
-      // Note: we don't strictly require nearbyWifiDevices for the UI indicator 
-      // as it's not applicable to all Android versions.
+      // For Bluetooth, we check both legacy and new permissions
+      // On Android 12+, Scan/Connect/Advertise are primary.
+      // On Android <12, Bluetooth is primary.
+      
+      // Use status to avoid issues with "missing in manifest" if one is not applicable
+      final bt = await Permission.bluetooth.isGranted;
+      final btScan = await Permission.bluetoothScan.isGranted;
+      final btConnect = await Permission.bluetoothConnect.isGranted;
+      final btAdvertise = await Permission.bluetoothAdvertise.isGranted;
 
+      bluetoothGranted.value = (btScan && btConnect && btAdvertise) || bt;
+          
       locationGranted.value = await Permission.location.isGranted;
+      gpsGranted.value = await Permission.location.isGranted; // GPS uses same permission check in this context
+      
       notificationGranted.value = await Permission.notification.isGranted;
 
       storageGranted.value =
@@ -88,42 +96,55 @@ class PermissionController extends GetxController {
     // Essential permissions for core mesh functionality
     isAllGranted.value =
         bluetoothGranted.value &&
-        locationGranted.value;
-        
-    // Storage and others are "important" but maybe not strictly "blocking" for the mesh?
-    // But for onboarding, we typically want all of them.
-    // However, we'll keep the current logic but ensure bluetoothGranted is lenient.
+        locationGranted.value &&
+        gpsGranted.value;
   }
 
   Future<void> requestAllPermissions() async {
     isLoading.value = true;
-
-    await requestLocationPermission();
-    await requestBluetoothPermission();
-    await requestNotificationPermission();
-    await requestStoragePermission();
-    await requestCameraPermission();
-    await requestMicrophonePermission();
-
-    isLoading.value = false;
+    try {
+      await requestLocationPermission();
+      await requestBluetoothPermission();
+      await requestNotificationPermission();
+      await requestStoragePermission();
+      await requestCameraPermission();
+      await requestMicrophonePermission();
+    } catch (e) {
+      Get.log("Error requesting all permissions: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> requestBluetoothPermission() async {
-    final status = await [
-      Permission.bluetooth,
-      Permission.bluetoothAdvertise,
-      Permission.bluetoothConnect,
+    final List<Permission> toRequest = [
       Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.bluetoothAdvertise,
       Permission.nearbyWifiDevices,
-    ].request();
+    ];
+    
+    // We don't request Permission.bluetooth (legacy) at runtime on Android 12+
+    // as it's not a "dangerous" permission that needs a dialog.
+    // Requesting it often causes "missing in manifest" errors if not handled correctly by the plugin.
 
-    // Lenient check: Nearby WiFi is only mandatory for Android 13+
-    bool essentials = (status[Permission.bluetooth]?.isGranted ?? true) &&
-        (status[Permission.bluetoothAdvertise]?.isGranted ?? true) &&
-        (status[Permission.bluetoothConnect]?.isGranted ?? true) &&
-        (status[Permission.bluetoothScan]?.isGranted ?? true);
-        
-    bluetoothGranted.value = essentials;
+    try {
+      final status = await toRequest.request();
+
+      bool modernBt = (status[Permission.bluetoothScan]?.isGranted ?? true) &&
+          (status[Permission.bluetoothConnect]?.isGranted ?? true) &&
+          (status[Permission.bluetoothAdvertise]?.isGranted ?? true);
+          
+      // Nearby WiFi is Android 13+ only
+      // bool wifi = (status[Permission.nearbyWifiDevices]?.isGranted ?? true);
+          
+      bluetoothGranted.value = modernBt;
+    } catch (e) {
+      Get.log("Error requesting bluetooth permissions: $e");
+      // Fallback check
+      await checkPermissionStatus();
+    }
+    
     _savePermissionsToIsar();
     _updateOverallStatus();
   }
@@ -131,6 +152,7 @@ class PermissionController extends GetxController {
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
     locationGranted.value = status.isGranted;
+    gpsGranted.value = status.isGranted;
     _savePermissionsToIsar();
     _updateOverallStatus();
   }

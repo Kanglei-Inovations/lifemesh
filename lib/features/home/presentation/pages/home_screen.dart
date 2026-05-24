@@ -15,23 +15,7 @@ import '../../../feed/presentation/pages/feed_screen.dart';
 import '../../../profile/presentation/pages/profile_screen.dart';
 import '../../../timeline/presentation/pages/timeline_screen.dart';
 import '../controllers/home_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:glassmorphism/glassmorphism.dart';
-import 'package:shimmer/shimmer.dart';
-import 'dart:io';
-import 'dart:math' as math;
-import '../../../../core/app_colors.dart';
-import '../../../../core/constants/mesh_states.dart';
-import '../../../../models/nearby_user_model.dart';
-import '../../../../widgets/mesh_background.dart';
-import '../../../chat/presentation/pages/chat_screen.dart';
-import '../../../feed/presentation/pages/feed_screen.dart';
-import '../../../profile/presentation/pages/profile_screen.dart';
-import '../../../timeline/presentation/pages/timeline_screen.dart';
-import '../controllers/home_controller.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -732,6 +716,7 @@ class HomeScreen extends StatelessWidget {
                       ? AppColors.cyanBlue
                       : Colors.orangeAccent,
                 ),
+
               ],
             ),
             if (controller.lastError.value.isNotEmpty) ...[

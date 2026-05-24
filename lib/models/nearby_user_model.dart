@@ -18,6 +18,14 @@ class NearbyUserModel {
   String? deviceName; // Android device name
   DateTime? lastSeen; // Last successful ping
   String? connectionStatus; // idle/discovering/connecting/connected/failed
+  
+  // Heartbeat tracking
+  bool isOnline = false;
+  DateTime? lastHeartbeat;
+
+  // Hybrid discovery fields
+  String? discoverySource; // ble, lan, wifiDirect, internet
+  String? connectionType; // p2p, lan, ble, proxy
 
   static NearbyUserModel fromPayload({
     required String endpointId,
@@ -36,6 +44,8 @@ class NearbyUserModel {
       ..deviceName = deviceName
       ..connectedAt = DateTime.now()
       ..lastSeen = DateTime.now()
+      ..isOnline = true
+      ..lastHeartbeat = DateTime.now()
       ..connectionStatus = 'connected';
   }
 }

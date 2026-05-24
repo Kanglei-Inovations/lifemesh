@@ -35,25 +35,13 @@ class OnboardingController extends GetxController {
               await _db.isar.onboardingUserModels.put(user);
             });
           }
-          
-          // Before going to discovery, check if permissions are still valid
-          final arePermissionsGranted = await _checkEssentialPermissions();
-          if (arePermissionsGranted) {
-            if (Get.currentRoute != '/discovering') {
-              Get.offAllNamed('/discovering');
-            }
-          } else {
-            if (Get.currentRoute != '/permissions') {
-              Get.offAllNamed('/permissions');
-            }
-          }
           return;
         }
 
-        // Restore step if app was closed
+        // Restore step if app was closed, but DON'T auto-navigate here.
+        // The SplashController or the UI should handle the initial navigation.
         if (state.currentStep > 1) {
           currentStep.value = state.currentStep;
-          _navigateBasedOnStep();
         }
       }
     } catch (e) {
@@ -63,10 +51,15 @@ class OnboardingController extends GetxController {
 
   Future<bool> _checkEssentialPermissions() async {
     final location = await Permission.location.isGranted;
+    final bluetooth = await Permission.bluetooth.isGranted;
     final bluetoothScan = await Permission.bluetoothScan.isGranted;
     final bluetoothConnect = await Permission.bluetoothConnect.isGranted;
     final bluetoothAdvertise = await Permission.bluetoothAdvertise.isGranted;
-    return location && bluetoothScan && bluetoothConnect && bluetoothAdvertise;
+    
+    // On Android 12+, we need Scan/Connect/Advertise.
+    // On Android <12, we need legacy Bluetooth.
+    // Being safe and checking all that are in the manifest.
+    return location && bluetooth && bluetoothScan && bluetoothConnect && bluetoothAdvertise;
   }
 
   /// Saves the current step to the database.

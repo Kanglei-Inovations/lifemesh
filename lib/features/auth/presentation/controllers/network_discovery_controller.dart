@@ -7,7 +7,7 @@ import 'package:isar/isar.dart';
 
 import '../../../../core/constants/mesh_states.dart';
 import '../../../../core/database_service.dart';
-import '../../../../core/services/nearby_discovery_service.dart';
+import '../../../../core/services/nearby_service.dart';
 import '../../../../models/nearby_user_model.dart';
 import '../../../../models/onboarding_state_model.dart';
 import '../../../../models/onboarding_user_model.dart';
@@ -28,8 +28,7 @@ class DiscoveredUser {
 
 class NetworkDiscoveryController extends GetxController {
   final DatabaseService dbService = Get.find<DatabaseService>();
-  final NearbyDiscoveryService nearbyDiscovery =
-      Get.find<NearbyDiscoveryService>();
+  final NearbyService meshService = Get.find<NearbyService>();
 
   final RxDouble discoveryProgress = 0.0.obs;
   final RxInt nearbyUsersCount = 0.obs;
@@ -78,12 +77,12 @@ class NetworkDiscoveryController extends GetxController {
 
     try {
       print('Starting nearby discovery...');
-      await nearbyDiscovery.start();
+      await meshService.startMesh();
       _scheduleHomeTransition();
     } catch (e) {
       print('Network discovery start error: $e');
       scanningStatus.value = 'Error starting discovery: $e';
-      _hasStarted = false; // Allow retry if it failed
+      _hasStarted = false; 
     } finally {
       _startFuture = null;
     }
@@ -115,8 +114,7 @@ class NetworkDiscoveryController extends GetxController {
             nearbyUsersCount.value = discoveredUsers.length;
 
             if (discoveredUsers.isNotEmpty &&
-                nearbyDiscovery.connectionState.value !=
-                    MeshConnectionState.connected) {
+                meshService.globalState.value != MeshConnectionState.connected) {
               discoveryProgress.value = 0.78;
               scanningStatus.value = 'Nearby LifeMesh device found...';
             }
@@ -129,17 +127,10 @@ class NetworkDiscoveryController extends GetxController {
 
   void _bindDiscoveryState() {
     _workers.add(
-      ever<MeshConnectionState>(nearbyDiscovery.connectionState, (state) {
+      ever<MeshConnectionState>(meshService.globalState, (state) {
         _applyMeshState(state);
         if (state == MeshConnectionState.connected) {
           _scheduleHomeTransition(delay: const Duration(milliseconds: 1200));
-        }
-      }),
-    );
-    _workers.add(
-      ever<String>(nearbyDiscovery.lastError, (error) {
-        if (error.isNotEmpty) {
-          scanningStatus.value = 'Discovery error: $error';
         }
       }),
     );
@@ -226,9 +217,6 @@ class NetworkDiscoveryController extends GetxController {
   }
 
   bool _isActiveNearbyUser(NearbyUserModel user) {
-    final status = user.connectionStatus ?? '';
-    return status == MeshConnectionState.discovering.name ||
-        status == MeshConnectionState.connecting.name ||
-        status == MeshConnectionState.connected.name;
+    return user.isOnline;
   }
 }

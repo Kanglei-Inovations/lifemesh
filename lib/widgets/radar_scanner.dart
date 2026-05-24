@@ -33,9 +33,23 @@ class _RadarScannerState extends State<RadarScanner>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return CustomPaint(
-          painter: RadarPainter(_controller.value),
-          size: const Size(300, 300),
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              painter: RadarPainter(_controller.value),
+              size: Size.infinite,
+            ),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.cyanBlue.withValues(alpha: 0.1),
+                border: Border.all(color: AppColors.cyanBlue.withValues(alpha: 0.5)),
+              ),
+              child: const Icon(Icons.hub, color: AppColors.cyanBlue, size: 20),
+            ),
+          ],
         );
       },
     );
@@ -50,7 +64,7 @@ class RadarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
+    final radius = min(size.width, size.height) / 2;
 
     final bgPaint = Paint()
       ..color = AppColors.cyanBlue.withValues(alpha: 0.05)
@@ -94,7 +108,7 @@ class RadarPainter extends CustomPainter {
         transform: GradientRotation(angle * pi * 2),
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
-    canvas.drawCircle(center, radius, Paint()..shader = sweepPaint as Shader?);
+    canvas.drawCircle(center, radius, sweepPaint);
 
     // Draw leading edge
     final edgeAngle = angle * pi * 2;

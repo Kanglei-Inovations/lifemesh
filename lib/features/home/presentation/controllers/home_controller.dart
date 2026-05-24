@@ -5,7 +5,7 @@ import 'package:isar/isar.dart';
 
 import '../../../../core/database_service.dart';
 import '../../../../core/constants/mesh_states.dart';
-import '../../../../core/services/nearby_discovery_service.dart';
+import '../../../../core/services/nearby_service.dart';
 import '../../../../models/activity_model.dart';
 import '../../../../models/dashboard_stat_model.dart';
 import '../../../../models/nearby_user_model.dart';
@@ -13,8 +13,7 @@ import '../../../../models/onboarding_user_model.dart';
 
 class HomeController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
-  final NearbyDiscoveryService _nearbyDiscovery =
-      Get.find<NearbyDiscoveryService>();
+  final NearbyService _meshService = Get.find<NearbyService>();
 
   final RxInt currentIndex = 0.obs;
 
@@ -41,16 +40,17 @@ class HomeController extends GetxController {
   final List<StreamSubscription<dynamic>> _subscriptions = [];
   final List<Worker> _workers = [];
 
-  RxBool get isAdvertising => _nearbyDiscovery.isAdvertising;
-  RxBool get isDiscovering => _nearbyDiscovery.isDiscovering;
-  RxBool get bluetoothEnabled => _nearbyDiscovery.bluetoothEnabled;
-  RxBool get wifiEnabled => _nearbyDiscovery.wifiEnabled;
-  RxInt get connectedEndpointCount => _nearbyDiscovery.connectedEndpointCount;
-  RxList<String> get endpointIds => _nearbyDiscovery.endpointIds;
-  RxString get lastPayload => _nearbyDiscovery.lastPayload;
-  RxString get lastError => _nearbyDiscovery.lastError;
-  Rx<MeshConnectionState> get connectionState =>
-      _nearbyDiscovery.connectionState;
+  final RxString lastPayload = ''.obs;
+  final RxString lastError = ''.obs;
+
+  RxBool get bluetoothEnabled => true.obs;
+  RxBool get wifiEnabled => true.obs;
+
+  RxBool get isAdvertising => _meshService.isScanning;
+  RxBool get isDiscovering => _meshService.isScanning;
+  RxInt get connectedEndpointCount => _meshService.connectedNodes.length.obs;
+  RxList<String> get endpointIds => _meshService.connectedNodes.map((u) => u.endpointId ?? 'unknown').toList().obs;
+  Rx<MeshConnectionState> get connectionState => _meshService.globalState;
 
   @override
   void onInit() {
@@ -59,7 +59,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> startDiscovery() async {
-    await _nearbyDiscovery.start();
+    await _meshService.startMesh();
   }
 
   @override
@@ -83,8 +83,8 @@ class HomeController extends GetxController {
     _watchDashboardStats();
     _watchNearbyUsers();
     _watchActivities();
-    _bindNearbyDiscovery();
-    await _nearbyDiscovery.start();
+    _bindMeshService();
+    await _meshService.startMesh();
 
     Future.delayed(const Duration(milliseconds: 700), () {
       isQuickActionsLoading.value = false;
@@ -182,22 +182,21 @@ class HomeController extends GetxController {
     _subscriptions.add(subscription);
   }
 
-  void _bindNearbyDiscovery() {
+  void _bindMeshService() {
     _workers.add(
-      ever<MeshConnectionState>(_nearbyDiscovery.connectionState, (_) {
+      ever<MeshConnectionState>(_meshService.globalState, (_) {
         _updateMeshStatus();
       }),
     );
+    // Listen to connectedNodes length directly
     _workers.add(
-      ever<int>(_nearbyDiscovery.connectedEndpointCount, (count) {
-        connectionCount.value = count;
+      ever(_meshService.connectedNodes, (nodes) {
+        connectionCount.value = nodes.length;
       }),
     );
     _workers.add(
-      ever<double>(_nearbyDiscovery.averageSignalStrength, (signal) {
-        if (!hasDashboardStats.value) {
-          signalStrength.value = signal * 100;
-        }
+      ever<double>(_meshService.avgSignalStrength, (signal) {
+        signalStrength.value = signal * 100;
       }),
     );
   }
@@ -241,9 +240,8 @@ class HomeController extends GetxController {
     final count = nearbyUsers.length;
     final averageSignal = _averageSignal(nearbyUsers);
 
-    isMeshActive.value =
-        _nearbyDiscovery.connectionState.value != MeshConnectionState.idle &&
-        _nearbyDiscovery.connectionState.value != MeshConnectionState.failed;
+    isMeshActive.value = _meshService.globalState.value != MeshConnectionState.idle &&
+                         _meshService.globalState.value != MeshConnectionState.failed;
     connectionCount.value = count;
     signalStrength.value = averageSignal;
     _updateMeshStatus();
@@ -260,7 +258,7 @@ class HomeController extends GetxController {
   }
 
   void _updateMeshStatus() {
-    final state = _nearbyDiscovery.connectionState.value;
+    final state = _meshService.globalState.value;
     isMeshActive.value =
         state != MeshConnectionState.idle &&
         state != MeshConnectionState.failed;
@@ -268,10 +266,7 @@ class HomeController extends GetxController {
   }
 
   bool _isActiveNearbyUser(NearbyUserModel user) {
-    final status = user.connectionStatus ?? '';
-    return status == MeshConnectionState.discovering.name ||
-        status == MeshConnectionState.connecting.name ||
-        status == MeshConnectionState.connected.name;
+    return user.isOnline;
   }
 
   String signalLabel() {

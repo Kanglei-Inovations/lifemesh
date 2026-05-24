@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -16,24 +17,22 @@
         android:usesPermissionFlags="neverForLocation"/>
 
     <!-- Bluetooth Legacy (Android <=11) -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH"
-        android:maxSdkVersion="30"/>
-
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_ADMIN"
-        android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <!-- Android 12+ -->
     <uses-permission
         android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation"/>
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s"/>
 
     <uses-permission
-        android:name="android.permission.BLUETOOTH_CONNECT"/>
+        android:name="android.permission.BLUETOOTH_CONNECT"
+        tools:targetApi="s"/>
 
     <uses-permission
-        android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+        android:name="android.permission.BLUETOOTH_ADVERTISE"
+        tools:targetApi="s"/>
 
     <!-- Location -->
     <uses-permission

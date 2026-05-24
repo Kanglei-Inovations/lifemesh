@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -18,6 +28,12 @@ subprojects {
 
 subprojects {
     project.evaluationDependsOn(":app")
+}
+
+subprojects {
+    plugins.withType<com.android.build.gradle.api.AndroidBasePlugin> {
+        project.apply(plugin = "org.jetbrains.kotlin.android")
+    }
 }
 
 // Fixed namespace injection for AGP 8.0+ compatibility

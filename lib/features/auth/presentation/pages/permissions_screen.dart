@@ -39,15 +39,14 @@ class PermissionsScreen extends StatelessWidget {
               children: [
                 _buildHeader(controller.onboardingController),
                 Expanded(
-                  child: SingleChildScrollView(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        const SizedBox(height: 10),
                         const Text(
                           'Allow Permissions',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -56,170 +55,163 @@ class PermissionsScreen extends StatelessWidget {
                           delay: const Duration(milliseconds: 200),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'To give you the best LifeMesh experience,\nwe need access to a few things.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
-                            fontSize: 14,
-                            height: 1.4,
-                          ),
-                        ).animate().fadeIn(
-                          delay: const Duration(milliseconds: 300),
-                        ),
-                        const SizedBox(height: 32),
 
-                        // Glowing Shield Illustration
-                        _buildShieldIllustration().animate().scale(
+                        // Slightly smaller illustration to save space
+                        SizedBox(
+                          height: 140,
+                          child: _buildShieldIllustration(),
+                        ).animate().scale(
                           delay: const Duration(milliseconds: 400),
                           curve: Curves.easeOutBack,
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 12),
 
-                        // Permissions List
-                        Obx(
-                              () => _buildPermissionCard(
+                        // Permissions List - Scrollable if needed but intended to fit
+                        Expanded(
+                          child: ListView(
+                            padding: EdgeInsets.zero,
+                            physics: const BouncingScrollPhysics(),
+                            children: [
+                              Obx(() => _buildPermissionCard(
                                 icon: Icons.location_on_outlined,
                                 iconColor: AppColors.neonPurple,
                                 title: 'Location',
-                                description:
-                                    'Helps you connect with people\nnear you.',
+                                description: 'Helps you connect with people near you.',
                                 isAllowed: controller.locationGranted.value,
                                 onTap: controller.requestLocationPermission,
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(delay: const Duration(milliseconds: 500))
-                            .slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 16),
-
-                        Obx(
-                              () => _buildPermissionCard(
+                              )),
+                              const SizedBox(height: 12),
+                              Obx(() => _buildPermissionCard(
+                                icon: Icons.gps_fixed,
+                                iconColor: AppColors.cyanBlue,
+                                title: 'GPS Accuracy',
+                                description: 'Ensures precise positioning for accurate mesh mapping.',
+                                isAllowed: controller.gpsGranted.value,
+                                onTap: controller.requestLocationPermission,
+                              )),
+                              const SizedBox(height: 12),
+                              Obx(() => _buildPermissionCard(
                                 icon: Icons.bluetooth_connected,
                                 iconColor: Colors.blueAccent,
                                 title: 'Bluetooth & Nearby',
-                                description:
-                                    'Required to build the offline\nmesh network securely.',
+                                description: 'Required to build the offline mesh network securely.',
                                 isAllowed: controller.bluetoothGranted.value,
                                 onTap: controller.requestBluetoothPermission,
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(delay: const Duration(milliseconds: 600))
-                            .slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 16),
-
-                        Obx(
-                              () => _buildPermissionCard(
+                              )),
+                              const SizedBox(height: 12),
+                              Obx(() => _buildPermissionCard(
                                 icon: Icons.notifications_none_outlined,
                                 iconColor: AppColors.softGlowPink,
                                 title: 'Notifications',
-                                description:
-                                    'Keeps you updated about important\nactivities.',
+                                description: 'Keeps you updated about important activities.',
                                 isAllowed: controller.notificationGranted.value,
                                 onTap: controller.requestNotificationPermission,
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(delay: const Duration(milliseconds: 700))
-                            .slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 16),
-
-                        Obx(
-                              () => _buildPermissionCard(
+                              )),
+                              const SizedBox(height: 12),
+                              Obx(() => _buildPermissionCard(
                                 icon: Icons.image_outlined,
                                 iconColor: AppColors.cyanBlue,
                                 title: 'Photos & Media',
-                                description:
-                                    'Lets you share photos and\nmedia on LifeMesh.',
+                                description: 'Lets you share photos and media on LifeMesh.',
                                 isAllowed: controller.storageGranted.value,
                                 onTap: controller.requestStoragePermission,
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(delay: const Duration(milliseconds: 800))
-                            .slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 24),
-
-                        // Privacy Notice
-                        _buildPrivacyNotice()
-                            .animate()
-                            .fadeIn(delay: const Duration(milliseconds: 900))
-                            .slideY(begin: 0.1, end: 0),
-                        const SizedBox(height: 32),
-
-                        // Continue Button
-                        Container(
-                          width: double.infinity,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(28),
+                              )),
+                              const SizedBox(height: 12),
+                              Obx(() => _buildPermissionCard(
+                                icon: Icons.camera_alt_outlined,
+                                iconColor: Colors.orangeAccent,
+                                title: 'Camera',
+                                description: 'Required for taking photos and scanning QR codes.',
+                                isAllowed: controller.cameraGranted.value,
+                                onTap: controller.requestCameraPermission,
+                              )),
+                              const SizedBox(height: 12),
+                              Obx(() => _buildPermissionCard(
+                                icon: Icons.mic_none_outlined,
+                                iconColor: Colors.tealAccent,
+                                title: 'Microphone',
+                                description: 'Enables voice messages and audio sharing.',
+                                isAllowed: controller.microphoneGranted.value,
+                                onTap: controller.requestMicrophonePermission,
+                              )),
+                              const SizedBox(height: 16),
+                            ],
                           ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (!controller.isAllGranted.value) {
-                                // Request anything that hasn't been granted
-                                controller.requestAllPermissions().then((_) {
-                                  controller.continueToNextStep();
-                                });
-                              } else {
-                                controller.continueToNextStep();
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                            ),
-                            child: Obx(
-                              () => controller.isLoading.value
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Text(
-                                          'Continue',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.arrow_forward,
-                                            size: 16,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                            ),
-                          ),
-                        ).animate().fadeIn(
-                          delay: const Duration(milliseconds: 1000),
                         ),
-                        const SizedBox(height: 40),
                       ],
                     ),
+                  ),
+                ),
+                
+                // Fixed Bottom Section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildPrivacyNotice(),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (!controller.isAllGranted.value) {
+                              controller.requestAllPermissions().then((_) {
+                                controller.continueToNextStep();
+                              });
+                            } else {
+                              controller.continueToNextStep();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                          ),
+                          child: Obx(
+                            () => controller.isLoading.value
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        'Continue',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white.withValues(alpha: 0.5),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.arrow_forward,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -250,11 +242,15 @@ class PermissionsScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildCompletedStep('Create ID'),
+                _buildCompletedStep('ID'),
                 _buildStepConnector(isActive: true),
-                _buildCompletedStep('Personal Info'),
+                _buildCompletedStep('Info'),
                 _buildStepConnector(isActive: true),
-                _buildActiveStep(4, 'Permissions'),
+                _buildCompletedStep('Review'),
+                _buildStepConnector(isActive: true),
+                _buildActiveStep(4, 'Perms'),
+                _buildStepConnector(),
+                _buildInactiveStep(5, 'Scan'),
               ],
             ),
           ),
@@ -332,11 +328,42 @@ class PermissionsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildInactiveStep(int step, String label) {
+    return Column(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            step.toString(),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildStepConnector({bool isActive = false}) {
     return Container(
-      width: 30,
+      width: 12,
       height: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
+      margin: const EdgeInsets.symmetric(horizontal: 2).copyWith(bottom: 14),
       decoration: BoxDecoration(
         color: isActive
             ? AppColors.cyanBlue
@@ -535,7 +562,7 @@ class PermissionsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isAllowed
-                ? Color(0xFF00E676).withValues(alpha: 0.5)
+                ? const Color(0xFF00E676).withValues(alpha: 0.5)
                 : Colors.white.withValues(alpha: 0.05),
           ),
         ),
@@ -551,8 +578,7 @@ class PermissionsScreen extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
                   Text(
                     title,
@@ -562,13 +588,30 @@ class PermissionsScreen extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
-                      height: 1.3,
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: title,
+                        middleText: description,
+                        backgroundColor: AppColors.deepNavy,
+                        titleStyle: const TextStyle(color: Colors.white),
+                        middleTextStyle:
+                            const TextStyle(color: Colors.white70),
+                        radius: 16,
+                        confirm: TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text(
+                            'Got it',
+                            style: TextStyle(color: AppColors.cyanBlue),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.4),
                     ),
                   ),
                 ],

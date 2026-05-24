@@ -1,91 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
-import '../../../../core/database_service.dart';
-import '../../../../models/onboarding_state_model.dart';
-import '../../../../models/onboarding_user_model.dart';
-
-class SplashController extends GetxController {
-  final dbService = Get.find<DatabaseService>();
-  RxBool isLoading = true.obs;
-  RxBool isOnboardingCompleted = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _checkStatus();
-  }
-
-  Future<void> _checkStatus() async {
-    await Future.delayed(const Duration(seconds: 2));
-    final isar = dbService.isar;
-    final user = await isar.onboardingUserModels.where().findFirst();
-    final state = await isar.onboardingStateModels.where().findFirst();
-    
-    final hasCompletedProfile =
-        user != null &&
-        (user.onboardingCompleted || (state?.onboardingCompleted ?? false));
-
-    if (hasCompletedProfile) {
-      // Profile completed, now check permissions
-      final arePermissionsGranted = await _checkEssentialPermissions();
-      
-      await _syncCompletedFlags(user, state);
-      isOnboardingCompleted.value = true;
-      
-      if (arePermissionsGranted) {
-        Get.offAllNamed('/discovering');
-      } else {
-        Get.offAllNamed('/permissions');
-      }
-    } else {
-      isOnboardingCompleted.value = false;
-      Get.offAllNamed('/identity');
-    }
-  }
-
-  Future<bool> _checkEssentialPermissions() async {
-    // We check Location and Bluetooth Scan/Connect as they are critical
-    final location = await Permission.location.isGranted;
-    final bluetoothScan = await Permission.bluetoothScan.isGranted;
-    final bluetoothConnect = await Permission.bluetoothConnect.isGranted;
-    final bluetoothAdvertise = await Permission.bluetoothAdvertise.isGranted;
-    
-    // We are lenient with nearbyWifiDevices as seen in the previous fix
-    return location && bluetoothScan && bluetoothConnect && bluetoothAdvertise;
-  }
-
-  Future<void> _syncCompletedFlags(
-    OnboardingUserModel user,
-    OnboardingStateModel? state,
-  ) async {
-    final shouldUpdateUser = !user.onboardingCompleted;
-    final shouldUpdateState = state == null || !state.onboardingCompleted;
-    if (!shouldUpdateUser && !shouldUpdateState) return;
-
-    await dbService.isar.writeTxn(() async {
-      user.onboardingCompleted = true;
-      user.createdAt ??= DateTime.now();
-      await dbService.isar.onboardingUserModels.put(user);
-
-      final nextState = state ?? OnboardingStateModel();
-      nextState.onboardingCompleted = true;
-      nextState.currentStep = 5;
-      nextState.lastUpdated = DateTime.now();
-      await dbService.isar.onboardingStateModels.put(nextState);
-    });
-  }
-}
+import '../controllers/splash_controller.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Inject SplashController
     final controller = Get.put(SplashController());
 
     return Scaffold(
@@ -122,7 +47,7 @@ class SplashScreen extends StatelessWidget {
                           )
                           .animate()
                           .scale(duration: 800.ms, curve: Curves.easeInBack)
-                          .shimmer(delay: GetNumUtils(1).seconds),
+                          .shimmer(delay: const Duration(seconds: 1)),
                       const SizedBox(height: 16),
                       Text(
                         'LifeMesh',

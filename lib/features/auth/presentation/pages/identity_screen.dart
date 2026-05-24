@@ -228,11 +228,15 @@ class IdentityScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildStep(1, 'Create ID', isActive: true),
+                _buildStep(1, 'ID', isActive: true),
                 _buildStepConnector(isActive: true),
-                _buildStep(2, 'Personal Info'),
+                _buildStep(2, 'Info'),
                 _buildStepConnector(),
                 _buildStep(3, 'Review'),
+                _buildStepConnector(),
+                _buildStep(4, 'Perms'),
+                _buildStepConnector(),
+                _buildStep(5, 'Scan'),
               ],
             ),
           ),
@@ -291,9 +295,9 @@ class IdentityScreen extends StatelessWidget {
 
   Widget _buildStepConnector({bool isActive = false}) {
     return Container(
-      width: 30,
+      width: 12,
       height: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: 14),
+      margin: const EdgeInsets.symmetric(horizontal: 2).copyWith(bottom: 14),
       decoration: BoxDecoration(
         color: isActive
             ? AppColors.cyanBlue

@@ -16,16 +16,26 @@ class ChatDetailScreen extends StatelessWidget {
     final controller = Get.put(ChatDetailController());
 
     return Scaffold(
+      backgroundColor: AppColors.deepNavy,
       body: Stack(
         children: [
           const MeshBackground(),
           SafeArea(
+            bottom: false,
             child: Column(
               children: [
                 _buildAppBar(chat),
-                _buildMessageList(controller),
-                _buildAISuggestions(controller),
-                _buildInputArea(controller),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildSecurityBanner(),
+                      _buildMessageList(controller),
+                      _buildAISuggestions(controller),
+                      _buildInputArea(controller),
+                      _buildBottomStatus(),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -35,27 +45,29 @@ class ChatDetailScreen extends StatelessWidget {
   }
 
   Widget _buildAppBar(ChatSummary chat) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.deepNavy.withValues(alpha: 0.5),
-        border: Border(
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           IconButton(
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
           Stack(
             children: [
-              CircleAvatar(
-                backgroundColor: AppColors.cyanBlue.withValues(alpha: 0.1),
-                child: Text(
-                  chat.name[0],
-                  style: const TextStyle(color: AppColors.cyanBlue),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.5), width: 1),
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    'https://pravatar.cc/150?u=rahul',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white),
+                  ),
                 ),
               ),
               if (chat.isOnline)
@@ -82,24 +94,109 @@ class ChatDetailScreen extends StatelessWidget {
                 Text(
                   chat.name,
                   style: const TextStyle(
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 18,
                   ),
                 ),
                 Text(
-                  chat.isOnline ? 'Mesh Connected' : 'Offline',
+                  '${chat.isOnline ? "Online" : "Offline"} • ${chat.distance}',
                   style: TextStyle(
+                    color: chat.isOnline ? Colors.greenAccent : Colors.white38,
                     fontSize: 12,
-                    color: chat.isOnline ? AppColors.cyanBlue : Colors.white38,
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert, color: Colors.white70),
+          _buildAppBarAction(Icons.security_outlined, hasDot: true),
+          const SizedBox(width: 12),
+          _buildAppBarAction(Icons.phone_outlined),
+          const SizedBox(width: 12),
+          _buildAppBarAction(Icons.more_vert),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBarAction(IconData icon, {bool hasDot = false}) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        shape: BoxShape.circle,
+      ),
+      child: Stack(
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          if (hasDot)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: Colors.greenAccent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecurityBanner() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF1A1F3D).withValues(alpha: 0.5),
+            const Color(0xFF0D1127).withValues(alpha: 0.5),
+          ],
+        ),
+        border: Border.all(
+          color: AppColors.neonPurple.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lock_outline, color: AppColors.neonPurple, size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'End-to-end encrypted',
+                  style: TextStyle(
+                    color: AppColors.neonPurple,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(
+                      'Messages are secured in the mesh network',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.info_outline, color: Colors.white.withValues(alpha: 0.4), size: 12),
+                  ],
+                ),
+              ],
+            ),
           ),
+          const Icon(Icons.hub_outlined, color: AppColors.cyanBlue, size: 30),
         ],
       ),
     );
@@ -109,160 +206,409 @@ class ChatDetailScreen extends StatelessWidget {
     return Expanded(
       child: Obx(
         () => ListView.builder(
-          padding: const EdgeInsets.all(20),
-          reverse: false,
-          itemCount: controller.messages.length,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: controller.messages.length + 1, // +1 for the date header
           itemBuilder: (context, index) {
-            final message = controller.messages[index];
-            return _buildMessageBubble(message, index);
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Text(
+                    'Today',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              );
+            }
+            final message = controller.messages[index - 1];
+            return _buildMessageRow(message, index - 1);
           },
         ),
       ),
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message, int index) {
-    return Align(
-      alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child:
-          Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                constraints: BoxConstraints(maxWidth: Get.width * 0.75),
-                child: Column(
-                  crossAxisAlignment: message.isMe
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: [
-                    GlassmorphicContainer(
-                      width: double.infinity,
-                      height: 0, // Dynamic height fix below
-                      borderRadius: 20,
-                      blur: 10,
-                      alignment: Alignment.center,
-                      border: 1,
-                      linearGradient: LinearGradient(
-                        colors: message.isMe
-                            ? [
-                                AppColors.neonPurple.withValues(alpha: 0.2),
-                                AppColors.neonPurple.withValues(alpha: 0.1),
-                              ]
-                            : [
-                                Colors.white.withValues(alpha: 0.1),
-                                Colors.white.withValues(alpha: 0.05),
-                              ],
-                      ),
-                      borderGradient: LinearGradient(
-                        colors: message.isMe
-                            ? [
-                                AppColors.neonPurple.withValues(alpha: 0.5),
-                                Colors.transparent,
-                              ]
-                            : [
-                                AppColors.cyanBlue.withValues(alpha: 0.5),
-                                Colors.transparent,
-                              ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Text(
-                          message.text,
-                          style: const TextStyle(fontSize: 15, height: 1.4),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          message.time,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.white.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        if (message.isMe) ...[
-                          const SizedBox(width: 4),
-                          _buildStatusIcon(message.status),
-                        ],
-                      ],
-                    ),
-                  ],
+  Widget _buildMessageRow(ChatMessage message, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!message.isMe) _buildMessageAvatar(),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              _buildMessageBubble(message),
+              const SizedBox(height: 6),
+              _buildHopIndicator(message),
+            ],
+          ),
+          const SizedBox(width: 12),
+          if (message.isMe) _buildMessageAvatar(),
+        ],
+      ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.1, end: 0),
+    );
+  }
+
+  Widget _buildMessageAvatar() {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+      ),
+      child: ClipOval(
+        child: Image.network(
+          'https://pravatar.cc/100?u=user',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white, size: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageBubble(ChatMessage message) {
+    Widget content;
+    switch (message.type) {
+      case MessageType.voice:
+        content = _buildVoiceContent(message);
+        break;
+      case MessageType.location:
+        content = _buildLocationContent(message);
+        break;
+      case MessageType.image:
+        content = _buildImageContent(message);
+        break;
+      case MessageType.file:
+        content = _buildFileContent(message);
+        break;
+      default:
+        content = _buildTextContent(message);
+    }
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: Get.width * 0.7),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: message.isMe ? const Color(0xFF00383F).withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: message.isMe ? AppColors.cyanBlue.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          content,
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                message.time,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  fontSize: 10,
                 ),
-              )
-              .animate()
-              .fadeIn(delay: (index * 50).ms)
-              .slideX(begin: message.isMe ? 0.1 : -0.1, end: 0),
+              ),
+              if (message.isMe) ...[
+                const SizedBox(width: 4),
+                _buildStatusIcon(message.status),
+              ],
+            ],
+          ),
+          if (message.reactions != null) _buildReactions(message.reactions!),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextContent(ChatMessage message) {
+    return Text(
+      message.text ?? '',
+      style: const TextStyle(color: Colors.white, fontSize: 15),
+    );
+  }
+
+  Widget _buildVoiceContent(ChatMessage message) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(
+            color: Color(0xFF4D3DFF),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
+        ),
+        const SizedBox(width: 12),
+        _buildVoiceWaveform(),
+        const SizedBox(width: 12),
+        Text(
+          message.voiceDuration ?? '0:00',
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVoiceWaveform() {
+    return Row(
+      children: List.generate(
+        15,
+        (index) => Container(
+          margin: const EdgeInsets.only(right: 2),
+          width: 2,
+          height: 10 + (index % 5) * 4,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(1),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationContent(ChatMessage message) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.location_on, color: Colors.greenAccent, size: 16),
+            const SizedBox(width: 8),
+            const Text(
+              'Current location',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Tap to view on map',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 100,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  'https://picsum.photos/seed/map/400/200',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    child: const Icon(Icons.map_outlined, color: Colors.white38),
+                  ),
+                ),
+                const Center(
+                  child: Icon(Icons.location_on, color: Colors.redAccent, size: 30),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageContent(ChatMessage message) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            'https://picsum.photos/seed/fest/400/300',
+            width: 200,
+            height: 150,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 200,
+              height: 150,
+              color: Colors.white.withValues(alpha: 0.1),
+              child: const Icon(Icons.image_not_supported_outlined, color: Colors.white38),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 8,
+          bottom: 8,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.reply, color: Colors.white, size: 16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFileContent(ChatMessage message) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(Icons.insert_drive_file, color: AppColors.neonPurple, size: 24),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                message.fileName ?? 'File',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${message.fileSize} • ${message.fileType}',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHopIndicator(ChatMessage message) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: List.generate(
+            3,
+            (index) => Container(
+              margin: const EdgeInsets.only(right: 4),
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: index < message.meshHops ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'Delivered via ${message.meshHops} ${message.meshHops == 1 ? "hop" : "hops"}',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.3),
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReactions(List<MessageReaction> reactions) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: reactions.map((r) => Row(
+          children: [
+            Text(r.emoji, style: const TextStyle(fontSize: 12)),
+            const SizedBox(width: 4),
+            Text(
+              '${r.count}',
+              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
+          ],
+        )).toList(),
+      ),
     );
   }
 
   Widget _buildStatusIcon(MessageStatus status) {
-    IconData icon;
-    Color color = Colors.white38;
     switch (status) {
       case MessageStatus.sending:
-        icon = Icons.access_time;
-        break;
+        return Icon(Icons.access_time, size: 12, color: Colors.white.withValues(alpha: 0.3));
       case MessageStatus.sent:
-        icon = Icons.check;
-        break;
+        return Icon(Icons.check, size: 12, color: Colors.white.withValues(alpha: 0.3));
       case MessageStatus.received:
-        icon = Icons.done_all;
-        break;
+        return Icon(Icons.done_all, size: 12, color: Colors.white.withValues(alpha: 0.3));
       case MessageStatus.read:
-        icon = Icons.done_all;
-        color = AppColors.cyanBlue;
-        break;
+        return const Icon(Icons.done_all, size: 12, color: AppColors.cyanBlue);
     }
-    return Icon(icon, size: 12, color: color);
   }
 
   Widget _buildAISuggestions(ChatDetailController controller) {
-    return Obx(
-      () => Container(
-        height: 50,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: controller.aiSuggestions.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () =>
-                  controller.sendMessage(controller.aiSuggestions[index]),
-              child: Container(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D1127).withValues(alpha: 0.8),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: AppColors.neonPurple, size: 16),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'AI Smart Replies',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ],
+              ),
+              Icon(Icons.close, color: Colors.white.withValues(alpha: 0.3), size: 16),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: controller.aiSuggestions.map((text) => Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.cyanBlue.withValues(alpha: 0.3),
-                  ),
-                  color: AppColors.cyanBlue.withValues(alpha: 0.05),
+                  border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.3)),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
-                child: Center(
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.auto_awesome,
-                        size: 14,
-                        color: Colors.amberAccent,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        controller.aiSuggestions[index],
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.cyanBlue,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: Text(
+                  text,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
-              ),
-            ).animate().fadeIn(delay: (index * 100).ms).scale();
-          },
-        ),
+              )).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -271,43 +617,103 @@ class ChatDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.deepNavy.withValues(alpha: 0.8),
+        color: AppColors.deepNavy,
         border: Border(
           top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
         ),
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add_circle_outline, color: Colors.white70),
-          ),
+          _buildSquareIconButton(Icons.add),
+          const SizedBox(width: 12),
           Expanded(
-            child: TextField(
-              controller: controller.textController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Neural link active...',
-                hintStyle: TextStyle(color: Colors.white24),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(24),
               ),
-              onSubmitted: (val) => controller.sendMessage(val),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller.textController,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      decoration: const InputDecoration(
+                        hintText: 'Type a message...',
+                        hintStyle: TextStyle(color: Colors.white24),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.emoji_emotions_outlined, color: Colors.white.withValues(alpha: 0.4), size: 20),
+                  const SizedBox(width: 12),
+                  Icon(Icons.graphic_eq, color: Colors.white.withValues(alpha: 0.4), size: 20),
+                ],
+              ),
             ),
           ),
+          const SizedBox(width: 12),
           Container(
-            decoration: BoxDecoration(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: AppColors.primaryGradient,
             ),
-            child: IconButton(
-              onPressed: () =>
-                  controller.sendMessage(controller.textController.text),
-              icon: const Icon(Icons.send_rounded, color: Colors.white),
-            ),
+            child: const Icon(Icons.mic, color: Colors.white),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSquareIconButton(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF4D3DFF).withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: const Color(0xFF4D3DFF), size: 20),
+    );
+  }
+
+  Widget _buildBottomStatus() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      color: AppColors.deepNavy,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildStatusItem(Icons.sensors, 'Mesh Network', 'Strong Signal', Colors.greenAccent),
+          _buildStatusItem(Icons.circle_outlined, 'You', 'Good', Colors.greenAccent),
+          _buildStatusItem(Icons.battery_3_bar, 'Battery Saver', 'On', Colors.white),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusItem(IconData icon, String label, String value, Color color) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 16),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 9),
+            ),
+            Text(
+              value,
+              style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

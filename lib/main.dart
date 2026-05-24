@@ -15,12 +15,16 @@ import 'features/marketplace/presentation/pages/marketplace_screen.dart';
 import 'features/games/presentation/pages/games_screen.dart';
 
 import 'package:lifemesh/core/database_service.dart';
-import 'package:lifemesh/core/services/nearby_discovery_service.dart';
+import 'package:lifemesh/core/services/crypto_service.dart';
+import 'package:lifemesh/core/services/background_mesh_service.dart';
+import 'package:lifemesh/core/services/nearby_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => DatabaseService().init());
-  await Get.putAsync(() => NearbyDiscoveryService().init(), permanent: true);
+  Get.put(CryptoService());
+  Get.put(BackgroundMeshService());
+  await Get.putAsync(() => NearbyService().init(), permanent: true);
   runApp(const LifeMeshApp());
 }
 
