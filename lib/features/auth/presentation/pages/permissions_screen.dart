@@ -3,17 +3,19 @@ import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
+import '../controllers/permission_controller.dart';
+import '../controllers/onboarding_controller.dart';
 
-class PermissionsScreen extends StatefulWidget {
+class PermissionsScreen extends StatelessWidget {
   const PermissionsScreen({super.key});
 
   @override
-  State<PermissionsScreen> createState() => _PermissionsScreenState();
-}
-
-class _PermissionsScreenState extends State<PermissionsScreen> {
-  @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<OnboardingController>()) {
+      Get.put(OnboardingController());
+    }
+    final controller = Get.put(PermissionController());
+
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
       body: Stack(
@@ -35,7 +37,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(controller.onboardingController),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -64,40 +66,44 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         const SizedBox(height: 40),
                         
                         // Permissions List
-                        _buildPermissionCard(
+                        Obx(() => _buildPermissionCard(
                           icon: Icons.location_on_outlined,
                           iconColor: AppColors.neonPurple,
                           title: 'Location',
                           description: 'Helps you connect with people\nnear you.',
-                          isAllowed: true,
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 500)).slideY(begin: 0.1, end: 0),
+                          isAllowed: controller.locationGranted.value,
+                          onTap: controller.requestLocationPermission,
+                        )).animate().fadeIn(delay: const Duration(milliseconds: 500)).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 16),
                         
-                        _buildPermissionCard(
-                          icon: Icons.badge_outlined,
+                        Obx(() => _buildPermissionCard(
+                          icon: Icons.bluetooth_connected,
                           iconColor: Colors.blueAccent,
-                          title: 'Contacts',
-                          description: 'Helps you find and connect\nwith friends.',
-                          isAllowed: true,
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 600)).slideY(begin: 0.1, end: 0),
+                          title: 'Bluetooth & Nearby',
+                          description: 'Required to build the offline\nmesh network securely.',
+                          isAllowed: controller.bluetoothGranted.value,
+                          onTap: controller.requestBluetoothPermission,
+                        )).animate().fadeIn(delay: const Duration(milliseconds: 600)).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 16),
                         
-                        _buildPermissionCard(
+                        Obx(() => _buildPermissionCard(
                           icon: Icons.notifications_none_outlined,
                           iconColor: AppColors.softGlowPink,
                           title: 'Notifications',
                           description: 'Keeps you updated about important\nactivities.',
-                          isAllowed: true,
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 700)).slideY(begin: 0.1, end: 0),
+                          isAllowed: controller.notificationGranted.value,
+                          onTap: controller.requestNotificationPermission,
+                        )).animate().fadeIn(delay: const Duration(milliseconds: 700)).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 16),
                         
-                        _buildPermissionCard(
+                        Obx(() => _buildPermissionCard(
                           icon: Icons.image_outlined,
                           iconColor: AppColors.cyanBlue,
                           title: 'Photos & Media',
                           description: 'Lets you share photos and\nmedia on LifeMesh.',
-                          isAllowed: true,
-                        ).animate().fadeIn(delay: const Duration(milliseconds: 800)).slideY(begin: 0.1, end: 0),
+                          isAllowed: controller.storageGranted.value,
+                          onTap: controller.requestStoragePermission,
+                        )).animate().fadeIn(delay: const Duration(milliseconds: 800)).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 24),
                         
                         // Privacy Notice
@@ -114,7 +120,14 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                           ),
                           child: ElevatedButton(
                             onPressed: () {
-                              Get.toNamed('/discovering');
+                              if (!controller.isAllGranted.value) {
+                                // Request anything that hasn't been granted
+                                controller.requestAllPermissions().then((_) {
+                                  controller.continueToNextStep();
+                                });
+                              } else {
+                                controller.continueToNextStep();
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
@@ -122,24 +135,26 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Continue',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-                                ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
-                                  ),
-                                  child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
-                                ),
-                              ],
-                            ),
+                            child: Obx(() => controller.isLoading.value 
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Continue',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
+                                      ),
+                                      child: const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
+                                    ),
+                                  ],
+                                )),
                           ),
                         ).animate().fadeIn(delay: const Duration(milliseconds: 1000)),
                         const SizedBox(height: 40),
@@ -155,7 +170,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OnboardingController onboardingController) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -168,7 +183,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Get.back(),
+              onPressed: onboardingController.previousStep,
             ),
           ),
           Expanded(
@@ -354,53 +369,57 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     required String title,
     required String description,
     required bool isAllowed,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isAllowed ? Color(0xFF00E676).withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.05)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, size: 24, color: iconColor),
             ),
-            child: Icon(icon, size: 24, color: iconColor),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12, height: 1.3),
-                ),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12, height: 1.3),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          if (isAllowed)
-            Row(
-              children: [
-                const Icon(Icons.check_circle_outline, color: Color(0xFF00E676), size: 18),
-                const SizedBox(width: 4),
-                const Text('Allowed', style: TextStyle(color: Color(0xFF00E676), fontSize: 13, fontWeight: FontWeight.w500)),
-                const SizedBox(width: 8),
-                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3), size: 20),
-              ],
-            )
-        ],
+            const SizedBox(width: 8),
+            if (isAllowed)
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_outline, color: Color(0xFF00E676), size: 18),
+                  const SizedBox(width: 4),
+                  const Text('Allowed', style: TextStyle(color: Color(0xFF00E676), fontSize: 13, fontWeight: FontWeight.w500)),
+                ],
+              )
+            else
+              const Text('Allow', style: TextStyle(color: AppColors.cyanBlue, fontSize: 13, fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }

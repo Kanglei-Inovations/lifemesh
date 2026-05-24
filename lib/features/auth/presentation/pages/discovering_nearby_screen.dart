@@ -4,36 +4,25 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:math' as math;
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
+import '../controllers/network_discovery_controller.dart';
+import '../controllers/onboarding_controller.dart';
 
-class DiscoveringNearbyScreen extends StatefulWidget {
+class DiscoveringNearbyScreen extends StatelessWidget {
   const DiscoveringNearbyScreen({super.key});
 
   @override
-  State<DiscoveringNearbyScreen> createState() => _DiscoveringNearbyScreenState();
-}
-
-class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _progressController;
-
-  @override
-  void initState() {
-    super.initState();
-    _progressController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..forward().whenComplete(() {
-        Get.offAllNamed('/welcome');
-      });
-  }
-
-  @override
-  void dispose() {
-    _progressController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<OnboardingController>()) {
+      Get.put(OnboardingController());
+    }
+    final OnboardingController onboardingController = Get.find<OnboardingController>();
+    final controller = Get.put(NetworkDiscoveryController());
+    
+    // Auto-start discovery upon landing on screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.startDiscovery();
+    });
+
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
       body: Stack(
@@ -55,7 +44,7 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(onboardingController),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -82,16 +71,16 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
                         // Mesh Globe with Avatars
                         SizedBox(
                           height: 320,
-                          child: _buildMeshGlobe(),
+                          child: _buildMeshGlobe(controller),
                         ).animate().scale(delay: const Duration(milliseconds: 400), curve: Curves.easeOutBack),
                         const SizedBox(height: 40),
                         
                         // Status List
-                        _buildStatusCards().animate().fadeIn(delay: const Duration(milliseconds: 500)).slideY(begin: 0.1, end: 0),
+                        _buildStatusCards(controller).animate().fadeIn(delay: const Duration(milliseconds: 500)).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 24),
                         
                         // Progress Section
-                        _buildProgressSection().animate().fadeIn(delay: const Duration(milliseconds: 700)).slideY(begin: 0.1, end: 0),
+                        _buildProgressSection(controller).animate().fadeIn(delay: const Duration(milliseconds: 700)).slideY(begin: 0.1, end: 0),
                         const SizedBox(height: 32),
                         
                         // Privacy Note
@@ -126,7 +115,7 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OnboardingController onboardingController) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -139,7 +128,7 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Get.back(),
+              onPressed: onboardingController.previousStep,
             ),
           ),
           Expanded(
@@ -227,7 +216,7 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
     );
   }
 
-  Widget _buildMeshGlobe() {
+  Widget _buildMeshGlobe(NetworkDiscoveryController controller) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -264,58 +253,65 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
           child: const Icon(Icons.hub_outlined, size: 50, color: AppColors.cyanBlue),
         ).animate(onPlay: (controller) => controller.repeat(reverse: true)).scaleXY(begin: 1.0, end: 1.1, duration: const Duration(seconds: 2)),
 
-        // Orbiting Avatars
-        _buildOrbitingAvatar(0, 'https://i.pravatar.cc/100?img=1', AppColors.neonPurple),
-        _buildOrbitingAvatar(math.pi / 3, 'https://i.pravatar.cc/100?img=2', AppColors.cyanBlue),
-        _buildOrbitingAvatar((2 * math.pi) / 3, 'https://i.pravatar.cc/100?img=3', AppColors.softGlowPink),
-        _buildOrbitingAvatar(math.pi, 'https://i.pravatar.cc/100?img=4', AppColors.neonPurple),
-        _buildOrbitingAvatar((4 * math.pi) / 3, 'https://i.pravatar.cc/100?img=5', AppColors.cyanBlue),
-        _buildOrbitingAvatar((5 * math.pi) / 3, 'https://i.pravatar.cc/100?img=6', AppColors.softGlowPink),
+        // Orbiting Avatars - Reveal as progress increases
+        Obx(() => controller.discoveryProgress.value > 0.1 
+          ? _buildOrbitingAvatar(0, 'https://i.pravatar.cc/100?img=1', AppColors.neonPurple, controller)
+          : const SizedBox()),
+        Obx(() => controller.discoveryProgress.value > 0.3
+          ? _buildOrbitingAvatar(math.pi / 3, 'https://i.pravatar.cc/100?img=2', AppColors.cyanBlue, controller)
+          : const SizedBox()),
+        Obx(() => controller.discoveryProgress.value > 0.5
+          ? _buildOrbitingAvatar((2 * math.pi) / 3, 'https://i.pravatar.cc/100?img=3', AppColors.softGlowPink, controller)
+          : const SizedBox()),
+        Obx(() => controller.discoveryProgress.value > 0.7
+          ? _buildOrbitingAvatar(math.pi, 'https://i.pravatar.cc/100?img=4', AppColors.neonPurple, controller)
+          : const SizedBox()),
+        Obx(() => controller.discoveryProgress.value > 0.85
+          ? _buildOrbitingAvatar((4 * math.pi) / 3, 'https://i.pravatar.cc/100?img=5', AppColors.cyanBlue, controller)
+          : const SizedBox()),
+        Obx(() => controller.discoveryProgress.value > 0.95
+          ? _buildOrbitingAvatar((5 * math.pi) / 3, 'https://i.pravatar.cc/100?img=6', AppColors.softGlowPink, controller)
+          : const SizedBox()),
       ],
     );
   }
 
-  Widget _buildOrbitingAvatar(double startAngle, String imgUrl, Color ringColor) {
-    return AnimatedBuilder(
-      animation: _progressController,
-      builder: (context, child) {
-        // Full rotation over the entire progress duration
-        final currentAngle = startAngle + (_progressController.value * 2 * math.pi);
-        // Radius of orbit
-        const radius = 140.0;
-        
-        return Transform.translate(
-          offset: Offset(math.cos(currentAngle) * radius, math.sin(currentAngle) * radius),
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.deepNavy,
-              border: Border.all(color: ringColor, width: 2),
-              boxShadow: [
-                BoxShadow(color: ringColor.withValues(alpha: 0.5), blurRadius: 10),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: NetworkImage(imgUrl),
-                    fit: BoxFit.cover,
-                  ),
+  Widget _buildOrbitingAvatar(double startAngle, String imgUrl, Color ringColor, NetworkDiscoveryController controller) {
+    return Obx(() {
+      final currentAngle = startAngle + (controller.discoveryProgress.value * 2 * math.pi);
+      const radius = 140.0;
+      
+      return Transform.translate(
+        offset: Offset(math.cos(currentAngle) * radius, math.sin(currentAngle) * radius),
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.deepNavy,
+            border: Border.all(color: ringColor, width: 2),
+            boxShadow: [
+              BoxShadow(color: ringColor.withValues(alpha: 0.5), blurRadius: 10),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: NetworkImage(imgUrl),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    });
   }
 
-  Widget _buildStatusCards() {
+  Widget _buildStatusCards(NetworkDiscoveryController controller) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.03),
@@ -324,37 +320,59 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
       ),
       child: Column(
         children: [
-          _buildStatusRow(Icons.people_outline, 'Scanning for nearby users', AppColors.neonPurple),
+          Obx(() => _buildStatusRow(
+            Icons.people_outline, 
+            'Scanning for nearby users', 
+            AppColors.neonPurple, 
+            controller.discoveryProgress.value < 0.33
+          )),
           _buildDivider(),
-          _buildStatusRow(Icons.wifi_tethering, 'Connecting securely', AppColors.cyanBlue),
+          Obx(() => _buildStatusRow(
+            Icons.wifi_tethering, 
+            'Connecting securely', 
+            AppColors.cyanBlue, 
+            controller.discoveryProgress.value >= 0.33 && controller.discoveryProgress.value < 0.66
+          )),
           _buildDivider(),
-          _buildStatusRow(Icons.security, 'Verifying connections', AppColors.softGlowPink),
+          Obx(() => _buildStatusRow(
+            Icons.security, 
+            'Verifying connections', 
+            AppColors.softGlowPink, 
+            controller.discoveryProgress.value >= 0.66
+          )),
         ],
       ),
     );
   }
 
-  Widget _buildStatusRow(IconData icon, String text, Color color) {
+  Widget _buildStatusRow(IconData icon, String text, Color color, bool isActive) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 24),
+          Icon(icon, color: isActive ? color : Colors.white24, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.white54, 
+                fontSize: 15, 
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal
+              ),
             ),
           ),
-          SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
+          if (isActive)
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            )
+          else if (!isActive && color != AppColors.neonPurple) // Just a hacky way to know if we've passed it
+            Icon(Icons.check_circle, color: color, size: 20)
         ],
       ),
     );
@@ -367,7 +385,7 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
     );
   }
 
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(NetworkDiscoveryController controller) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -378,39 +396,29 @@ class _DiscoveringNearbyScreenState extends State<DiscoveringNearbyScreen> with 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Almost there! We\'re building your network.',
-            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-          ),
+          Obx(() => Text(
+            controller.scanningStatus.value,
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          )),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: AnimatedBuilder(
-                  animation: _progressController,
-                  builder: (context, child) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: _progressController.value,
-                        minHeight: 8,
-                        backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.cyanBlue),
-                      ),
-                    );
-                  },
-                ),
+                child: Obx(() => ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: controller.discoveryProgress.value,
+                    minHeight: 8,
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.cyanBlue),
+                  ),
+                )),
               ),
               const SizedBox(width: 12),
-              AnimatedBuilder(
-                animation: _progressController,
-                builder: (context, child) {
-                  return Text(
-                    '${(_progressController.value * 100).toInt()}%',
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                  );
-                },
-              ),
+              Obx(() => Text(
+                '${(controller.discoveryProgress.value * 100).toInt()}%',
+                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+              )),
             ],
           ),
         ],
@@ -430,14 +438,12 @@ class _GlobeGridPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // Draw Latitudes
     for (int i = 1; i < 6; i++) {
       final yOffset = (radius / 3) * i - radius;
       final xRadius = math.sqrt(math.pow(radius, 2) - math.pow(yOffset, 2));
       canvas.drawOval(Rect.fromCenter(center: Offset(center.dx, center.dy + yOffset), width: xRadius * 2, height: xRadius * 0.4), paint);
     }
     
-    // Draw Longitudes
     for(int i = 0; i < 6; i++) {
       canvas.drawArc(Rect.fromCenter(center: center, width: radius * 2, height: radius * 2), 0, math.pi * 2, false, paint);
     }
