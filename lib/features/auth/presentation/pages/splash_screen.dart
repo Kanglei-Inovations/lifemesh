@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
 import '../../../../core/database_service.dart';
@@ -24,18 +25,38 @@ class SplashController extends GetxController {
     final isar = dbService.isar;
     final user = await isar.onboardingUserModels.where().findFirst();
     final state = await isar.onboardingStateModels.where().findFirst();
+    
     final hasCompletedProfile =
         user != null &&
         (user.onboardingCompleted || (state?.onboardingCompleted ?? false));
 
     if (hasCompletedProfile) {
+      // Profile completed, now check permissions
+      final arePermissionsGranted = await _checkEssentialPermissions();
+      
       await _syncCompletedFlags(user, state);
       isOnboardingCompleted.value = true;
-      Get.offAllNamed('/discovering');
+      
+      if (arePermissionsGranted) {
+        Get.offAllNamed('/discovering');
+      } else {
+        Get.offAllNamed('/permissions');
+      }
     } else {
       isOnboardingCompleted.value = false;
       Get.offAllNamed('/identity');
     }
+  }
+
+  Future<bool> _checkEssentialPermissions() async {
+    // We check Location and Bluetooth Scan/Connect as they are critical
+    final location = await Permission.location.isGranted;
+    final bluetoothScan = await Permission.bluetoothScan.isGranted;
+    final bluetoothConnect = await Permission.bluetoothConnect.isGranted;
+    final bluetoothAdvertise = await Permission.bluetoothAdvertise.isGranted;
+    
+    // We are lenient with nearbyWifiDevices as seen in the previous fix
+    return location && bluetoothScan && bluetoothConnect && bluetoothAdvertise;
   }
 
   Future<void> _syncCompletedFlags(

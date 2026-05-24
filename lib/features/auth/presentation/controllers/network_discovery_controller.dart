@@ -42,6 +42,7 @@ class NetworkDiscoveryController extends GetxController {
   StreamSubscription<List<NearbyUserModel>>? _nearbySubscription;
   Timer? _homeTimer;
   bool _hasStarted = false;
+  Future<void>? _startFuture;
 
   @override
   void onInit() {
@@ -62,16 +63,30 @@ class NetworkDiscoveryController extends GetxController {
 
   Future<void> startDiscovery() async {
     if (_hasStarted) return;
+    if (_startFuture != null) return _startFuture;
 
     _hasStarted = true;
+    _startFuture = _internalStartDiscovery();
+    return _startFuture;
+  }
+
+  Future<void> _internalStartDiscovery() async {
     isScanning.value = true;
     isDiscoveryCompleted.value = false;
     discoveryProgress.value = 0.08;
     scanningStatus.value = 'Starting nearby discovery...';
 
-    print('Starting nearby discovery...');
-    await nearbyDiscovery.start();
-    _scheduleHomeTransition();
+    try {
+      print('Starting nearby discovery...');
+      await nearbyDiscovery.start();
+      _scheduleHomeTransition();
+    } catch (e) {
+      print('Network discovery start error: $e');
+      scanningStatus.value = 'Error starting discovery: $e';
+      _hasStarted = false; // Allow retry if it failed
+    } finally {
+      _startFuture = null;
+    }
   }
 
   void stopDiscovery() {

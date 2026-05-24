@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/database_service.dart';
 import '../../../../models/onboarding_state_model.dart';
 import '../../../../models/onboarding_user_model.dart';
@@ -34,8 +35,17 @@ class OnboardingController extends GetxController {
               await _db.isar.onboardingUserModels.put(user);
             });
           }
-          if (Get.currentRoute != '/discovering') {
-            Get.offAllNamed('/discovering');
+          
+          // Before going to discovery, check if permissions are still valid
+          final arePermissionsGranted = await _checkEssentialPermissions();
+          if (arePermissionsGranted) {
+            if (Get.currentRoute != '/discovering') {
+              Get.offAllNamed('/discovering');
+            }
+          } else {
+            if (Get.currentRoute != '/permissions') {
+              Get.offAllNamed('/permissions');
+            }
           }
           return;
         }
@@ -49,6 +59,14 @@ class OnboardingController extends GetxController {
     } catch (e) {
       Get.log("Error checking onboarding status: $e");
     }
+  }
+
+  Future<bool> _checkEssentialPermissions() async {
+    final location = await Permission.location.isGranted;
+    final bluetoothScan = await Permission.bluetoothScan.isGranted;
+    final bluetoothConnect = await Permission.bluetoothConnect.isGranted;
+    final bluetoothAdvertise = await Permission.bluetoothAdvertise.isGranted;
+    return location && bluetoothScan && bluetoothConnect && bluetoothAdvertise;
   }
 
   /// Saves the current step to the database.

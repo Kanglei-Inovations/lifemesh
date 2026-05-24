@@ -56,7 +56,7 @@ class NearbyDiscoveryService extends GetxService {
   final Map<String, String> _endpointMeshIds = <String, String>{};
 
   bool _isStarted = false;
-  bool _isStarting = false;
+  Completer<void>? _startCompleter;
 
   String _localMeshId = '';
   String _localMeshFingerprint = '';
@@ -86,12 +86,17 @@ class NearbyDiscoveryService extends GetxService {
   }
 
   Future<void> start() async {
-    if (_isStarted || _isStarting) {
-      print('Nearby discovery already running');
+    if (_isStarted) {
+      print('Nearby discovery already started');
       return;
     }
 
-    _isStarting = true;
+    if (_startCompleter != null) {
+      print('Nearby discovery start in progress, waiting...');
+      return _startCompleter!.future;
+    }
+
+    _startCompleter = Completer<void>();
     lastError.value = '';
 
     try {
@@ -119,15 +124,26 @@ class NearbyDiscoveryService extends GetxService {
       await _startDiscovery();
       _isStarted = true;
       print('LifeMesh nearby discovery started');
+      _startCompleter?.complete();
     } catch (e) {
+      // Gracefully handle "already advertising" errors
+      if (e.toString().contains('STATUS_ALREADY_ADVERTISING') || 
+          e.toString().contains('STATUS_ALREADY_DISCOVERING')) {
+        print('Nearby discovery already active (native side)');
+        _isStarted = true;
+        _startCompleter?.complete();
+        return;
+      }
+
       connectionState.value = MeshConnectionState.failed;
       lastError.value = e.toString();
       print('Discovery error: $e');
       // Ensure states are reset on failure
       isAdvertising.value = false;
       isDiscovering.value = false;
+      _startCompleter?.completeError(e);
     } finally {
-      _isStarting = false;
+      _startCompleter = null;
       await _syncDashboardStatsToIsar();
     }
   }
@@ -135,7 +151,7 @@ class NearbyDiscoveryService extends GetxService {
   Future<void> stop() async {
     print('Stopping nearby discovery...');
     _isStarted = false;
-    _isStarting = false;
+    _startCompleter = null;
 
     try {
       await _nearby.stopDiscovery();
@@ -243,14 +259,27 @@ class NearbyDiscoveryService extends GetxService {
     ];
 
     final statuses = await permissions.request();
-    final allGranted = statuses.values.every((status) => status.isGranted);
+    
+    // On Android, we need Location and Bluetooth essentials.
+    // Permission.nearbyWifiDevices is only required for Android 13+, 
+    // and might be reported as denied on older versions even if declared in manifest.
+    bool essentialGranted = true;
+    
+    if (Platform.isAndroid) {
+      essentialGranted = statuses[Permission.location]!.isGranted &&
+          statuses[Permission.bluetoothScan]!.isGranted &&
+          statuses[Permission.bluetoothConnect]!.isGranted &&
+          statuses[Permission.bluetoothAdvertise]!.isGranted;
+    } else {
+      essentialGranted = statuses[Permission.location]!.isGranted;
+    }
     
     final summary = statuses.entries
         .map((entry) => '${entry.key}: ${entry.value}')
         .join(', ');
     print('Nearby permissions summary: $summary');
 
-    return allGranted;
+    return essentialGranted;
   }
 
   Future<void> _startAdvertising() async {
@@ -674,6 +703,8 @@ class NearbyDiscoveryService extends GetxService {
     }
   }
 
+  final Map<String, DateTime> _lastRssiUpdateTime = {};
+
   void _listenForBleRssi() {
     if (!Platform.isAndroid) return;
     _rssiSubscription = _rssiEvents.receiveBroadcastStream().listen(
@@ -684,7 +715,15 @@ class NearbyDiscoveryService extends GetxService {
         if (!_validText(fingerprint) || rssi is! int) return;
         if (fingerprint == _localMeshFingerprint) return;
 
-        rssiByFingerprint[fingerprint!] = rssi;
+        // Throttle RSSI updates to once every 2 seconds per fingerprint
+        final now = DateTime.now();
+        final lastUpdate = _lastRssiUpdateTime[fingerprint];
+        if (lastUpdate != null && now.difference(lastUpdate).inSeconds < 2) {
+          return;
+        }
+        _lastRssiUpdateTime[fingerprint!] = now;
+
+        rssiByFingerprint[fingerprint] = rssi;
         print('BLE RSSI update: $fingerprint $rssi dBm');
         unawaited(_applyRssiUpdate(fingerprint, rssi));
       },
@@ -713,7 +752,8 @@ class NearbyDiscoveryService extends GetxService {
           await _db.isar.nearbyUserModels.put(user);
         }
       });
-      print('Dashboard updated');
+      
+      // Only sync dashboard if something actually changed
       await _syncDashboardStatsToIsarLocked();
     });
   }
