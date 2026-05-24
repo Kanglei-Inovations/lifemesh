@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:isar/isar.dart';
 import 'dart:io';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
@@ -46,7 +47,6 @@ class ReviewScreen extends StatelessWidget {
                 }
                 
                 final user = snapshot.data;
-                final bool isPrivate = user?.isPrivate ?? true;
 
                 return Column(
                   children: [
