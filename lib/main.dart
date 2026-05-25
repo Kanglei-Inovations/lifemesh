@@ -24,6 +24,8 @@ import 'package:lifemesh/core/network/local_node_server.dart';
 import 'package:lifemesh/core/network/lan_discovery_service.dart';
 import 'package:lifemesh/core/services/mesh_network_service.dart';
 
+import 'features/settings/presentation/pages/settings_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => DatabaseService().init());
@@ -55,11 +57,9 @@ class LifeMeshApp extends StatelessWidget {
         GetPage(name: '/personal-info', page: () => const PersonalInfoScreen()),
         GetPage(name: '/review', page: () => const ReviewScreen()),
         GetPage(name: '/permissions', page: () => const PermissionsScreen()),
-        GetPage(
-          name: '/discovering',
-          page: () => const DiscoveringNearbyScreen(),
-        ),
+        GetPage(name: '/discovering', page: () => const DiscoveringNearbyScreen(),),
         GetPage(name: '/home', page: () => const HomeScreen()),
+        GetPage(name: '/settings', page: () => const SettingsScreen()),
         GetPage(name: '/file-sharing', page: () => const FileSharingScreen()),
         GetPage(name: '/disaster', page: () => const DisasterScreen()),
         GetPage(name: '/chat-detail', page: () => const ChatDetailScreen()),
