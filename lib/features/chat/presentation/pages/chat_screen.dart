@@ -27,7 +27,7 @@ class ChatScreen extends StatelessWidget {
               case 1:
                 return _buildGroupsView(controller);
               case 2:
-                return _buildNearbyView(controller);
+                return _buildNearbyView(context, controller);
               default:
                 return _buildAllChatsView(controller);
             }
@@ -702,7 +702,7 @@ class ChatScreen extends StatelessWidget {
   }
 
   // --- NEARBY VIEW (REAL-TIME IMPLEMENTATION) ---
-  Widget _buildNearbyView(ChatController chatController) {
+  Widget _buildNearbyView(BuildContext context, ChatController chatController) {
     final nearbyController = Get.put(NearbyTabController());
     
     return Column(
@@ -744,7 +744,7 @@ class ChatScreen extends StatelessWidget {
                     return _buildStartDiscoveryFooter(nearbyController);
                   }
                   final user = nearbyController.filteredUsers[index];
-                  return _buildRealNearbyTile(user, index);
+                  return _buildRealNearbyTile(context, user, index);
                 },
               ),
           ),
@@ -844,7 +844,7 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRealNearbyTile(NearbyUserModel user, int index) {
+  Widget _buildRealNearbyTile(BuildContext context, NearbyUserModel user, int index) {
     final status = user.connectionStatus ?? 'idle';
     final signal = ((user.signalStrength ?? 0) * 100).round();
     
@@ -894,9 +894,9 @@ class ChatScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(width: 16),
-          _buildActionButton(Icons.chat_bubble_outline),
+          _buildActionButton(Icons.chat_bubble_outline, () => _navigateToChat(user)),
           const SizedBox(width: 8),
-          _buildActionButton(Icons.person_outline),
+          _buildActionButton(Icons.person_outline, () => _showPeerDetails(context, user)),
         ],
       ),
     ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
@@ -953,15 +953,19 @@ class ChatScreen extends StatelessWidget {
     return 'Weak';
   }
 
-  Widget _buildActionButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+  Widget _buildActionButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Icon(icon, color: Colors.white, size: 16),
       ),
-      child: Icon(icon, color: Colors.white, size: 16),
     );
   }
 
@@ -1068,6 +1072,114 @@ class ChatScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _navigateToChat(NearbyUserModel user) {
+    final chat = ChatSummary(
+      id: user.meshId ?? 'unknown',
+      name: user.name ?? 'Unknown',
+      lastMessage: 'Mesh connection active',
+      time: 'Now',
+      unreadCount: 0,
+      isOnline: user.isOnline,
+      distance: user.distance ?? '',
+      avatar: user.avatar,
+    );
+    Get.toNamed('/chat-detail', arguments: chat);
+  }
+
+  void _showPeerDetails(BuildContext context, NearbyUserModel user) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: AppColors.deepNavy,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                _buildAvatar(user.isOnline, false, user.avatar),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(user.name ?? 'Unknown', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      _buildStatusBadge(user.isOnline ? 'Connected' : 'Discovered'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            const Text('MESH CONNECTION DETAILS', style: TextStyle(color: AppColors.cyanBlue, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+            const SizedBox(height: 16),
+            _buildDetailRow(Icons.fingerprint, 'Mesh ID', user.meshId ?? 'N/A'),
+            _buildDetailRow(Icons.devices, 'Device Name', user.deviceName ?? 'Unknown Device'),
+            _buildDetailRow(Icons.lan, 'Discovery Source', user.discoverySource?.toUpperCase() ?? 'BLE'),
+            _buildDetailRow(Icons.network_ping, 'IP Address', user.ipAddress ?? 'Hidden'),
+            _buildDetailRow(Icons.settings_input_component, 'Port', user.port?.toString() ?? 'N/A'),
+            _buildDetailRow(Icons.timer_outlined, 'Last Seen', _formatLastSeen(user.lastSeen)),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Get.back(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.cyanBlue.withValues(alpha: 0.1),
+                  foregroundColor: AppColors.cyanBlue,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  side: BorderSide(color: AppColors.cyanBlue.withValues(alpha: 0.3)),
+                ),
+                child: const Text('Close Details', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white38, size: 18),
+          const SizedBox(width: 12),
+          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 14)),
+          const Spacer(),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  String _formatLastSeen(DateTime? lastSeen) {
+    if (lastSeen == null) return 'Never';
+    final diff = DateTime.now().difference(lastSeen);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 }
 

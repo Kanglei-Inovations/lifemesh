@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import '../../../../core/app_colors.dart';
@@ -40,7 +41,7 @@ class ProfileScreen extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: AppColors.primaryGradient,
               ),
-            ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 3.seconds),
+            ).animate(onPlay: (c) => c.repeat()).shimmer(duration: GetNumUtils(3).seconds),
             const CircleAvatar(
               radius: 56,
               backgroundColor: AppColors.deepNavy,
@@ -119,12 +120,13 @@ class ProfileScreen extends StatelessWidget {
           Icons.settings,
           'Mesh Settings',
           'Relay permissions & protocols',
+          onTap: () => Get.toNamed('/settings'),
         ),
       ],
     ).animate().fadeIn(delay: 400.ms);
   }
 
-  Widget _buildActionTile(IconData icon, String title, String subtitle) {
+  Widget _buildActionTile(IconData icon, String title, String subtitle, {VoidCallback? onTap}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: GlassmorphicContainer(
@@ -147,6 +149,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
         child: ListTile(
+          onTap: onTap,
           leading: Icon(icon, color: AppColors.cyanBlue),
           title: Text(
             title,

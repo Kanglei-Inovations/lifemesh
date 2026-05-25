@@ -26,6 +26,8 @@ class NearbyUserModel {
   // Hybrid discovery fields
   String? discoverySource; // ble, lan, wifiDirect, internet
   String? connectionType; // p2p, lan, ble, proxy
+  String? ipAddress; // LAN IP Address
+  int? port; // LAN Port
 
   static NearbyUserModel fromPayload({
     required String endpointId,

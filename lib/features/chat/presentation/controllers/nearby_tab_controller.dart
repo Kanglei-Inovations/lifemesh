@@ -2,11 +2,11 @@
 
 import 'dart:async';
 import 'package:get/get.dart';
-import '../../../../core/services/nearby_service.dart';
+import '../../../../core/services/mesh_network_service.dart';
 import '../../../../models/nearby_user_model.dart';
 
 class NearbyTabController extends GetxController {
-  final NearbyService _meshService = Get.find<NearbyService>();
+  final MeshNetworkService _meshService = Get.find<MeshNetworkService>();
 
   // Observable states for UI - Listen to central service
   RxList<NearbyUserModel> get nearbyUsers => _meshService.activeNearbyUsers;
@@ -15,7 +15,7 @@ class NearbyTabController extends GetxController {
   
   // Real-time stats from central service
   RxInt get nearbyDevicesCount => _meshService.activeNearbyUsers.length.obs;
-  RxInt get signalAvg => (_meshService.avgSignalStrength.value * 100).round().obs;
+  RxInt get signalAvg => (_meshService.avgSignalStrength.value * 100).round().obs; 
   var meshStability = 88.obs; 
   RxString get discoveryStatus => _meshService.isScanning.value ? 'Active'.obs : 'Idle'.obs;
   

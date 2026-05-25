@@ -17,7 +17,11 @@ const NearbyUserModelSchema = CollectionSchema(
   name: r'NearbyUserModel',
   id: -7488551062341779348,
   properties: {
-    r'avatar': PropertySchema(id: 0, name: r'avatar', type: IsarType.string),
+    r'avatar': PropertySchema(
+      id: 0,
+      name: r'avatar',
+      type: IsarType.string,
+    ),
     r'connectedAt': PropertySchema(
       id: 1,
       name: r'connectedAt',
@@ -28,33 +32,71 @@ const NearbyUserModelSchema = CollectionSchema(
       name: r'connectionStatus',
       type: IsarType.string,
     ),
-    r'deviceName': PropertySchema(
+    r'connectionType': PropertySchema(
       id: 3,
+      name: r'connectionType',
+      type: IsarType.string,
+    ),
+    r'deviceName': PropertySchema(
+      id: 4,
       name: r'deviceName',
       type: IsarType.string,
     ),
+    r'discoverySource': PropertySchema(
+      id: 5,
+      name: r'discoverySource',
+      type: IsarType.string,
+    ),
     r'distance': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'distance',
       type: IsarType.string,
     ),
     r'endpointId': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'endpointId',
       type: IsarType.string,
     ),
+    r'ipAddress': PropertySchema(
+      id: 8,
+      name: r'ipAddress',
+      type: IsarType.string,
+    ),
+    r'isOnline': PropertySchema(
+      id: 9,
+      name: r'isOnline',
+      type: IsarType.bool,
+    ),
+    r'lastHeartbeat': PropertySchema(
+      id: 10,
+      name: r'lastHeartbeat',
+      type: IsarType.dateTime,
+    ),
     r'lastSeen': PropertySchema(
-      id: 6,
+      id: 11,
       name: r'lastSeen',
       type: IsarType.dateTime,
     ),
-    r'meshId': PropertySchema(id: 7, name: r'meshId', type: IsarType.string),
-    r'name': PropertySchema(id: 8, name: r'name', type: IsarType.string),
+    r'meshId': PropertySchema(
+      id: 12,
+      name: r'meshId',
+      type: IsarType.string,
+    ),
+    r'name': PropertySchema(
+      id: 13,
+      name: r'name',
+      type: IsarType.string,
+    ),
+    r'port': PropertySchema(
+      id: 14,
+      name: r'port',
+      type: IsarType.long,
+    ),
     r'signalStrength': PropertySchema(
-      id: 9,
+      id: 15,
       name: r'signalStrength',
       type: IsarType.double,
-    ),
+    )
   },
   estimateSize: _nearbyUserModelEstimateSize,
   serialize: _nearbyUserModelSerialize,
@@ -89,7 +131,19 @@ int _nearbyUserModelEstimateSize(
     }
   }
   {
+    final value = object.connectionType;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.deviceName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.discoverySource;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -102,6 +156,12 @@ int _nearbyUserModelEstimateSize(
   }
   {
     final value = object.endpointId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.ipAddress;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -130,13 +190,19 @@ void _nearbyUserModelSerialize(
   writer.writeString(offsets[0], object.avatar);
   writer.writeDateTime(offsets[1], object.connectedAt);
   writer.writeString(offsets[2], object.connectionStatus);
-  writer.writeString(offsets[3], object.deviceName);
-  writer.writeString(offsets[4], object.distance);
-  writer.writeString(offsets[5], object.endpointId);
-  writer.writeDateTime(offsets[6], object.lastSeen);
-  writer.writeString(offsets[7], object.meshId);
-  writer.writeString(offsets[8], object.name);
-  writer.writeDouble(offsets[9], object.signalStrength);
+  writer.writeString(offsets[3], object.connectionType);
+  writer.writeString(offsets[4], object.deviceName);
+  writer.writeString(offsets[5], object.discoverySource);
+  writer.writeString(offsets[6], object.distance);
+  writer.writeString(offsets[7], object.endpointId);
+  writer.writeString(offsets[8], object.ipAddress);
+  writer.writeBool(offsets[9], object.isOnline);
+  writer.writeDateTime(offsets[10], object.lastHeartbeat);
+  writer.writeDateTime(offsets[11], object.lastSeen);
+  writer.writeString(offsets[12], object.meshId);
+  writer.writeString(offsets[13], object.name);
+  writer.writeLong(offsets[14], object.port);
+  writer.writeDouble(offsets[15], object.signalStrength);
 }
 
 NearbyUserModel _nearbyUserModelDeserialize(
@@ -149,14 +215,20 @@ NearbyUserModel _nearbyUserModelDeserialize(
   object.avatar = reader.readStringOrNull(offsets[0]);
   object.connectedAt = reader.readDateTimeOrNull(offsets[1]);
   object.connectionStatus = reader.readStringOrNull(offsets[2]);
-  object.deviceName = reader.readStringOrNull(offsets[3]);
-  object.distance = reader.readStringOrNull(offsets[4]);
-  object.endpointId = reader.readStringOrNull(offsets[5]);
+  object.connectionType = reader.readStringOrNull(offsets[3]);
+  object.deviceName = reader.readStringOrNull(offsets[4]);
+  object.discoverySource = reader.readStringOrNull(offsets[5]);
+  object.distance = reader.readStringOrNull(offsets[6]);
+  object.endpointId = reader.readStringOrNull(offsets[7]);
   object.id = id;
-  object.lastSeen = reader.readDateTimeOrNull(offsets[6]);
-  object.meshId = reader.readStringOrNull(offsets[7]);
-  object.name = reader.readStringOrNull(offsets[8]);
-  object.signalStrength = reader.readDoubleOrNull(offsets[9]);
+  object.ipAddress = reader.readStringOrNull(offsets[8]);
+  object.isOnline = reader.readBool(offsets[9]);
+  object.lastHeartbeat = reader.readDateTimeOrNull(offsets[10]);
+  object.lastSeen = reader.readDateTimeOrNull(offsets[11]);
+  object.meshId = reader.readStringOrNull(offsets[12]);
+  object.name = reader.readStringOrNull(offsets[13]);
+  object.port = reader.readLongOrNull(offsets[14]);
+  object.signalStrength = reader.readDoubleOrNull(offsets[15]);
   return object;
 }
 
@@ -180,12 +252,24 @@ P _nearbyUserModelDeserializeProp<P>(
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
       return (reader.readStringOrNull(offset)) as P;
     case 9:
+      return (reader.readBool(offset)) as P;
+    case 10:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 11:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readLongOrNull(offset)) as P;
+    case 15:
       return (reader.readDoubleOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -201,10 +285,7 @@ List<IsarLinkBase<dynamic>> _nearbyUserModelGetLinks(NearbyUserModel object) {
 }
 
 void _nearbyUserModelAttach(
-  IsarCollection<dynamic> col,
-  Id id,
-  NearbyUserModel object,
-) {
+    IsarCollection<dynamic> col, Id id, NearbyUserModel object) {
   object.id = id;
 }
 
@@ -220,15 +301,17 @@ extension NearbyUserModelQueryWhereSort
 extension NearbyUserModelQueryWhere
     on QueryBuilder<NearbyUserModel, NearbyUserModel, QWhereClause> {
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterWhereClause> idEqualTo(
-    Id id,
-  ) {
+      Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterWhereClause>
-  idNotEqualTo(Id id) {
+      idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -251,7 +334,7 @@ extension NearbyUserModelQueryWhere
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterWhereClause>
-  idGreaterThan(Id id, {bool include = false}) {
+      idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -260,9 +343,8 @@ extension NearbyUserModelQueryWhere
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterWhereClause> idLessThan(
-    Id id, {
-    bool include = false,
-  }) {
+      Id id,
+      {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -277,14 +359,12 @@ extension NearbyUserModelQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.between(
-          lower: lowerId,
-          includeLower: includeLower,
-          upper: upperId,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -292,74 +372,71 @@ extension NearbyUserModelQueryWhere
 extension NearbyUserModelQueryFilter
     on QueryBuilder<NearbyUserModel, NearbyUserModel, QFilterCondition> {
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarIsNull() {
+      avatarIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'avatar'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'avatar',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarIsNotNull() {
+      avatarIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'avatar'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'avatar',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarEqualTo(String? value, {bool caseSensitive = true}) {
+      avatarEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'avatar',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarGreaterThan(
+      avatarGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'avatar',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarLessThan(
+      avatarLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'avatar',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarBetween(
+      avatarBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -367,231 +444,227 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'avatar',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'avatar',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarStartsWith(String value, {bool caseSensitive = true}) {
+      avatarStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'avatar',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarEndsWith(String value, {bool caseSensitive = true}) {
+      avatarEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'avatar',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarContains(String value, {bool caseSensitive = true}) {
+      avatarContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'avatar',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarMatches(String pattern, {bool caseSensitive = true}) {
+      avatarMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'avatar',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'avatar',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarIsEmpty() {
+      avatarIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'avatar', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'avatar',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  avatarIsNotEmpty() {
+      avatarIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'avatar', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'avatar',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectedAtIsNull() {
+      connectedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'connectedAt'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'connectedAt',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectedAtIsNotNull() {
+      connectedAtIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'connectedAt'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'connectedAt',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectedAtEqualTo(DateTime? value) {
+      connectedAtEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'connectedAt', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'connectedAt',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectedAtGreaterThan(DateTime? value, {bool include = false}) {
+      connectedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'connectedAt',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'connectedAt',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectedAtLessThan(DateTime? value, {bool include = false}) {
+      connectedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'connectedAt',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'connectedAt',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectedAtBetween(
+      connectedAtBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'connectedAt',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'connectedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusIsNull() {
+      connectionStatusIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'connectionStatus'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'connectionStatus',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusIsNotNull() {
+      connectionStatusIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'connectionStatus'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'connectionStatus',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusEqualTo(String? value, {bool caseSensitive = true}) {
+      connectionStatusEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'connectionStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'connectionStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusGreaterThan(
+      connectionStatusGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'connectionStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'connectionStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusLessThan(
+      connectionStatusLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'connectionStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'connectionStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusBetween(
+      connectionStatusBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -599,158 +672,153 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'connectionStatus',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'connectionStatus',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusStartsWith(String value, {bool caseSensitive = true}) {
+      connectionStatusStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'connectionStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'connectionStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusEndsWith(String value, {bool caseSensitive = true}) {
+      connectionStatusEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'connectionStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'connectionStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusContains(String value, {bool caseSensitive = true}) {
+      connectionStatusContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'connectionStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'connectionStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusMatches(String pattern, {bool caseSensitive = true}) {
+      connectionStatusMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'connectionStatus',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'connectionStatus',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusIsEmpty() {
+      connectionStatusIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'connectionStatus', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'connectionStatus',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  connectionStatusIsNotEmpty() {
+      connectionStatusIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'connectionStatus', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'connectionStatus',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameIsNull() {
+      connectionTypeIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'deviceName'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'connectionType',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameIsNotNull() {
+      connectionTypeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'deviceName'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'connectionType',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameEqualTo(String? value, {bool caseSensitive = true}) {
+      connectionTypeEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'deviceName',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'connectionType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameGreaterThan(
+      connectionTypeGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'deviceName',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'connectionType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameLessThan(
+      connectionTypeLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'deviceName',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'connectionType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameBetween(
+      connectionTypeBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -758,158 +826,153 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'deviceName',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'connectionType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameStartsWith(String value, {bool caseSensitive = true}) {
+      connectionTypeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'deviceName',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'connectionType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameEndsWith(String value, {bool caseSensitive = true}) {
+      connectionTypeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'deviceName',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'connectionType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameContains(String value, {bool caseSensitive = true}) {
+      connectionTypeContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'deviceName',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'connectionType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameMatches(String pattern, {bool caseSensitive = true}) {
+      connectionTypeMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'deviceName',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'connectionType',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameIsEmpty() {
+      connectionTypeIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'deviceName', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'connectionType',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  deviceNameIsNotEmpty() {
+      connectionTypeIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'deviceName', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'connectionType',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceIsNull() {
+      deviceNameIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'distance'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'deviceName',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceIsNotNull() {
+      deviceNameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'distance'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'deviceName',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceEqualTo(String? value, {bool caseSensitive = true}) {
+      deviceNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'distance',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'deviceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceGreaterThan(
+      deviceNameGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'distance',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'deviceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceLessThan(
+      deviceNameLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'distance',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'deviceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceBetween(
+      deviceNameBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -917,158 +980,153 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'distance',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'deviceName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceStartsWith(String value, {bool caseSensitive = true}) {
+      deviceNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'distance',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'deviceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceEndsWith(String value, {bool caseSensitive = true}) {
+      deviceNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'distance',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'deviceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceContains(String value, {bool caseSensitive = true}) {
+      deviceNameContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'distance',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'deviceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceMatches(String pattern, {bool caseSensitive = true}) {
+      deviceNameMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'distance',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'deviceName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceIsEmpty() {
+      deviceNameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'distance', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'deviceName',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  distanceIsNotEmpty() {
+      deviceNameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'distance', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'deviceName',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdIsNull() {
+      discoverySourceIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'endpointId'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'discoverySource',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdIsNotNull() {
+      discoverySourceIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'endpointId'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'discoverySource',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdEqualTo(String? value, {bool caseSensitive = true}) {
+      discoverySourceEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'endpointId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'discoverySource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdGreaterThan(
+      discoverySourceGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'endpointId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'discoverySource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdLessThan(
+      discoverySourceLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'endpointId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'discoverySource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdBetween(
+      discoverySourceBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1076,286 +1134,829 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'endpointId',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'discoverySource',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdStartsWith(String value, {bool caseSensitive = true}) {
+      discoverySourceStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'endpointId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'discoverySource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdEndsWith(String value, {bool caseSensitive = true}) {
+      discoverySourceEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'endpointId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'discoverySource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdContains(String value, {bool caseSensitive = true}) {
+      discoverySourceContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'endpointId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'discoverySource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdMatches(String pattern, {bool caseSensitive = true}) {
+      discoverySourceMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'endpointId',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'discoverySource',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdIsEmpty() {
+      discoverySourceIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'endpointId', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'discoverySource',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  endpointIdIsNotEmpty() {
+      discoverySourceIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'endpointId', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'discoverySource',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  idEqualTo(Id value) {
+      distanceIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'id', value: value),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'distance',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  idGreaterThan(Id value, {bool include = false}) {
+      distanceIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'distance',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  idLessThan(Id value, {bool include = false}) {
+      distanceEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'distance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  idBetween(
+      distanceGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'distance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'distance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'distance',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'distance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'distance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'distance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'distance',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'distance',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      distanceIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'distance',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'endpointId',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'endpointId',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'endpointId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'endpointId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'endpointId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'endpointId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'endpointId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'endpointId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'endpointId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'endpointId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'endpointId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      endpointIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'endpointId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      idEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'id',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  lastSeenIsNull() {
+      ipAddressIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'lastSeen'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'ipAddress',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  lastSeenIsNotNull() {
+      ipAddressIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'lastSeen'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'ipAddress',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  lastSeenEqualTo(DateTime? value) {
+      ipAddressEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'lastSeen', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'ipAddress',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  lastSeenGreaterThan(DateTime? value, {bool include = false}) {
+      ipAddressGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'lastSeen',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'ipAddress',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  lastSeenLessThan(DateTime? value, {bool include = false}) {
+      ipAddressLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'lastSeen',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'ipAddress',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  lastSeenBetween(
+      ipAddressBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'ipAddress',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      ipAddressStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'ipAddress',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      ipAddressEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'ipAddress',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      ipAddressContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'ipAddress',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      ipAddressMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'ipAddress',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      ipAddressIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'ipAddress',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      ipAddressIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'ipAddress',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      isOnlineEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isOnline',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastHeartbeatIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastHeartbeat',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastHeartbeatIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastHeartbeat',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastHeartbeatEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastHeartbeat',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastHeartbeatGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastHeartbeat',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastHeartbeatLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastHeartbeat',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastHeartbeatBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'lastSeen',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastHeartbeat',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdIsNull() {
+      lastSeenIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'meshId'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastSeen',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdIsNotNull() {
+      lastSeenIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'meshId'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastSeen',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdEqualTo(String? value, {bool caseSensitive = true}) {
+      lastSeenEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'meshId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastSeen',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdGreaterThan(
+      lastSeenGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastSeen',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastSeenLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastSeen',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      lastSeenBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastSeen',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      meshIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'meshId',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      meshIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'meshId',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      meshIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'meshId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      meshIdGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'meshId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'meshId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdLessThan(
+      meshIdLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'meshId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'meshId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdBetween(
+      meshIdBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1363,158 +1964,153 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'meshId',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'meshId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdStartsWith(String value, {bool caseSensitive = true}) {
+      meshIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'meshId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'meshId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdEndsWith(String value, {bool caseSensitive = true}) {
+      meshIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'meshId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'meshId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdContains(String value, {bool caseSensitive = true}) {
+      meshIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'meshId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'meshId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdMatches(String pattern, {bool caseSensitive = true}) {
+      meshIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'meshId',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'meshId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdIsEmpty() {
+      meshIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'meshId', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'meshId',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  meshIdIsNotEmpty() {
+      meshIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'meshId', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'meshId',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameIsNull() {
+      nameIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'name'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'name',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameIsNotNull() {
+      nameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'name'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'name',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameEqualTo(String? value, {bool caseSensitive = true}) {
+      nameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'name',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'name',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameGreaterThan(
+      nameGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'name',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'name',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameLessThan(
+      nameLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'name',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'name',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameBetween(
+      nameBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1522,158 +2118,227 @@ extension NearbyUserModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'name',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'name',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameStartsWith(String value, {bool caseSensitive = true}) {
+      nameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'name',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'name',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameEndsWith(String value, {bool caseSensitive = true}) {
+      nameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'name',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'name',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameContains(String value, {bool caseSensitive = true}) {
+      nameContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'name',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'name',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameMatches(String pattern, {bool caseSensitive = true}) {
+      nameMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'name',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'name',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameIsEmpty() {
+      nameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'name', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'name',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  nameIsNotEmpty() {
+      nameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'name', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'name',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  signalStrengthIsNull() {
+      portIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'signalStrength'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'port',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  signalStrengthIsNotNull() {
+      portIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'signalStrength'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'port',
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  signalStrengthEqualTo(double? value, {double epsilon = Query.epsilon}) {
+      portEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'signalStrength',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'port',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  signalStrengthGreaterThan(
+      portGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'port',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      portLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'port',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      portBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'port',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      signalStrengthIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'signalStrength',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      signalStrengthIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'signalStrength',
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      signalStrengthEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'signalStrength',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
+      signalStrengthGreaterThan(
     double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'signalStrength',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'signalStrength',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  signalStrengthLessThan(
+      signalStrengthLessThan(
     double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'signalStrength',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'signalStrength',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterFilterCondition>
-  signalStrengthBetween(
+      signalStrengthBetween(
     double? lower,
     double? upper, {
     bool includeLower = true,
@@ -1681,16 +2346,14 @@ extension NearbyUserModelQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'signalStrength',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'signalStrength',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
     });
   }
 }
@@ -1710,91 +2373,161 @@ extension NearbyUserModelQuerySortBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByAvatarDesc() {
+      sortByAvatarDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'avatar', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByConnectedAt() {
+      sortByConnectedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedAt', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByConnectedAtDesc() {
+      sortByConnectedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedAt', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByConnectionStatus() {
+      sortByConnectionStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectionStatus', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByConnectionStatusDesc() {
+      sortByConnectionStatusDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectionStatus', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByDeviceName() {
+      sortByConnectionType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'connectionType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByConnectionTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'connectionType', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByDeviceName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'deviceName', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByDeviceNameDesc() {
+      sortByDeviceNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'deviceName', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByDistance() {
+      sortByDiscoverySource() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'discoverySource', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByDiscoverySourceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'discoverySource', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByDistance() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'distance', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByDistanceDesc() {
+      sortByDistanceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'distance', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByEndpointId() {
+      sortByEndpointId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endpointId', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByEndpointIdDesc() {
+      sortByEndpointIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endpointId', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByLastSeen() {
+      sortByIpAddress() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ipAddress', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByIpAddressDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ipAddress', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByIsOnline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnline', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByIsOnlineDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnline', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByLastHeartbeat() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastHeartbeat', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByLastHeartbeatDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastHeartbeat', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortByLastSeen() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSeen', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByLastSeenDesc() {
+      sortByLastSeenDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSeen', Sort.desc);
     });
@@ -1807,7 +2540,7 @@ extension NearbyUserModelQuerySortBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByMeshIdDesc() {
+      sortByMeshIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'meshId', Sort.desc);
     });
@@ -1820,21 +2553,34 @@ extension NearbyUserModelQuerySortBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortByNameDesc() {
+      sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
 
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy> sortByPort() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'port', Sort.asc);
+    });
+  }
+
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortBySignalStrength() {
+      sortByPortDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'port', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      sortBySignalStrength() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  sortBySignalStrengthDesc() {
+      sortBySignalStrengthDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.desc);
     });
@@ -1850,77 +2596,105 @@ extension NearbyUserModelQuerySortThenBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByAvatarDesc() {
+      thenByAvatarDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'avatar', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByConnectedAt() {
+      thenByConnectedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedAt', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByConnectedAtDesc() {
+      thenByConnectedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedAt', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByConnectionStatus() {
+      thenByConnectionStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectionStatus', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByConnectionStatusDesc() {
+      thenByConnectionStatusDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectionStatus', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByDeviceName() {
+      thenByConnectionType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'connectionType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByConnectionTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'connectionType', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByDeviceName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'deviceName', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByDeviceNameDesc() {
+      thenByDeviceNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'deviceName', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByDistance() {
+      thenByDiscoverySource() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'discoverySource', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByDiscoverySourceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'discoverySource', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByDistance() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'distance', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByDistanceDesc() {
+      thenByDistanceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'distance', Sort.desc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByEndpointId() {
+      thenByEndpointId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endpointId', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByEndpointIdDesc() {
+      thenByEndpointIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endpointId', Sort.desc);
     });
@@ -1939,14 +2713,56 @@ extension NearbyUserModelQuerySortThenBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByLastSeen() {
+      thenByIpAddress() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ipAddress', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByIpAddressDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ipAddress', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByIsOnline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnline', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByIsOnlineDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnline', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByLastHeartbeat() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastHeartbeat', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByLastHeartbeatDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastHeartbeat', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenByLastSeen() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSeen', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByLastSeenDesc() {
+      thenByLastSeenDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSeen', Sort.desc);
     });
@@ -1959,7 +2775,7 @@ extension NearbyUserModelQuerySortThenBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByMeshIdDesc() {
+      thenByMeshIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'meshId', Sort.desc);
     });
@@ -1972,21 +2788,34 @@ extension NearbyUserModelQuerySortThenBy
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenByNameDesc() {
+      thenByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
 
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy> thenByPort() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'port', Sort.asc);
+    });
+  }
+
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenBySignalStrength() {
+      thenByPortDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'port', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
+      thenBySignalStrength() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.asc);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QAfterSortBy>
-  thenBySignalStrengthDesc() {
+      thenBySignalStrengthDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.desc);
     });
@@ -1995,78 +2824,115 @@ extension NearbyUserModelQuerySortThenBy
 
 extension NearbyUserModelQueryWhereDistinct
     on QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> {
-  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByAvatar({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByAvatar(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'avatar', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
-  distinctByConnectedAt() {
+      distinctByConnectedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'connectedAt');
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
-  distinctByConnectionStatus({bool caseSensitive = true}) {
+      distinctByConnectionStatus({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(
-        r'connectionStatus',
-        caseSensitive: caseSensitive,
-      );
+      return query.addDistinctBy(r'connectionStatus',
+          caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
-  distinctByDeviceName({bool caseSensitive = true}) {
+      distinctByConnectionType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'connectionType',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
+      distinctByDeviceName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'deviceName', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByDistance({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
+      distinctByDiscoverySource({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'discoverySource',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByDistance(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'distance', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
-  distinctByEndpointId({bool caseSensitive = true}) {
+      distinctByEndpointId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'endpointId', caseSensitive: caseSensitive);
     });
   }
 
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByIpAddress(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'ipAddress', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
-  distinctByLastSeen() {
+      distinctByIsOnline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isOnline');
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
+      distinctByLastHeartbeat() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastHeartbeat');
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
+      distinctByLastSeen() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastSeen');
     });
   }
 
-  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByMeshId({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByMeshId(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'meshId', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByName({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByName(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
     });
   }
 
+  QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct> distinctByPort() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'port');
+    });
+  }
+
   QueryBuilder<NearbyUserModel, NearbyUserModel, QDistinct>
-  distinctBySignalStrength() {
+      distinctBySignalStrength() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'signalStrength');
     });
@@ -2088,23 +2954,37 @@ extension NearbyUserModelQueryProperty
   }
 
   QueryBuilder<NearbyUserModel, DateTime?, QQueryOperations>
-  connectedAtProperty() {
+      connectedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'connectedAt');
     });
   }
 
   QueryBuilder<NearbyUserModel, String?, QQueryOperations>
-  connectionStatusProperty() {
+      connectionStatusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'connectionStatus');
     });
   }
 
   QueryBuilder<NearbyUserModel, String?, QQueryOperations>
-  deviceNameProperty() {
+      connectionTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'connectionType');
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, String?, QQueryOperations>
+      deviceNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'deviceName');
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, String?, QQueryOperations>
+      discoverySourceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'discoverySource');
     });
   }
 
@@ -2115,14 +2995,33 @@ extension NearbyUserModelQueryProperty
   }
 
   QueryBuilder<NearbyUserModel, String?, QQueryOperations>
-  endpointIdProperty() {
+      endpointIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'endpointId');
     });
   }
 
+  QueryBuilder<NearbyUserModel, String?, QQueryOperations> ipAddressProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'ipAddress');
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, bool, QQueryOperations> isOnlineProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isOnline');
+    });
+  }
+
   QueryBuilder<NearbyUserModel, DateTime?, QQueryOperations>
-  lastSeenProperty() {
+      lastHeartbeatProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastHeartbeat');
+    });
+  }
+
+  QueryBuilder<NearbyUserModel, DateTime?, QQueryOperations>
+      lastSeenProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastSeen');
     });
@@ -2140,8 +3039,14 @@ extension NearbyUserModelQueryProperty
     });
   }
 
+  QueryBuilder<NearbyUserModel, int?, QQueryOperations> portProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'port');
+    });
+  }
+
   QueryBuilder<NearbyUserModel, double?, QQueryOperations>
-  signalStrengthProperty() {
+      signalStrengthProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'signalStrength');
     });

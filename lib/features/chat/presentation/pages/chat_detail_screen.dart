@@ -29,7 +29,7 @@ class ChatDetailScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildSecurityBanner(),
-                      _buildMessageList(controller),
+                      _buildMessageList(controller, chat),
                       _buildAISuggestions(controller),
                       _buildInputArea(controller),
                       _buildBottomStatus(),
@@ -64,7 +64,7 @@ class ChatDetailScreen extends StatelessWidget {
                 ),
                 child: ClipOval(
                   child: Image.network(
-                    'https://pravatar.cc/150?u=rahul',
+                    chat.avatar ?? 'https://pravatar.cc/150?u=${chat.id}',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white),
                   ),
@@ -202,7 +202,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageList(ChatDetailController controller) {
+  Widget _buildMessageList(ChatDetailController controller, ChatSummary chat) {
     return Expanded(
       child: Obx(
         () => ListView.builder(
@@ -224,21 +224,21 @@ class ChatDetailScreen extends StatelessWidget {
               );
             }
             final message = controller.messages[index - 1];
-            return _buildMessageRow(message, index - 1);
+            return _buildMessageRow(message, index - 1, chat);
           },
         ),
       ),
     );
   }
 
-  Widget _buildMessageRow(ChatMessage message, int index) {
+  Widget _buildMessageRow(ChatMessage message, int index, ChatSummary chat) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!message.isMe) _buildMessageAvatar(),
+          if (!message.isMe) _buildMessageAvatar(chat.avatar, chat.id),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -249,13 +249,13 @@ class ChatDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(width: 12),
-          if (message.isMe) _buildMessageAvatar(),
+          if (message.isMe) _buildMessageAvatar(null, 'me'),
         ],
       ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.1, end: 0),
     );
   }
 
-  Widget _buildMessageAvatar() {
+  Widget _buildMessageAvatar(String? avatarUrl, String id) {
     return Container(
       width: 32,
       height: 32,
@@ -265,7 +265,7 @@ class ChatDetailScreen extends StatelessWidget {
       ),
       child: ClipOval(
         child: Image.network(
-          'https://pravatar.cc/100?u=user',
+          avatarUrl ?? 'https://pravatar.cc/100?u=$id',
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white, size: 16),
         ),
@@ -640,6 +640,8 @@ class ChatDetailScreen extends StatelessWidget {
                     child: TextField(
                       controller: controller.textController,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (value) => controller.sendMessage(value),
                       decoration: const InputDecoration(
                         hintText: 'Type a message...',
                         hintStyle: TextStyle(color: Colors.white24),
@@ -648,8 +650,13 @@ class ChatDetailScreen extends StatelessWidget {
                     ),
                   ),
                   Icon(Icons.emoji_emotions_outlined, color: Colors.white.withValues(alpha: 0.4), size: 20),
-                  const SizedBox(width: 12),
-                  Icon(Icons.graphic_eq, color: Colors.white.withValues(alpha: 0.4), size: 20),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () => controller.sendMessage(controller.textController.text),
+                    icon: const Icon(Icons.send, color: AppColors.cyanBlue, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
                 ],
               ),
             ),

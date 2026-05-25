@@ -5,7 +5,10 @@ import 'package:isar/isar.dart';
 
 import '../../../../core/database_service.dart';
 import '../../../../core/constants/mesh_states.dart';
-import '../../../../core/services/nearby_service.dart';
+import '../../../../core/services/mesh_network_service.dart';
+import '../../../../core/network/local_node_server.dart';
+import '../../../../core/network/lan_discovery_service.dart';
+import '../../../../features/auth/presentation/controllers/permission_controller.dart';
 import '../../../../models/activity_model.dart';
 import '../../../../models/dashboard_stat_model.dart';
 import '../../../../models/nearby_user_model.dart';
@@ -13,7 +16,10 @@ import '../../../../models/onboarding_user_model.dart';
 
 class HomeController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
-  final NearbyService _meshService = Get.find<NearbyService>();
+  final MeshNetworkService _meshService = Get.find<MeshNetworkService>();
+  final LocalNodeServer _nodeServer = Get.find<LocalNodeServer>();
+  final LanDiscoveryService _lanService = Get.find<LanDiscoveryService>();
+  final PermissionController _permissionController = Get.put(PermissionController());
 
   final RxInt currentIndex = 0.obs;
 
@@ -42,15 +48,27 @@ class HomeController extends GetxController {
 
   final RxString lastPayload = ''.obs;
   final RxString lastError = ''.obs;
+  final RxList<String> logs = <String>[].obs;
 
-  RxBool get bluetoothEnabled => true.obs;
-  RxBool get wifiEnabled => true.obs;
+  RxBool get bluetoothEnabled => _permissionController.bluetoothGranted;
+  RxBool get wifiEnabled => _permissionController.locationGranted; 
 
   RxBool get isAdvertising => _meshService.isScanning;
   RxBool get isDiscovering => _meshService.isScanning;
-  RxInt get connectedEndpointCount => _meshService.connectedNodes.length.obs;
-  RxList<String> get endpointIds => _meshService.connectedNodes.map((u) => u.endpointId ?? 'unknown').toList().obs;
+  
+  RxBool get isLanActive => _lanService.isDiscovering.obs;
+  RxBool get isServerRunning => _nodeServer.isRunning.obs;
+  RxInt get serverPort => _nodeServer.port.obs;
+
+  RxInt get connectedEndpointCount => _meshService.activeNearbyUsers.length.obs;
+  RxList<String> get endpointIds => _meshService.activeNearbyUsers.map((u) => u.endpointId ?? u.meshId?.substring(0,8) ?? 'unknown').toList().obs;
   Rx<MeshConnectionState> get connectionState => _meshService.globalState;
+
+  void addLog(String message) {
+    final time = DateTime.now().toString().split(' ').last.substring(0, 8);
+    logs.insert(0, '[$time] $message');
+    if (logs.length > 20) logs.removeLast();
+  }
 
   @override
   void onInit() {
@@ -59,6 +77,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> startDiscovery() async {
+    await _permissionController.checkPermissionStatus();
     await _meshService.startMesh();
   }
 
@@ -79,6 +98,7 @@ class HomeController extends GetxController {
 
   Future<void> _bootstrap() async {
     await _removeLegacySeedData();
+    await _permissionController.checkPermissionStatus();
     _watchProfile();
     _watchDashboardStats();
     _watchNearbyUsers();
@@ -184,13 +204,14 @@ class HomeController extends GetxController {
 
   void _bindMeshService() {
     _workers.add(
-      ever<MeshConnectionState>(_meshService.globalState, (_) {
+      ever<MeshConnectionState>(_meshService.globalState, (state) {
+        addLog('Mesh State: ${state.name}');
         _updateMeshStatus();
       }),
     );
-    // Listen to connectedNodes length directly
     _workers.add(
-      ever(_meshService.connectedNodes, (nodes) {
+      ever(_meshService.activeNearbyUsers, (nodes) {
+        addLog('Active Peers: ${nodes.length}');
         connectionCount.value = nodes.length;
       }),
     );

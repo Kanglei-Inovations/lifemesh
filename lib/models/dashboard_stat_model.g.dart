@@ -37,7 +37,7 @@ const DashboardStatModelSchema = CollectionSchema(
       id: 3,
       name: r'signalStrength',
       type: IsarType.long,
-    ),
+    )
   },
   estimateSize: _dashboardStatModelEstimateSize,
   serialize: _dashboardStatModelSerialize,
@@ -114,16 +114,12 @@ Id _dashboardStatModelGetId(DashboardStatModel object) {
 }
 
 List<IsarLinkBase<dynamic>> _dashboardStatModelGetLinks(
-  DashboardStatModel object,
-) {
+    DashboardStatModel object) {
   return [];
 }
 
 void _dashboardStatModelAttach(
-  IsarCollection<dynamic> col,
-  Id id,
-  DashboardStatModel object,
-) {
+    IsarCollection<dynamic> col, Id id, DashboardStatModel object) {
   object.id = id;
 }
 
@@ -139,14 +135,17 @@ extension DashboardStatModelQueryWhereSort
 extension DashboardStatModelQueryWhere
     on QueryBuilder<DashboardStatModel, DashboardStatModel, QWhereClause> {
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterWhereClause>
-  idEqualTo(Id id) {
+      idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterWhereClause>
-  idNotEqualTo(Id id) {
+      idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -169,7 +168,7 @@ extension DashboardStatModelQueryWhere
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterWhereClause>
-  idGreaterThan(Id id, {bool include = false}) {
+      idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -178,7 +177,7 @@ extension DashboardStatModelQueryWhere
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterWhereClause>
-  idLessThan(Id id, {bool include = false}) {
+      idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -187,21 +186,19 @@ extension DashboardStatModelQueryWhere
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterWhereClause>
-  idBetween(
+      idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.between(
-          lower: lowerId,
-          includeLower: includeLower,
-          upper: upperId,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -209,249 +206,254 @@ extension DashboardStatModelQueryWhere
 extension DashboardStatModelQueryFilter
     on QueryBuilder<DashboardStatModel, DashboardStatModel, QFilterCondition> {
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  connectedNodesEqualTo(int value) {
+      connectedNodesEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'connectedNodes', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'connectedNodes',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  connectedNodesGreaterThan(int value, {bool include = false}) {
+      connectedNodesGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'connectedNodes',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'connectedNodes',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  connectedNodesLessThan(int value, {bool include = false}) {
+      connectedNodesLessThan(
+    int value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'connectedNodes',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'connectedNodes',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  connectedNodesBetween(
+      connectedNodesBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'connectedNodes',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'connectedNodes',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  idEqualTo(Id value) {
+      idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'id', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  idGreaterThan(Id value, {bool include = false}) {
+      idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  idLessThan(Id value, {bool include = false}) {
+      idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  idBetween(
+      idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'id',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  isMeshActiveEqualTo(bool value) {
+      isMeshActiveEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'isMeshActive', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isMeshActive',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  lastUpdatedIsNull() {
+      lastUpdatedIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'lastUpdated'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastUpdated',
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  lastUpdatedIsNotNull() {
+      lastUpdatedIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'lastUpdated'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastUpdated',
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  lastUpdatedEqualTo(DateTime? value) {
+      lastUpdatedEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'lastUpdated', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastUpdated',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  lastUpdatedGreaterThan(DateTime? value, {bool include = false}) {
+      lastUpdatedGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'lastUpdated',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastUpdated',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  lastUpdatedLessThan(DateTime? value, {bool include = false}) {
+      lastUpdatedLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'lastUpdated',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastUpdated',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  lastUpdatedBetween(
+      lastUpdatedBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'lastUpdated',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastUpdated',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  signalStrengthEqualTo(int value) {
+      signalStrengthEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'signalStrength', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'signalStrength',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  signalStrengthGreaterThan(int value, {bool include = false}) {
+      signalStrengthGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'signalStrength',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'signalStrength',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  signalStrengthLessThan(int value, {bool include = false}) {
+      signalStrengthLessThan(
+    int value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'signalStrength',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'signalStrength',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterFilterCondition>
-  signalStrengthBetween(
+      signalStrengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'signalStrength',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'signalStrength',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -465,56 +467,56 @@ extension DashboardStatModelQueryLinks
 extension DashboardStatModelQuerySortBy
     on QueryBuilder<DashboardStatModel, DashboardStatModel, QSortBy> {
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortByConnectedNodes() {
+      sortByConnectedNodes() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedNodes', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortByConnectedNodesDesc() {
+      sortByConnectedNodesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedNodes', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortByIsMeshActive() {
+      sortByIsMeshActive() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isMeshActive', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortByIsMeshActiveDesc() {
+      sortByIsMeshActiveDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isMeshActive', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortByLastUpdated() {
+      sortByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortByLastUpdatedDesc() {
+      sortByLastUpdatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortBySignalStrength() {
+      sortBySignalStrength() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  sortBySignalStrengthDesc() {
+      sortBySignalStrengthDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.desc);
     });
@@ -524,70 +526,70 @@ extension DashboardStatModelQuerySortBy
 extension DashboardStatModelQuerySortThenBy
     on QueryBuilder<DashboardStatModel, DashboardStatModel, QSortThenBy> {
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByConnectedNodes() {
+      thenByConnectedNodes() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedNodes', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByConnectedNodesDesc() {
+      thenByConnectedNodesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'connectedNodes', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenById() {
+      thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByIdDesc() {
+      thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByIsMeshActive() {
+      thenByIsMeshActive() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isMeshActive', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByIsMeshActiveDesc() {
+      thenByIsMeshActiveDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isMeshActive', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByLastUpdated() {
+      thenByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenByLastUpdatedDesc() {
+      thenByLastUpdatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.desc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenBySignalStrength() {
+      thenBySignalStrength() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.asc);
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QAfterSortBy>
-  thenBySignalStrengthDesc() {
+      thenBySignalStrengthDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalStrength', Sort.desc);
     });
@@ -597,28 +599,28 @@ extension DashboardStatModelQuerySortThenBy
 extension DashboardStatModelQueryWhereDistinct
     on QueryBuilder<DashboardStatModel, DashboardStatModel, QDistinct> {
   QueryBuilder<DashboardStatModel, DashboardStatModel, QDistinct>
-  distinctByConnectedNodes() {
+      distinctByConnectedNodes() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'connectedNodes');
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QDistinct>
-  distinctByIsMeshActive() {
+      distinctByIsMeshActive() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isMeshActive');
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QDistinct>
-  distinctByLastUpdated() {
+      distinctByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastUpdated');
     });
   }
 
   QueryBuilder<DashboardStatModel, DashboardStatModel, QDistinct>
-  distinctBySignalStrength() {
+      distinctBySignalStrength() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'signalStrength');
     });
@@ -634,28 +636,28 @@ extension DashboardStatModelQueryProperty
   }
 
   QueryBuilder<DashboardStatModel, int, QQueryOperations>
-  connectedNodesProperty() {
+      connectedNodesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'connectedNodes');
     });
   }
 
   QueryBuilder<DashboardStatModel, bool, QQueryOperations>
-  isMeshActiveProperty() {
+      isMeshActiveProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isMeshActive');
     });
   }
 
   QueryBuilder<DashboardStatModel, DateTime?, QQueryOperations>
-  lastUpdatedProperty() {
+      lastUpdatedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastUpdated');
     });
   }
 
   QueryBuilder<DashboardStatModel, int, QQueryOperations>
-  signalStrengthProperty() {
+      signalStrengthProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'signalStrength');
     });

@@ -14,17 +14,28 @@ import 'features/chat/presentation/pages/chat_detail_screen.dart';
 import 'features/marketplace/presentation/pages/marketplace_screen.dart';
 import 'features/games/presentation/pages/games_screen.dart';
 
+import 'features/settings/presentation/pages/debug_panel_screen.dart';
+
 import 'package:lifemesh/core/database_service.dart';
 import 'package:lifemesh/core/services/crypto_service.dart';
 import 'package:lifemesh/core/services/background_mesh_service.dart';
 import 'package:lifemesh/core/services/nearby_service.dart';
+import 'package:lifemesh/core/network/local_node_server.dart';
+import 'package:lifemesh/core/network/lan_discovery_service.dart';
+import 'package:lifemesh/core/services/mesh_network_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => DatabaseService().init());
   Get.put(CryptoService());
   Get.put(BackgroundMeshService());
+  
+  // Register Hybrid Discovery Services
+  await Get.putAsync(() => LocalNodeServer().init(), permanent: true);
+  await Get.putAsync(() => LanDiscoveryService().init(), permanent: true);
   await Get.putAsync(() => NearbyService().init(), permanent: true);
+  await Get.putAsync(() => MeshNetworkService().init(), permanent: true);
+
   runApp(const LifeMeshApp());
 }
 
@@ -54,6 +65,7 @@ class LifeMeshApp extends StatelessWidget {
         GetPage(name: '/chat-detail', page: () => const ChatDetailScreen()),
         GetPage(name: '/marketplace', page: () => const MarketplaceScreen()),
         GetPage(name: '/games', page: () => const GamesScreen()),
+        GetPage(name: '/debug-panel', page: () => const DebugPanelScreen()),
       ],
     );
   }

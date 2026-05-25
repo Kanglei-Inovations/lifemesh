@@ -95,6 +95,14 @@ class SettingsScreen extends StatelessWidget {
                           style: TextStyle(color: Colors.white24, fontSize: 12),
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () => Get.toNamed('/debug-panel'),
+                          icon: const Icon(Icons.bug_report, color: Colors.white38, size: 16),
+                          label: const Text('Developer Debug Panel', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                        ),
+                      ),
                       const SizedBox(height: 40),
                     ],
                   ),

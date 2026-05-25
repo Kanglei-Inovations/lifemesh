@@ -52,91 +52,37 @@ class ChatDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadMockMessages();
-  }
-
-  void loadMockMessages() {
-    messages.value = [
-      ChatMessage(
-        text: "Hey! Are you coming to the fest tonight?",
-        isMe: false,
-        time: "2:47 PM",
-        status: MessageStatus.received,
-        meshHops: 2,
-      ),
-      ChatMessage(
-        text: "Yes! I'll be there.",
-        isMe: true,
-        time: "2:48 PM",
-        status: MessageStatus.read,
-        meshHops: 1,
-      ),
-      ChatMessage(
-        isMe: false,
-        time: "2:49 PM",
-        status: MessageStatus.received,
-        type: MessageType.voice,
-        voiceDuration: "0:18",
-        meshHops: 3,
-      ),
-      ChatMessage(
-        isMe: true,
-        time: "2:50 PM",
-        status: MessageStatus.read,
-        type: MessageType.location,
-        meshHops: 2,
-      ),
-      ChatMessage(
-        isMe: false,
-        time: "2:51 PM",
-        status: MessageStatus.received,
-        type: MessageType.image,
-        imageUrl: "https://example.com/fest.jpg",
-        meshHops: 2,
-      ),
-      ChatMessage(
-        isMe: true,
-        time: "2:52 PM",
-        status: MessageStatus.read,
-        type: MessageType.file,
-        fileName: "DJ_Night_Setlist.pdf",
-        fileSize: "2.4 MB",
-        fileType: "PDF",
-        meshHops: 1,
-      ),
-      ChatMessage(
-        text: "Nice! 🔥",
-        isMe: false,
-        time: "2:52 PM",
-        status: MessageStatus.received,
-        meshHops: 2,
-        reactions: [MessageReaction(emoji: "❤️", count: 1)],
-      ),
-    ];
+    messages.value = [];
   }
 
   void sendMessage(String text) {
-    if (text.isEmpty) return;
+    if (text.trim().isEmpty) return;
+    
+    final now = DateTime.now();
+    final timeStr = "${now.hour}:${now.minute.toString().padLeft(2, '0')} ${now.hour >= 12 ? 'PM' : 'AM'}";
+
     messages.add(
       ChatMessage(
-        text: text,
+        text: text.trim(),
         isMe: true,
-        time: "2:53 PM",
+        time: timeStr,
         status: MessageStatus.sending,
         meshHops: 1,
       ),
     );
     textController.clear();
 
-    // Simulate message sent
-    Future.delayed(const Duration(seconds: 1), () {
+    // Simulate message flow through mesh
+    Future.delayed(const Duration(milliseconds: 500), () {
       final index = messages.length - 1;
+      final msg = messages[index];
       messages[index] = ChatMessage(
-        text: messages[index].text,
+        text: msg.text,
         isMe: true,
-        time: "2:53 PM",
+        time: msg.time,
         status: MessageStatus.sent,
         meshHops: 1,
+        type: msg.type,
       );
       messages.refresh();
     });

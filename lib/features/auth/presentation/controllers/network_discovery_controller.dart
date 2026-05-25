@@ -7,7 +7,7 @@ import 'package:isar/isar.dart';
 
 import '../../../../core/constants/mesh_states.dart';
 import '../../../../core/database_service.dart';
-import '../../../../core/services/nearby_service.dart';
+import '../../../../core/services/mesh_network_service.dart';
 import '../../../../models/nearby_user_model.dart';
 import '../../../../models/onboarding_state_model.dart';
 import '../../../../models/onboarding_user_model.dart';
@@ -28,7 +28,7 @@ class DiscoveredUser {
 
 class NetworkDiscoveryController extends GetxController {
   final DatabaseService dbService = Get.find<DatabaseService>();
-  final NearbyService meshService = Get.find<NearbyService>();
+  final MeshNetworkService meshService = Get.find<MeshNetworkService>();
 
   final RxDouble discoveryProgress = 0.0.obs;
   final RxInt nearbyUsersCount = 0.obs;

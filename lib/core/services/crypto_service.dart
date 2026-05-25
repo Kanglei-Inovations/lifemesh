@@ -29,8 +29,8 @@ class CryptoService {
     try {
       final secretBox = SecretBox.fromConcatenation(
         encryptedBytes,
-        nonceLength: _cipher.macAlgorithm.macLength,
-        macLength: _cipher.macAlgorithm.macLength,
+        nonceLength: 12,
+        macLength: 16,
       );
 
       final clearText = await _cipher.decrypt(

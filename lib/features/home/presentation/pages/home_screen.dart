@@ -684,17 +684,24 @@ class HomeScreen extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _buildDebugChip(
-                  'Advertising',
+                  'BLE',
                   controller.isAdvertising.value ? 'on' : 'off',
                   controller.isAdvertising.value
                       ? Colors.greenAccent
                       : Colors.white38,
                 ),
                 _buildDebugChip(
-                  'Discovery',
-                  controller.isDiscovering.value ? 'on' : 'off',
-                  controller.isDiscovering.value
+                  'LAN',
+                  controller.isLanActive.value ? 'on' : 'off',
+                  controller.isLanActive.value
                       ? AppColors.cyanBlue
+                      : Colors.white38,
+                ),
+                _buildDebugChip(
+                  'Server',
+                  controller.isServerRunning.value ? ':${controller.serverPort.value}' : 'off',
+                  controller.isServerRunning.value
+                      ? Colors.orangeAccent
                       : Colors.white38,
                 ),
                 _buildDebugChip(
@@ -703,15 +710,15 @@ class HomeScreen extends StatelessWidget {
                   Colors.greenAccent,
                 ),
                 _buildDebugChip(
-                  'Bluetooth',
-                  controller.bluetoothEnabled.value ? 'on' : 'off',
+                  'BT Perm',
+                  controller.bluetoothEnabled.value ? 'granted' : 'denied',
                   controller.bluetoothEnabled.value
                       ? AppColors.cyanBlue
                       : Colors.redAccent,
                 ),
                 _buildDebugChip(
-                  'Wi-Fi',
-                  controller.wifiEnabled.value ? 'on' : 'off',
+                  'Loc Perm',
+                  controller.wifiEnabled.value ? 'granted' : 'denied',
                   controller.wifiEnabled.value
                       ? AppColors.cyanBlue
                       : Colors.orangeAccent,
@@ -771,6 +778,39 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 10),
+            Text(
+              'Logs:',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              height: 80,
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: controller.logs.length,
+                itemBuilder: (context, index) {
+                  return Text(
+                    controller.logs[index],
+                    style: const TextStyle(
+                      color: Colors.greenAccent,
+                      fontSize: 9,
+                      fontFamily: 'monospace',
+                    ),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 10),
             Text(
               'State: ${controller.connectionState.value.display}',
