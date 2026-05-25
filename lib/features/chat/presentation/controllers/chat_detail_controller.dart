@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:mime/mime.dart';
 import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database_service.dart';
 import '../../../../core/services/mesh_network_service.dart';
+import '../../../../core/services/file_transfer_service.dart';
 import '../../../../core/network/payloads/chat_payloads.dart';
 import '../../../../models/chat_message_model.dart';
 import '../../../../models/chat_room_model.dart';
@@ -15,6 +20,13 @@ import '../../../../models/onboarding_user_model.dart';
 class ChatDetailController extends GetxController {
   final DatabaseService _db = Get.find<DatabaseService>();
   final MeshNetworkService _meshService = Get.find<MeshNetworkService>();
+  
+  FileTransferService get _fileTransferService {
+    if (!Get.isRegistered<FileTransferService>()) {
+      Get.put(FileTransferService());
+    }
+    return Get.find<FileTransferService>();
+  }
   
   final String roomId;
   final NearbyUserModel peer;
@@ -48,11 +60,52 @@ class ChatDetailController extends GetxController {
     _messageSubscription = _db.isar.chatMessageModels
         .filter()
         .roomIdEqualTo(roomId)
-        .sortByTimestamp()
+        .sortByTimestampDesc()
         .watch(fireImmediately: true)
         .listen((data) {
           messages.assignAll(data);
         });
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: source);
+    if (image != null) {
+      print("ChatDetailController: Picked image: ${image.path}");
+      await _sendFile(image.path, MessageType.image);
+    }
+  }
+
+  Future<void> pickDocument() async {
+    print("ChatDetailController: Picking document...");
+    final result = await FilePicker.pickFiles();
+    if (result != null && result.files.single.path != null) {
+      final path = result.files.single.path!;
+      print("ChatDetailController: Picked document: $path");
+      await _sendFile(path, MessageType.document);
+    }
+  }
+
+
+  Future<void> _sendFile(String filePath, MessageType messageType) async {
+    final localUser = await _db.isar.onboardingUserModels.where().findFirst();
+    if (localUser == null || localUser.meshId == null || peer.meshId == null) {
+      Get.snackbar('Error', 'Unable to send file: Identity missing.');
+      return;
+    }
+
+    final mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
+    final fileName = filePath.split(Platform.pathSeparator).last;
+
+    await _fileTransferService.startFileTransfer(
+      filePath: filePath,
+      fileName: fileName,
+      mimeType: mimeType,
+      roomId: roomId,
+      receiverMeshId: peer.meshId!,
+      senderMeshId: localUser.meshId!,
+      messageType: messageType,
+    );
   }
 
   Future<void> _markAsRead() async {

@@ -17,65 +17,70 @@ const ChatMessageModelSchema = CollectionSchema(
   name: r'ChatMessageModel',
   id: 3821037901158827866,
   properties: {
-    r'deliveryStatus': PropertySchema(
+    r'attachmentId': PropertySchema(
       id: 0,
+      name: r'attachmentId',
+      type: IsarType.long,
+    ),
+    r'deliveryStatus': PropertySchema(
+      id: 1,
       name: r'deliveryStatus',
       type: IsarType.byte,
       enumMap: _ChatMessageModeldeliveryStatusEnumValueMap,
     ),
     r'endpointId': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'endpointId',
       type: IsarType.string,
     ),
     r'isDelivered': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isDelivered',
       type: IsarType.bool,
     ),
     r'isMine': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'isMine',
       type: IsarType.bool,
     ),
     r'isRead': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'isRead',
       type: IsarType.bool,
     ),
     r'messageId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'messageId',
       type: IsarType.string,
     ),
     r'messageType': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'messageType',
       type: IsarType.byte,
       enumMap: _ChatMessageModelmessageTypeEnumValueMap,
     ),
     r'receiverMeshId': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'receiverMeshId',
       type: IsarType.string,
     ),
     r'roomId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'roomId',
       type: IsarType.string,
     ),
     r'senderMeshId': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'senderMeshId',
       type: IsarType.string,
     ),
     r'text': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'text',
       type: IsarType.string,
     ),
     r'timestamp': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'timestamp',
       type: IsarType.dateTime,
     )
@@ -186,18 +191,19 @@ void _chatMessageModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeByte(offsets[0], object.deliveryStatus.index);
-  writer.writeString(offsets[1], object.endpointId);
-  writer.writeBool(offsets[2], object.isDelivered);
-  writer.writeBool(offsets[3], object.isMine);
-  writer.writeBool(offsets[4], object.isRead);
-  writer.writeString(offsets[5], object.messageId);
-  writer.writeByte(offsets[6], object.messageType.index);
-  writer.writeString(offsets[7], object.receiverMeshId);
-  writer.writeString(offsets[8], object.roomId);
-  writer.writeString(offsets[9], object.senderMeshId);
-  writer.writeString(offsets[10], object.text);
-  writer.writeDateTime(offsets[11], object.timestamp);
+  writer.writeLong(offsets[0], object.attachmentId);
+  writer.writeByte(offsets[1], object.deliveryStatus.index);
+  writer.writeString(offsets[2], object.endpointId);
+  writer.writeBool(offsets[3], object.isDelivered);
+  writer.writeBool(offsets[4], object.isMine);
+  writer.writeBool(offsets[5], object.isRead);
+  writer.writeString(offsets[6], object.messageId);
+  writer.writeByte(offsets[7], object.messageType.index);
+  writer.writeString(offsets[8], object.receiverMeshId);
+  writer.writeString(offsets[9], object.roomId);
+  writer.writeString(offsets[10], object.senderMeshId);
+  writer.writeString(offsets[11], object.text);
+  writer.writeDateTime(offsets[12], object.timestamp);
 }
 
 ChatMessageModel _chatMessageModelDeserialize(
@@ -207,23 +213,24 @@ ChatMessageModel _chatMessageModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = ChatMessageModel();
+  object.attachmentId = reader.readLongOrNull(offsets[0]);
   object.deliveryStatus = _ChatMessageModeldeliveryStatusValueEnumMap[
-          reader.readByteOrNull(offsets[0])] ??
+          reader.readByteOrNull(offsets[1])] ??
       DeliveryStatus.sending;
-  object.endpointId = reader.readStringOrNull(offsets[1]);
+  object.endpointId = reader.readStringOrNull(offsets[2]);
   object.id = id;
-  object.isDelivered = reader.readBool(offsets[2]);
-  object.isMine = reader.readBool(offsets[3]);
-  object.isRead = reader.readBool(offsets[4]);
-  object.messageId = reader.readString(offsets[5]);
+  object.isDelivered = reader.readBool(offsets[3]);
+  object.isMine = reader.readBool(offsets[4]);
+  object.isRead = reader.readBool(offsets[5]);
+  object.messageId = reader.readString(offsets[6]);
   object.messageType = _ChatMessageModelmessageTypeValueEnumMap[
-          reader.readByteOrNull(offsets[6])] ??
+          reader.readByteOrNull(offsets[7])] ??
       MessageType.text;
-  object.receiverMeshId = reader.readString(offsets[7]);
-  object.roomId = reader.readString(offsets[8]);
-  object.senderMeshId = reader.readString(offsets[9]);
-  object.text = reader.readString(offsets[10]);
-  object.timestamp = reader.readDateTime(offsets[11]);
+  object.receiverMeshId = reader.readString(offsets[8]);
+  object.roomId = reader.readString(offsets[9]);
+  object.senderMeshId = reader.readString(offsets[10]);
+  object.text = reader.readString(offsets[11]);
+  object.timestamp = reader.readDateTime(offsets[12]);
   return object;
 }
 
@@ -235,25 +242,25 @@ P _chatMessageModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readLongOrNull(offset)) as P;
+    case 1:
       return (_ChatMessageModeldeliveryStatusValueEnumMap[
               reader.readByteOrNull(offset)] ??
           DeliveryStatus.sending) as P;
-    case 1:
-      return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
       return (reader.readBool(offset)) as P;
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (_ChatMessageModelmessageTypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           MessageType.text) as P;
-    case 7:
-      return (reader.readString(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
@@ -261,6 +268,8 @@ P _chatMessageModelDeserializeProp<P>(
     case 10:
       return (reader.readString(offset)) as P;
     case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -287,6 +296,8 @@ const _ChatMessageModelmessageTypeEnumValueMap = {
   'location': 2,
   'image': 3,
   'file': 4,
+  'video': 5,
+  'document': 6,
 };
 const _ChatMessageModelmessageTypeValueEnumMap = {
   0: MessageType.text,
@@ -294,6 +305,8 @@ const _ChatMessageModelmessageTypeValueEnumMap = {
   2: MessageType.location,
   3: MessageType.image,
   4: MessageType.file,
+  5: MessageType.video,
+  6: MessageType.document,
 };
 
 Id _chatMessageModelGetId(ChatMessageModel object) {
@@ -727,6 +740,80 @@ extension ChatMessageModelQueryWhere
 
 extension ChatMessageModelQueryFilter
     on QueryBuilder<ChatMessageModel, ChatMessageModel, QFilterCondition> {
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
+      attachmentIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'attachmentId',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
+      attachmentIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'attachmentId',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
+      attachmentIdEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'attachmentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
+      attachmentIdGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'attachmentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
+      attachmentIdLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'attachmentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
+      attachmentIdBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'attachmentId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterFilterCondition>
       deliveryStatusEqualTo(DeliveryStatus value) {
     return QueryBuilder.apply(this, (query) {
@@ -1825,6 +1912,20 @@ extension ChatMessageModelQueryLinks
 extension ChatMessageModelQuerySortBy
     on QueryBuilder<ChatMessageModel, ChatMessageModel, QSortBy> {
   QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterSortBy>
+      sortByAttachmentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attachmentId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterSortBy>
+      sortByAttachmentIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attachmentId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterSortBy>
       sortByDeliveryStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'deliveryStatus', Sort.asc);
@@ -1994,6 +2095,20 @@ extension ChatMessageModelQuerySortBy
 
 extension ChatMessageModelQuerySortThenBy
     on QueryBuilder<ChatMessageModel, ChatMessageModel, QSortThenBy> {
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterSortBy>
+      thenByAttachmentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attachmentId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterSortBy>
+      thenByAttachmentIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attachmentId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ChatMessageModel, ChatMessageModel, QAfterSortBy>
       thenByDeliveryStatus() {
     return QueryBuilder.apply(this, (query) {
@@ -2178,6 +2293,13 @@ extension ChatMessageModelQuerySortThenBy
 extension ChatMessageModelQueryWhereDistinct
     on QueryBuilder<ChatMessageModel, ChatMessageModel, QDistinct> {
   QueryBuilder<ChatMessageModel, ChatMessageModel, QDistinct>
+      distinctByAttachmentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'attachmentId');
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, ChatMessageModel, QDistinct>
       distinctByDeliveryStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'deliveryStatus');
@@ -2268,6 +2390,13 @@ extension ChatMessageModelQueryProperty
   QueryBuilder<ChatMessageModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<ChatMessageModel, int?, QQueryOperations>
+      attachmentIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'attachmentId');
     });
   }
 

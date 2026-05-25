@@ -25,7 +25,28 @@ class CryptoService {
     return secretBox.concatenation();
   }
 
+  Future<List<int>> encryptRaw(List<int> clearText) async {
+    final secretBox = await _cipher.encrypt(
+      clearText,
+      secretKey: _secretKey,
+    );
+    return secretBox.concatenation();
+  }
+
   Future<Map<String, dynamic>?> decryptMessage(List<int> encryptedBytes) async {
+    try {
+      final clearText = await decryptRaw(encryptedBytes);
+      if (clearText == null) return null;
+
+      final jsonStr = utf8.decode(clearText);
+      return jsonDecode(jsonStr) as Map<String, dynamic>?;
+    } catch (e) {
+      print("Encryption Layer: JSON Decryption failed - $e");
+      return null;
+    }
+  }
+
+  Future<List<int>?> decryptRaw(List<int> encryptedBytes) async {
     try {
       final secretBox = SecretBox.fromConcatenation(
         encryptedBytes,
@@ -33,15 +54,12 @@ class CryptoService {
         macLength: 16,
       );
 
-      final clearText = await _cipher.decrypt(
+      return await _cipher.decrypt(
         secretBox,
         secretKey: _secretKey,
       );
-
-      final jsonStr = utf8.decode(clearText);
-      return jsonDecode(jsonStr) as Map<String, dynamic>?;
     } catch (e) {
-      print("Encryption Layer: Decryption failed - $e");
+      print("Encryption Layer: Raw Decryption failed - $e");
       return null;
     }
   }

@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -13,6 +12,7 @@ import 'package:lifemesh/core/database_service.dart';
 import 'package:lifemesh/core/services/crypto_service.dart';
 import 'package:lifemesh/core/network/message_bus.dart';
 import 'package:lifemesh/core/network/payloads/chat_payloads.dart';
+import 'package:lifemesh/core/network/payloads/file_payloads.dart';
 import 'package:lifemesh/core/constants/mesh_states.dart';
 import 'package:lifemesh/models/nearby_user_model.dart';
 import 'package:lifemesh/models/onboarding_user_model.dart';
@@ -180,8 +180,26 @@ class NearbyService extends GetxService {
   Future<void> _handlePayload(String endpointId, Payload payload) async {
     if (payload.type != PayloadType.BYTES || payload.bytes == null) return;
     
-    final decryptedMap = await _cryptoService.decryptMessage(payload.bytes!.toList());
-    if (decryptedMap == null) return;
+    final clearText = await _cryptoService.decryptRaw(payload.bytes!.toList());
+    if (clearText == null || clearText.isEmpty) return;
+
+    if (clearText[0] == 0x02) { // Magic byte for FileChunkPayload
+      final chunkPayload = FileChunkPayload.fromBytes(Uint8List.fromList(clearText));
+      if (chunkPayload != null) {
+        _messageBus.publishFileChunk(chunkPayload);
+      }
+      return;
+    }
+
+    // Otherwise, attempt to decode as JSON
+    Map<String, dynamic>? decryptedMap;
+    try {
+      final jsonStr = utf8.decode(clearText);
+      decryptedMap = jsonDecode(jsonStr) as Map<String, dynamic>;
+    } catch (e) {
+      print("NearbyService: Failed to parse decrypted payload as JSON");
+      return;
+    }
 
     if (decryptedMap['type'] == 'lifemesh.identity.v1') {
       final user = NearbyUserModel()
@@ -218,12 +236,24 @@ class NearbyService extends GetxService {
     } else if (decryptedMap['type'] == 'lifemesh.chat.typing.v1') {
       print("NearbyService: Incoming Typing Payload");
       _messageBus.publishTyping(ChatTypingPayload.fromJson(decryptedMap));
+    } else if (decryptedMap['type'] == 'lifemesh.file.start.v1') {
+      print("NearbyService: Incoming File Start Payload");
+      _messageBus.publishFileStart(FileTransferStartPayload.fromJson(decryptedMap));
+    } else if (decryptedMap['type'] == 'lifemesh.file.ack.v1') {
+      print("NearbyService: Incoming File ACK Payload");
+      _messageBus.publishFileAck(FileTransferAckPayload.fromJson(decryptedMap));
     }
   }
 
   Future<void> sendPayload(String endpointId, Map<String, dynamic> payload) async {
     print("NearbyService: Transmitting encrypted ${payload['type']}");
     final encryptedBytes = await _cryptoService.encryptMessage(payload);
+    await _nearby.sendBytesPayload(endpointId, Uint8List.fromList(encryptedBytes));
+  }
+
+  Future<void> sendRawPayload(String endpointId, Uint8List rawBytes) async {
+    // We assume rawBytes is already structured (e.g., FileChunkPayload.toBytes())
+    final encryptedBytes = await _cryptoService.encryptRaw(rawBytes.toList());
     await _nearby.sendBytesPayload(endpointId, Uint8List.fromList(encryptedBytes));
   }
 

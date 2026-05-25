@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 
@@ -12,12 +14,25 @@ import 'package:lifemesh/core/network/lan_discovery_service.dart';
 import 'package:lifemesh/core/network/local_node_server.dart';
 import 'package:lifemesh/core/network/message_bus.dart';
 import 'package:lifemesh/core/network/payloads/chat_payloads.dart';
+import 'package:lifemesh/core/network/payloads/file_payloads.dart';
 import 'package:lifemesh/core/constants/mesh_states.dart';
 import 'package:lifemesh/models/nearby_user_model.dart';
 import 'package:lifemesh/models/dashboard_stat_model.dart';
 import 'package:lifemesh/models/chat_message_model.dart';
 import 'package:lifemesh/models/chat_room_model.dart';
 import 'package:lifemesh/models/onboarding_user_model.dart';
+
+class _QueuedPayload {
+  final String receiverMeshId;
+  final dynamic payload; // Map<String, dynamic> or Uint8List
+  final int priority;
+
+  _QueuedPayload({
+    required this.receiverMeshId,
+    required this.payload,
+    required this.priority,
+  });
+}
 
 class MeshNetworkService extends GetxService {
   final DatabaseService _db = Get.find<DatabaseService>();
@@ -40,6 +55,72 @@ class MeshNetworkService extends GetxService {
   static const int heartbeatTimeout = 15; // 15 seconds
 
   final List<StreamSubscription> _busSubscriptions = [];
+
+  // --- Priority Queue ---
+  final PriorityQueue<_QueuedPayload> _outboundQueue = PriorityQueue<_QueuedPayload>((a, b) => a.priority.compareTo(b.priority));
+  bool _isProcessingQueue = false;
+
+  Future<void> sendPriorityPayload({
+    required String receiverMeshId,
+    required Map<String, dynamic> payload,
+    required int priority,
+  }) async {
+    _outboundQueue.add(_QueuedPayload(
+      receiverMeshId: receiverMeshId,
+      payload: payload,
+      priority: priority,
+    ));
+    _processQueue();
+  }
+
+  Future<void> sendRawPriorityPayload({
+    required String receiverMeshId,
+    required String session,
+    required int index,
+    required Uint8List data,
+    required int priority,
+  }) async {
+    final chunkPayload = FileChunkPayload(
+      transferSessionId: session,
+      chunkIndex: index,
+      chunkData: data,
+    );
+    _outboundQueue.add(_QueuedPayload(
+      receiverMeshId: receiverMeshId,
+      payload: chunkPayload.toBytes(),
+      priority: priority,
+    ));
+    _processQueue();
+  }
+
+  Future<void> _processQueue() async {
+    if (_isProcessingQueue) return;
+    _isProcessingQueue = true;
+
+    while (_outboundQueue.isNotEmpty) {
+      final task = _outboundQueue.removeFirst();
+      final endpointId = getEndpointForMeshId(task.receiverMeshId);
+
+      if (endpointId != null) {
+        try {
+          if (task.payload is Map<String, dynamic>) {
+            await _nearbyService.sendPayload(endpointId, task.payload);
+          } else if (task.payload is Uint8List) {
+            await _nearbyService.sendRawPayload(endpointId, task.payload);
+          }
+        } catch (e) {
+          print("MeshNetworkService: Failed to send queued payload to $endpointId: $e");
+        }
+      } else {
+        print("MeshNetworkService: Dropping queued payload, peer offline: ${task.receiverMeshId}");
+      }
+
+      // Small delay to yield to main isolate and prevent connection flooding
+      await Future.delayed(const Duration(milliseconds: 10));
+    }
+
+    _isProcessingQueue = false;
+  }
 
   Future<MeshNetworkService> init() async {
     print("MeshNetworkService: Initializing...");

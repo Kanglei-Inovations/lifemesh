@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 
 part 'chat_message_model.g.dart';
 
-enum MessageType { text, voice, location, image, file }
+enum MessageType { text, voice, location, image, file, video, document }
 enum DeliveryStatus { sending, sent, delivered, read, failed }
 
 @collection
@@ -37,6 +37,9 @@ class ChatMessageModel {
   late bool isDelivered;
 
   String? endpointId;
+
+  // Link to FileAttachmentModel ID if this message has an attachment
+  int? attachmentId;
 
   ChatMessageModel();
 }

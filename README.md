@@ -1,7 +1,20 @@
 # LifeMesh
 
-> **Offline. Together.**
+> **Offline. Together.> **
 > The Future of Decentralized Human Connection.
+
+
+
+# 🚀 FUTURE OF LIFEMESH
+
+> **When you implement:> **
+
+  * relay routing
+  * store-and-forward
+  * offline propagation
+  * delayed delivery
+# 🚀 then:
+LifeMesh becomes:📊 Real decentralized local internet layer.
 
 ![LifeMesh Poster](LifeMeshui/POSTER.png)
 

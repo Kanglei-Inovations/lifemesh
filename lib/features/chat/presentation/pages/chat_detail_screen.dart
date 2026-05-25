@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:lifemesh/core/database_service.dart';
 import 'package:lifemesh/models/chat_message_model.dart';
+import 'package:lifemesh/models/file_attachment_model.dart';
 import 'package:lifemesh/models/nearby_user_model.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
@@ -25,21 +29,12 @@ class ChatDetailScreen extends StatelessWidget {
         children: [
           const MeshBackground(),
           SafeArea(
-            bottom: false,
             child: Column(
               children: [
                 _buildAppBar(peer),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _buildSecurityBanner(),
-                      _buildMessageList(controller, peer),
-                      _buildAISuggestions(controller),
-                      _buildInputArea(controller),
-                      _buildBottomStatus(peer),
-                    ],
-                  ),
-                ),
+                _buildSecurityBanner(),
+                _buildMessageList(controller, peer),
+                _buildInputArea(context, controller),
               ],
             ),
           ),
@@ -156,53 +151,26 @@ class ChatDetailScreen extends StatelessWidget {
   Widget _buildSecurityBanner() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF1A1F3D).withValues(alpha: 0.5),
-            const Color(0xFF0D1127).withValues(alpha: 0.5),
-          ],
-        ),
-        border: Border.all(
-          color: AppColors.neonPurple.withValues(alpha: 0.2),
-        ),
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.lock_outline, color: AppColors.neonPurple, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'End-to-end encrypted',
-                  style: TextStyle(
-                    color: AppColors.neonPurple,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Text(
-                      'Messages are secured in the mesh network',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.info_outline, color: Colors.white.withValues(alpha: 0.4), size: 12),
-                  ],
-                ),
-              ],
+          Icon(Icons.lock_outline, color: Colors.white.withValues(alpha: 0.3), size: 14),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Messages are end-to-end encrypted. No one outside of this chat, not even LifeMesh, can read them.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white38,
+                fontSize: 10,
+              ),
             ),
           ),
-          const Icon(Icons.hub_outlined, color: AppColors.cyanBlue, size: 30),
         ],
       ),
     );
@@ -212,32 +180,19 @@ class ChatDetailScreen extends StatelessWidget {
     return Expanded(
       child: Obx(
         () => ListView.builder(
+          reverse: true,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: controller.messages.length + 1, // +1 for the date header
+          itemCount: controller.messages.length,
           itemBuilder: (context, index) {
-            if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Text(
-                    'Today',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              );
-            }
-            final message = controller.messages[index - 1];
-            return _buildMessageRow(message, index - 1, peer);
+            final message = controller.messages[index];
+            return _buildMessageRow(context, message, index, peer);
           },
         ),
       ),
     );
   }
 
-  Widget _buildMessageRow(ChatMessageModel message, int index, NearbyUserModel peer) {
+  Widget _buildMessageRow(BuildContext context, ChatMessageModel message, int index, NearbyUserModel peer) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
@@ -249,7 +204,7 @@ class ChatDetailScreen extends StatelessWidget {
           Column(
             crossAxisAlignment: message.isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
-              _buildMessageBubble(message),
+              _buildMessageBubble(context, message),
               const SizedBox(height: 6),
               _buildHopIndicator(message),
             ],
@@ -281,7 +236,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageBubble(ChatMessageModel message) {
+  Widget _buildMessageBubble(BuildContext context, ChatMessageModel message) {
     Widget content;
     switch (message.messageType) {
       case MessageType.voice:
@@ -301,7 +256,7 @@ class ChatDetailScreen extends StatelessWidget {
     }
 
     return Container(
-      constraints: BoxConstraints(maxWidth: Get.width * 0.7),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: message.isMine ? const Color(0xFF00383F).withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.05),
@@ -434,70 +389,144 @@ class ChatDetailScreen extends StatelessWidget {
   }
 
   Widget _buildImageContent(ChatMessageModel message) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            'https://picsum.photos/seed/fest/400/300',
-            width: 200,
-            height: 150,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 200,
-              height: 150,
-              color: Colors.white.withValues(alpha: 0.1),
-              child: const Icon(Icons.image_not_supported_outlined, color: Colors.white38),
-            ),
+    if (message.attachmentId == null) return const SizedBox.shrink();
+
+    return _buildAttachmentStream(message.attachmentId!, (FileAttachmentModel? attachment) {
+      if (attachment == null) return const SizedBox.shrink();
+
+      final displayPath = attachment.localPath ?? attachment.tempPath;
+      final fileExists = displayPath != null && File(displayPath!).existsSync();
+
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: fileExists
+                ? Image.file(
+                    File(displayPath!),
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    width: 200,
+                    height: 200,
+                    color: Colors.white.withValues(alpha: 0.1),
+                    child: const Icon(Icons.image_not_supported_outlined, color: Colors.white38),
+                  ),
           ),
-        ),
-        Positioned(
-          right: 8,
-          bottom: 8,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.5),
-              shape: BoxShape.circle,
+          if (attachment.transferProgress < 1.0)
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      value: attachment.transferProgress,
+                      strokeWidth: 3,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.cyanBlue),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${(attachment.transferProgress * 100).toInt()}%',
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
-            child: const Icon(Icons.reply, color: Colors.white, size: 16),
-          ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 
   Widget _buildFileContent(ChatMessageModel message) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.insert_drive_file, color: AppColors.neonPurple, size: 24),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Document.pdf',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    if (message.attachmentId == null) return const SizedBox.shrink();
+
+    return _buildAttachmentStream(message.attachmentId!, (FileAttachmentModel? attachment) {
+      if (attachment == null) return const SizedBox.shrink();
+
+      final isComplete = attachment.transferProgress >= 1.0;
+
+      return Container(
+        width: 200, // Constrain width for file card
+        child: Row(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isComplete ? AppColors.neonPurple.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    isComplete ? Icons.insert_drive_file : Icons.downloading, 
+                    color: isComplete ? AppColors.neonPurple : Colors.white54, 
+                    size: 24
+                  ),
+                ),
+                if (!isComplete)
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: CircularProgressIndicator(
+                      value: attachment.transferProgress,
+                      strokeWidth: 2,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    attachment.fileName,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isComplete 
+                      ? '${(attachment.fileSize / (1024 * 1024)).toStringAsFixed(1)} MB'
+                      : '${(attachment.transferProgress * 100).toInt()}% • ${(attachment.fileSize / (1024 * 1024)).toStringAsFixed(1)} MB',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                '2.4 MB • PDF',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      );
+    });
+  }
+
+  Widget _buildAttachmentStream(int attachmentId, Widget Function(FileAttachmentModel?) builder) {
+    final db = Get.find<DatabaseService>();
+    return StreamBuilder<FileAttachmentModel?>(
+      stream: db.isar.fileAttachmentModels.watchObject(attachmentId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return FutureBuilder<FileAttachmentModel?>(
+            future: db.isar.fileAttachmentModels.get(attachmentId),
+            builder: (context, futureSnapshot) => builder(futureSnapshot.data),
+          );
+        }
+        return builder(snapshot.data);
+      },
     );
   }
 
@@ -546,64 +575,9 @@ class ChatDetailScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildAISuggestions(ChatDetailController controller) {
+  Widget _buildInputArea(BuildContext context, ChatDetailController controller) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0D1127).withValues(alpha: 0.8),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.auto_awesome, color: AppColors.neonPurple, size: 16),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'AI Smart Replies',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                ],
-              ),
-              Icon(Icons.close, color: Colors.white.withValues(alpha: 0.3), size: 16),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: controller.aiSuggestions.map((text) => GestureDetector(
-                onTap: () => controller.sendMessage(text),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.3)),
-                    color: Colors.white.withValues(alpha: 0.05),
-                  ),
-                  child: Text(
-                    text,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                  ),
-                ),
-              )).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInputArea(ChatDetailController controller) {
-    return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.deepNavy,
         border: Border(
@@ -612,18 +586,22 @@ class ChatDetailScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildSquareIconButton(Icons.add),
-          const SizedBox(width: 12),
           Expanded(
             child: Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
                 children: [
+                  IconButton(
+                    onPressed: () => _showAttachmentSheet(context, controller),
+                    icon: Icon(Icons.attach_file, color: Colors.white.withValues(alpha: 0.4), size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: controller.textController,
@@ -634,79 +612,104 @@ class ChatDetailScreen extends StatelessWidget {
                         hintText: 'Type a message...',
                         hintStyle: TextStyle(color: Colors.white24),
                         border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
-                  Icon(Icons.emoji_emotions_outlined, color: Colors.white.withValues(alpha: 0.4), size: 20),
-                  const SizedBox(width: 8),
                   IconButton(
-                    onPressed: () => controller.sendMessage(controller.textController.text),
-                    icon: const Icon(Icons.send, color: AppColors.cyanBlue, size: 20),
+                    onPressed: () {}, // Add emoji picker if needed
+                    icon: Icon(Icons.emoji_emotions_outlined, color: Colors.white.withValues(alpha: 0.4), size: 20),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
+                  const SizedBox(width: 8),
                 ],
               ),
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppColors.primaryGradient,
+          GestureDetector(
+            onTap: () => controller.sendMessage(controller.textController.text),
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppColors.primaryGradient,
+              ),
+              child: const Icon(Icons.send, color: Colors.white, size: 20),
             ),
-            child: const Icon(Icons.mic, color: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSquareIconButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF4D3DFF).withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(icon, color: const Color(0xFF4D3DFF), size: 20),
-    );
-  }
-
-  Widget _buildBottomStatus(NearbyUserModel peer) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      color: AppColors.deepNavy,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildStatusItem(Icons.sensors, 'Mesh Network', 'Strong Signal', Colors.greenAccent),
-          _buildStatusItem(Icons.circle_outlined, 'Peer', peer.isOnline ? 'Online' : 'Offline', peer.isOnline ? Colors.greenAccent : Colors.white38),
-          _buildStatusItem(Icons.battery_3_bar, 'Mesh Type', peer.connectionType ?? 'Nearby', Colors.white),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusItem(IconData icon, String label, String value, Color color) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 16),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  void _showAttachmentSheet(BuildContext context, ChatDetailController controller) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: AppColors.deepNavy,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 9),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            Text(
-              value,
-              style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAttachmentOption(Icons.image, 'Gallery', Colors.purple, () {
+                  Get.back();
+                  controller.pickImage(ImageSource.gallery);
+                }),
+                _buildAttachmentOption(Icons.camera_alt, 'Camera', Colors.pink, () {
+                  Get.back();
+                  controller.pickImage(ImageSource.camera);
+                }),
+                _buildAttachmentOption(Icons.description, 'Document', Colors.blue, () {
+                  Get.back();
+                  controller.pickDocument();
+                }),
+                _buildAttachmentOption(Icons.videocam, 'Video', Colors.orange, () {}),
+              ],
             ),
+            const SizedBox(height: 24),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttachmentOption(IconData icon, String label, Color color, VoidCallback onTap) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withValues(alpha: 0.2)),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
         ),
       ],
     );

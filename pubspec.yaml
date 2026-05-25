@@ -38,6 +38,10 @@ dependencies:
   shelf_web_socket: ^2.0.1
   web_socket_channel: ^3.0.3
   udp: ^5.0.3
+  file_picker: ^11.0.2
+  mime: ^2.0.0
+  open_filex: ^4.7.0
+  crypto: ^3.0.7
 
 
 dev_dependencies:
