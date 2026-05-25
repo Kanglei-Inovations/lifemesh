@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:lifemesh/models/chat_message_model.dart';
+import 'package:lifemesh/models/nearby_user_model.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../widgets/mesh_background.dart';
-import '../controllers/chat_controller.dart';
 import '../controllers/chat_detail_controller.dart';
 
 class ChatDetailScreen extends StatelessWidget {
@@ -12,8 +13,11 @@ class ChatDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChatSummary chat = Get.arguments;
-    final controller = Get.put(ChatDetailController());
+    final Map<String, dynamic> args = Get.arguments;
+    final String roomId = args['roomId'];
+    final NearbyUserModel peer = args['peer'];
+    
+    final controller = Get.put(ChatDetailController(roomId: roomId, peer: peer));
 
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
@@ -24,15 +28,15 @@ class ChatDetailScreen extends StatelessWidget {
             bottom: false,
             child: Column(
               children: [
-                _buildAppBar(chat),
+                _buildAppBar(peer),
                 Expanded(
                   child: Column(
                     children: [
                       _buildSecurityBanner(),
-                      _buildMessageList(controller, chat),
+                      _buildMessageList(controller, peer),
                       _buildAISuggestions(controller),
                       _buildInputArea(controller),
-                      _buildBottomStatus(),
+                      _buildBottomStatus(peer),
                     ],
                   ),
                 ),
@@ -44,7 +48,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(ChatSummary chat) {
+  Widget _buildAppBar(NearbyUserModel peer) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -63,14 +67,16 @@ class ChatDetailScreen extends StatelessWidget {
                   border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.5), width: 1),
                 ),
                 child: ClipOval(
-                  child: Image.network(
-                    chat.avatar ?? 'https://pravatar.cc/150?u=${chat.id}',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white),
-                  ),
+                  child: peer.avatar != null && peer.avatar!.startsWith('http')
+                    ? Image.network(
+                        peer.avatar!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white),
+                      )
+                    : const Icon(Icons.person, color: Colors.white),
                 ),
               ),
-              if (chat.isOnline)
+              if (peer.isOnline)
                 Positioned(
                   right: 0,
                   bottom: 0,
@@ -92,7 +98,7 @@ class ChatDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  chat.name,
+                  peer.name ?? 'Unknown',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -100,9 +106,9 @@ class ChatDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${chat.isOnline ? "Online" : "Offline"} • ${chat.distance}',
+                  '${peer.isOnline ? "Online" : "Offline"} • ${peer.distance ?? "Nearby"}',
                   style: TextStyle(
-                    color: chat.isOnline ? Colors.greenAccent : Colors.white38,
+                    color: peer.isOnline ? Colors.greenAccent : Colors.white38,
                     fontSize: 12,
                   ),
                 ),
@@ -202,7 +208,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageList(ChatDetailController controller, ChatSummary chat) {
+  Widget _buildMessageList(ChatDetailController controller, NearbyUserModel peer) {
     return Expanded(
       child: Obx(
         () => ListView.builder(
@@ -224,24 +230,24 @@ class ChatDetailScreen extends StatelessWidget {
               );
             }
             final message = controller.messages[index - 1];
-            return _buildMessageRow(message, index - 1, chat);
+            return _buildMessageRow(message, index - 1, peer);
           },
         ),
       ),
     );
   }
 
-  Widget _buildMessageRow(ChatMessage message, int index, ChatSummary chat) {
+  Widget _buildMessageRow(ChatMessageModel message, int index, NearbyUserModel peer) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: message.isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!message.isMe) _buildMessageAvatar(chat.avatar, chat.id),
+          if (!message.isMine) _buildMessageAvatar(peer.avatar, peer.meshId ?? 'unknown'),
           const SizedBox(width: 12),
           Column(
-            crossAxisAlignment: message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: message.isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               _buildMessageBubble(message),
               const SizedBox(height: 6),
@@ -249,7 +255,7 @@ class ChatDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(width: 12),
-          if (message.isMe) _buildMessageAvatar(null, 'me'),
+          if (message.isMine) _buildMessageAvatar(null, 'me'),
         ],
       ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.1, end: 0),
     );
@@ -264,18 +270,20 @@ class ChatDetailScreen extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
       child: ClipOval(
-        child: Image.network(
-          avatarUrl ?? 'https://pravatar.cc/100?u=$id',
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white, size: 16),
-        ),
+        child: avatarUrl != null && avatarUrl.startsWith('http')
+          ? Image.network(
+              avatarUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white, size: 16),
+            )
+          : const Icon(Icons.person, color: Colors.white, size: 16),
       ),
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message) {
+  Widget _buildMessageBubble(ChatMessageModel message) {
     Widget content;
-    switch (message.type) {
+    switch (message.messageType) {
       case MessageType.voice:
         content = _buildVoiceContent(message);
         break;
@@ -296,10 +304,10 @@ class ChatDetailScreen extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: Get.width * 0.7),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: message.isMe ? const Color(0xFF00383F).withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.05),
+        color: message.isMine ? const Color(0xFF00383F).withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: message.isMe ? AppColors.cyanBlue.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.1),
+          color: message.isMine ? AppColors.cyanBlue.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -311,32 +319,31 @@ class ChatDetailScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                message.time,
+                "${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}",
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 10,
                 ),
               ),
-              if (message.isMe) ...[
+              if (message.isMine) ...[
                 const SizedBox(width: 4),
-                _buildStatusIcon(message.status),
+                _buildStatusIcon(message.deliveryStatus),
               ],
             ],
           ),
-          if (message.reactions != null) _buildReactions(message.reactions!),
         ],
       ),
     );
   }
 
-  Widget _buildTextContent(ChatMessage message) {
+  Widget _buildTextContent(ChatMessageModel message) {
     return Text(
-      message.text ?? '',
+      message.text,
       style: const TextStyle(color: Colors.white, fontSize: 15),
     );
   }
 
-  Widget _buildVoiceContent(ChatMessage message) {
+  Widget _buildVoiceContent(ChatMessageModel message) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -351,9 +358,9 @@ class ChatDetailScreen extends StatelessWidget {
         const SizedBox(width: 12),
         _buildVoiceWaveform(),
         const SizedBox(width: 12),
-        Text(
-          message.voiceDuration ?? '0:00',
-          style: const TextStyle(color: Colors.white, fontSize: 12),
+        const Text(
+          '0:12',
+          style: TextStyle(color: Colors.white, fontSize: 12),
         ),
       ],
     );
@@ -376,7 +383,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationContent(ChatMessage message) {
+  Widget _buildLocationContent(ChatMessageModel message) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -426,7 +433,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImageContent(ChatMessage message) {
+  Widget _buildImageContent(ChatMessageModel message) {
     return Stack(
       children: [
         ClipRRect(
@@ -460,7 +467,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFileContent(ChatMessage message) {
+  Widget _buildFileContent(ChatMessageModel message) {
     return Row(
       children: [
         Container(
@@ -476,15 +483,15 @@ class ChatDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                message.fileName ?? 'File',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              const Text(
+                'Document.pdf',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text(
-                '${message.fileSize} • ${message.fileType}',
+                '2.4 MB • PDF',
                 style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
               ),
             ],
@@ -494,7 +501,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHopIndicator(ChatMessage message) {
+  Widget _buildHopIndicator(ChatMessageModel message) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -507,14 +514,14 @@ class ChatDetailScreen extends StatelessWidget {
               height: 6,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: index < message.meshHops ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.1),
+                color: index < 1 ? AppColors.cyanBlue : Colors.white.withValues(alpha: 0.1),
               ),
             ),
           ),
         ),
         const SizedBox(width: 8),
         Text(
-          'Delivered via ${message.meshHops} ${message.meshHops == 1 ? "hop" : "hops"}',
+          'Delivered via 1 hop',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.3),
             fontSize: 10,
@@ -524,40 +531,18 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReactions(List<MessageReaction> reactions) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: reactions.map((r) => Row(
-          children: [
-            Text(r.emoji, style: const TextStyle(fontSize: 12)),
-            const SizedBox(width: 4),
-            Text(
-              '${r.count}',
-              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-            ),
-          ],
-        )).toList(),
-      ),
-    );
-  }
-
-  Widget _buildStatusIcon(MessageStatus status) {
+  Widget _buildStatusIcon(DeliveryStatus status) {
     switch (status) {
-      case MessageStatus.sending:
+      case DeliveryStatus.sending:
         return Icon(Icons.access_time, size: 12, color: Colors.white.withValues(alpha: 0.3));
-      case MessageStatus.sent:
+      case DeliveryStatus.sent:
         return Icon(Icons.check, size: 12, color: Colors.white.withValues(alpha: 0.3));
-      case MessageStatus.received:
+      case DeliveryStatus.delivered:
         return Icon(Icons.done_all, size: 12, color: Colors.white.withValues(alpha: 0.3));
-      case MessageStatus.read:
+      case DeliveryStatus.read:
         return const Icon(Icons.done_all, size: 12, color: AppColors.cyanBlue);
+      case DeliveryStatus.failed:
+        return const Icon(Icons.error_outline, size: 12, color: Colors.redAccent);
     }
   }
 
@@ -593,17 +578,20 @@ class ChatDetailScreen extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: controller.aiSuggestions.map((text) => Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.3)),
-                  color: Colors.white.withValues(alpha: 0.05),
-                ),
-                child: Text(
-                  text,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+              children: controller.aiSuggestions.map((text) => GestureDetector(
+                onTap: () => controller.sendMessage(text),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.neonPurple.withValues(alpha: 0.3)),
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
+                  child: Text(
+                    text,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                  ),
                 ),
               )).toList(),
             ),
@@ -687,7 +675,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomStatus() {
+  Widget _buildBottomStatus(NearbyUserModel peer) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       color: AppColors.deepNavy,
@@ -695,8 +683,8 @@ class ChatDetailScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildStatusItem(Icons.sensors, 'Mesh Network', 'Strong Signal', Colors.greenAccent),
-          _buildStatusItem(Icons.circle_outlined, 'You', 'Good', Colors.greenAccent),
-          _buildStatusItem(Icons.battery_3_bar, 'Battery Saver', 'On', Colors.white),
+          _buildStatusItem(Icons.circle_outlined, 'Peer', peer.isOnline ? 'Online' : 'Offline', peer.isOnline ? Colors.greenAccent : Colors.white38),
+          _buildStatusItem(Icons.battery_3_bar, 'Mesh Type', peer.connectionType ?? 'Nearby', Colors.white),
         ],
       ),
     );

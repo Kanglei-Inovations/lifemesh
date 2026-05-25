@@ -8,7 +8,10 @@ import 'package:lifemesh/widgets/radar_scanner.dart';
 import 'package:lifemesh/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:lifemesh/features/chat/presentation/controllers/nearby_tab_controller.dart';
 import 'package:lifemesh/models/nearby_user_model.dart';
-
+import 'package:lifemesh/models/chat_room_model.dart';
+import 'package:lifemesh/models/onboarding_user_model.dart';
+import 'package:isar/isar.dart';
+import 'package:lifemesh/core/database_service.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
@@ -19,17 +22,17 @@ class ChatScreen extends StatelessWidget {
 
     return Column(
       children: [
-        _buildAppBar(),
+        _buildAppBar(controller),
         _buildTabs(controller),
         Expanded(
           child: Obx(() {
             switch (controller.selectedTab.value) {
               case 1:
-                return _buildGroupsView(controller);
-              case 2:
-                return _buildNearbyView(context, controller);
-              default:
                 return _buildAllChatsView(controller);
+              case 2:
+                return _buildGroupsView(controller);
+              default:
+                return _buildNearbyView(context, controller);
             }
           }),
         ),
@@ -37,7 +40,7 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(ChatController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -54,26 +57,26 @@ class ChatScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              Row(
+              Obx(() => Row(
                 children: [
                   Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.greenAccent,
+                    decoration: BoxDecoration(
+                      color: controller.nearbyUsers.isNotEmpty ? Colors.greenAccent : Colors.orangeAccent,
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '12 People Connected',
+                    '${controller.nearbyUsers.length} People Connected',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),
                 ],
-              ),
+              )),
             ],
           ),
           Row(
@@ -112,9 +115,9 @@ class ChatScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildTabItem('All Chats', 0, controller, Icons.chat_bubble_outline),
-          _buildTabItem('Groups', 1, controller, Icons.group_outlined),
-          _buildTabItem('Nearby', 2, controller, Icons.explore_outlined),
+          _buildTabItem('Nearby', 0, controller, Icons.explore_outlined),
+          _buildTabItem('All Chats', 1, controller, Icons.chat_bubble_outline),
+          _buildTabItem('Groups', 2, controller, Icons.group_outlined),
         ],
       ),
     ));
@@ -292,122 +295,145 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChatTile(ChatSummary chat, int index) {
-    return GestureDetector(
-      onTap: () => Get.toNamed('/chat-detail', arguments: chat),
-      child: Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(
-          children: [
-            _buildAvatar(chat.isOnline, chat.isWaiting, chat.avatar),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        chat.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        chat.time,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    chat.lastMessage,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      if (chat.isWaiting)
-                        const Icon(Icons.access_time, color: Colors.orangeAccent, size: 12)
-                      else
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: Colors.greenAccent.withValues(alpha: 0.7),
-                          size: 12,
-                        ),
-                      const SizedBox(width: 4),
-                      Text(
-                        chat.distance,
-                        style: TextStyle(
-                          color: (chat.isWaiting ? Colors.orangeAccent : Colors.greenAccent).withValues(alpha: 0.7),
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '•',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        chat.isDirect ? 'Direct' : 'Group',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.lock_outline,
-                        color: Colors.white.withValues(alpha: 0.4),
-                        size: 12,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+  Widget _buildChatTile(ChatRoomModel room, int index) {
+    return FutureBuilder<NearbyUserModel?>(
+      future: _getPeerForRoom(room),
+      builder: (context, snapshot) {
+        final peer = snapshot.data;
+        if (peer == null) return const SizedBox.shrink();
+
+        return GestureDetector(
+          onTap: () => Get.toNamed('/chat-detail', arguments: {
+            'roomId': room.roomId,
+            'peer': peer,
+          }),
+          child: Container(
+            color: Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
               children: [
-                if (chat.isMuted)
-                  Icon(Icons.notifications_off_outlined, color: Colors.white38, size: 16),
-                if (chat.unreadCount > 0)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF4D3DFF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${chat.unreadCount}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                _buildAvatar(peer.isOnline, false, peer.avatar),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            peer.name ?? 'Unknown',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            _formatTime(room.lastMessageTime),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        room.lastMessage ?? 'No messages yet',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: Colors.greenAccent.withValues(alpha: 0.7),
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            peer.distance ?? 'Nearby',
+                            style: TextStyle(
+                              color: Colors.greenAccent.withValues(alpha: 0.7),
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '•',
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Direct',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.lock_outline,
+                            color: Colors.white.withValues(alpha: 0.4),
+                            size: 12,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (room.unreadCount > 0)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF4D3DFF),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${room.unreadCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
+          ),
+        ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
+      }
+    );
+  }
+
+  Future<NearbyUserModel?> _getPeerForRoom(ChatRoomModel room) async {
+    final db = Get.find<DatabaseService>();
+    final localUser = await db.isar.onboardingUserModels.where().findFirst();
+    final peerMeshId = room.participantMeshIds.firstWhere((id) => id != localUser?.meshId, orElse: () => '');
+    if (peerMeshId.isEmpty) return null;
+    return await db.isar.nearbyUserModels.filter().meshIdEqualTo(peerMeshId).findFirst();
+  }
+
+  String _formatTime(DateTime? time) {
+    if (time == null) return '';
+    final now = DateTime.now();
+    if (now.day == time.day && now.month == time.month && now.year == time.year) {
+      return "${time.hour}:${time.minute.toString().padLeft(2, '0')}";
+    }
+    return "${time.day}/${time.month}";
   }
 
   Widget _buildAvatar(bool isOnline, bool isWaiting, [String? avatarUrl]) {
@@ -424,11 +450,13 @@ class ChatScreen extends StatelessWidget {
             ),
           ),
           child: ClipOval(
-            child: Image.network(
-              avatarUrl ?? 'https://pravatar.cc/100?u=avatar',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white),
-            ),
+            child: avatarUrl != null && avatarUrl.startsWith('http')
+              ? Image.network(
+                  avatarUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white),
+                )
+              : const Icon(Icons.person, color: Colors.white),
           ),
         ),
         if (isOnline)
@@ -440,20 +468,6 @@ class ChatScreen extends StatelessWidget {
               height: 12,
               decoration: BoxDecoration(
                 color: Colors.greenAccent,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.deepNavy, width: 2),
-              ),
-            ),
-          ),
-        if (isWaiting)
-          Positioned(
-            right: 0,
-            bottom: 2,
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: Colors.orangeAccent,
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.deepNavy, width: 2),
               ),
@@ -1074,18 +1088,40 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToChat(NearbyUserModel user) {
-    final chat = ChatSummary(
-      id: user.meshId ?? 'unknown',
-      name: user.name ?? 'Unknown',
-      lastMessage: 'Mesh connection active',
-      time: 'Now',
-      unreadCount: 0,
-      isOnline: user.isOnline,
-      distance: user.distance ?? '',
-      avatar: user.avatar,
-    );
-    Get.toNamed('/chat-detail', arguments: chat);
+  void _navigateToChat(NearbyUserModel user) async {
+    final db = Get.find<DatabaseService>();
+    final localUser = await db.isar.onboardingUserModels.where().findFirst();
+    if (localUser == null || localUser.meshId == null) {
+      Get.snackbar('Error', 'Local user profile incomplete');
+      return;
+    }
+
+    if (user.meshId == null) {
+      Get.snackbar('Error', 'Target user MeshID missing');
+      return;
+    }
+
+    // Room ID is deterministic for P2P: sorted mesh IDs joined by underscore
+    final ids = [localUser.meshId!, user.meshId!];
+    ids.sort();
+    final roomId = ids.join('_');
+
+    // Create room if not exists
+    await db.isar.writeTxn(() async {
+      var room = await db.isar.chatRoomModels.filter().roomIdEqualTo(roomId).findFirst();
+      if (room == null) {
+        room = ChatRoomModel()
+          ..roomId = roomId
+          ..participantMeshIds = ids
+          ..createdAt = DateTime.now();
+        await db.isar.chatRoomModels.put(room);
+      }
+    });
+
+    Get.toNamed('/chat-detail', arguments: {
+      'roomId': roomId,
+      'peer': user,
+    });
   }
 
   void _showPeerDetails(BuildContext context, NearbyUserModel user) {

@@ -35,186 +35,195 @@ class PermissionsScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(controller.onboardingController),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Allow Permissions',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ).animate().fadeIn(
-                          delay: const Duration(milliseconds: 200),
-                        ),
-                        const SizedBox(height: 12),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final screenHeight = constraints.maxHeight;
+                // Dynamically adjust sizes based on screen height
+                final illustrationHeight = screenHeight < 600 ? 100.0 : 140.0;
+                final headerSpacing = screenHeight < 600 ? 8.0 : 12.0;
 
-                        // Slightly smaller illustration to save space
-                        SizedBox(
-                          height: 140,
-                          child: _buildShieldIllustration(),
-                        ).animate().scale(
-                          delay: const Duration(milliseconds: 400),
-                          curve: Curves.easeOutBack,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Permissions List - Scrollable if needed but intended to fit
-                        Expanded(
-                          child: ListView(
-                            padding: EdgeInsets.zero,
-                            physics: const BouncingScrollPhysics(),
-                            children: [
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.location_on_outlined,
-                                iconColor: AppColors.neonPurple,
-                                title: 'Location',
-                                description: 'Helps you connect with people near you.',
-                                isAllowed: controller.locationGranted.value,
-                                onTap: controller.requestLocationPermission,
-                              )),
-                              const SizedBox(height: 12),
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.gps_fixed,
-                                iconColor: AppColors.cyanBlue,
-                                title: 'GPS Accuracy',
-                                description: 'Ensures precise positioning for accurate mesh mapping.',
-                                isAllowed: controller.gpsGranted.value,
-                                onTap: controller.requestLocationPermission,
-                              )),
-                              const SizedBox(height: 12),
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.bluetooth_connected,
-                                iconColor: Colors.blueAccent,
-                                title: 'Bluetooth & Nearby',
-                                description: 'Required to build the offline mesh network securely.',
-                                isAllowed: controller.bluetoothGranted.value,
-                                onTap: controller.requestBluetoothPermission,
-                              )),
-                              const SizedBox(height: 12),
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.notifications_none_outlined,
-                                iconColor: AppColors.softGlowPink,
-                                title: 'Notifications',
-                                description: 'Keeps you updated about important activities.',
-                                isAllowed: controller.notificationGranted.value,
-                                onTap: controller.requestNotificationPermission,
-                              )),
-                              const SizedBox(height: 12),
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.image_outlined,
-                                iconColor: AppColors.cyanBlue,
-                                title: 'Photos & Media',
-                                description: 'Lets you share photos and media on LifeMesh.',
-                                isAllowed: controller.storageGranted.value,
-                                onTap: controller.requestStoragePermission,
-                              )),
-                              const SizedBox(height: 12),
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.camera_alt_outlined,
-                                iconColor: Colors.orangeAccent,
-                                title: 'Camera',
-                                description: 'Required for taking photos and scanning QR codes.',
-                                isAllowed: controller.cameraGranted.value,
-                                onTap: controller.requestCameraPermission,
-                              )),
-                              const SizedBox(height: 12),
-                              Obx(() => _buildPermissionCard(
-                                icon: Icons.mic_none_outlined,
-                                iconColor: Colors.tealAccent,
-                                title: 'Microphone',
-                                description: 'Enables voice messages and audio sharing.',
-                                isAllowed: controller.microphoneGranted.value,
-                                onTap: controller.requestMicrophonePermission,
-                              )),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                // Fixed Bottom Section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildPrivacyNotice(),
-                      const SizedBox(height: 16),
-                      Container(
-                        width: double.infinity,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (!controller.isAllGranted.value) {
-                              controller.requestAllPermissions().then((_) {
-                                controller.continueToNextStep();
-                              });
-                            } else {
-                              controller.continueToNextStep();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
+                return Column(
+                  children: [
+                    _buildHeader(controller.onboardingController),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Allow Permissions',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ).animate().fadeIn(
+                              delay: const Duration(milliseconds: 200),
                             ),
-                          ),
-                          child: Obx(
-                            () => controller.isLoading.value
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text(
-                                        'Continue',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white.withValues(alpha: 0.5),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.arrow_forward,
-                                          size: 16,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
+                            SizedBox(height: headerSpacing),
+
+                            // Dynamic illustration height
+                            SizedBox(
+                              height: illustrationHeight,
+                              child: _buildShieldIllustration(),
+                            ).animate().scale(
+                              delay: const Duration(milliseconds: 400),
+                              curve: Curves.easeOutBack,
+                            ),
+                            SizedBox(height: headerSpacing),
+
+                            // Permissions List
+                            Expanded(
+                              child: ListView(
+                                padding: EdgeInsets.zero,
+                                physics: const BouncingScrollPhysics(),
+                                children: [
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.location_on_outlined,
+                                    iconColor: AppColors.neonPurple,
+                                    title: 'Location',
+                                    description: 'Helps you connect with people near you.',
+                                    isAllowed: controller.locationGranted.value,
+                                    onTap: controller.requestLocationPermission,
+                                  )),
+                                  const SizedBox(height: 12),
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.gps_fixed,
+                                    iconColor: AppColors.cyanBlue,
+                                    title: 'GPS Accuracy',
+                                    description: 'Ensures precise positioning for accurate mesh mapping.',
+                                    isAllowed: controller.gpsGranted.value,
+                                    onTap: controller.requestLocationPermission,
+                                  )),
+                                  const SizedBox(height: 12),
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.bluetooth_connected,
+                                    iconColor: Colors.blueAccent,
+                                    title: 'Bluetooth & Nearby',
+                                    description: 'Required to build the offline mesh network securely.',
+                                    isAllowed: controller.bluetoothGranted.value,
+                                    onTap: controller.requestBluetoothPermission,
+                                  )),
+                                  const SizedBox(height: 12),
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.notifications_none_outlined,
+                                    iconColor: AppColors.softGlowPink,
+                                    title: 'Notifications',
+                                    description: 'Keeps you updated about important activities.',
+                                    isAllowed: controller.notificationGranted.value,
+                                    onTap: controller.requestNotificationPermission,
+                                  )),
+                                  const SizedBox(height: 12),
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.image_outlined,
+                                    iconColor: AppColors.cyanBlue,
+                                    title: 'Photos & Media',
+                                    description: 'Lets you share photos and media on LifeMesh.',
+                                    isAllowed: controller.storageGranted.value,
+                                    onTap: controller.requestStoragePermission,
+                                  )),
+                                  const SizedBox(height: 12),
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.camera_alt_outlined,
+                                    iconColor: Colors.orangeAccent,
+                                    title: 'Camera',
+                                    description: 'Required for taking photos and scanning QR codes.',
+                                    isAllowed: controller.cameraGranted.value,
+                                    onTap: controller.requestCameraPermission,
+                                  )),
+                                  const SizedBox(height: 12),
+                                  Obx(() => _buildPermissionCard(
+                                    icon: Icons.mic_none_outlined,
+                                    iconColor: Colors.tealAccent,
+                                    title: 'Microphone',
+                                    description: 'Enables voice messages and audio sharing.',
+                                    isAllowed: controller.microphoneGranted.value,
+                                    onTap: controller.requestMicrophonePermission,
+                                  )),
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                    
+                    // Fixed Bottom Section
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildPrivacyNotice(),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (!controller.isAllGranted.value) {
+                                  controller.requestAllPermissions().then((_) {
+                                    controller.continueToNextStep();
+                                  });
+                                } else {
+                                  controller.continueToNextStep();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                              ),
+                              child: Obx(
+                                () => controller.isLoading.value
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Text(
+                                            'Continue',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white.withValues(alpha: 0.5),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              Icons.arrow_forward,
+                                              size: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
             ),
           ),
         ],
@@ -239,19 +248,22 @@ class PermissionsScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildCompletedStep('ID'),
-                _buildStepConnector(isActive: true),
-                _buildCompletedStep('Info'),
-                _buildStepConnector(isActive: true),
-                _buildCompletedStep('Review'),
-                _buildStepConnector(isActive: true),
-                _buildActiveStep(4, 'Perms'),
-                _buildStepConnector(),
-                _buildInactiveStep(5, 'Scan'),
-              ],
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildCompletedStep('ID'),
+                  _buildStepConnector(isActive: true),
+                  _buildCompletedStep('Info'),
+                  _buildStepConnector(isActive: true),
+                  _buildCompletedStep('Review'),
+                  _buildStepConnector(isActive: true),
+                  _buildActiveStep(4, 'Perms'),
+                  _buildStepConnector(),
+                  _buildInactiveStep(5, 'Scan'),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 48), // Balance for back button
@@ -579,13 +591,18 @@ class PermissionsScreen extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                   const SizedBox(width: 8),

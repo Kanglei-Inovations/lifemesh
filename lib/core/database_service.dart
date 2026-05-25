@@ -8,6 +8,8 @@ import '../models/nearby_user_model.dart';
 import '../models/onboarding_state_model.dart';
 import '../models/activity_model.dart';
 import '../models/dashboard_stat_model.dart';
+import '../models/chat_message_model.dart';
+import '../models/chat_room_model.dart';
 
 class DatabaseService extends GetxService {
   late Isar isar;
@@ -22,6 +24,8 @@ class DatabaseService extends GetxService {
       OnboardingStateModelSchema,
       ActivityModelSchema,
       DashboardStatModelSchema,
+      ChatMessageModelSchema,
+      ChatRoomModelSchema,
     ], directory: dir.path);
 
     // Initialize default state if not exists

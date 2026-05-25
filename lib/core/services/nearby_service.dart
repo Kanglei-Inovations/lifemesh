@@ -2,20 +2,21 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 import 'package:uuid/uuid.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'package:lifemesh/core/database_service.dart';
 import 'package:lifemesh/core/services/crypto_service.dart';
+import 'package:lifemesh/core/network/message_bus.dart';
+import 'package:lifemesh/core/network/payloads/chat_payloads.dart';
 import 'package:lifemesh/core/constants/mesh_states.dart';
 import 'package:lifemesh/models/nearby_user_model.dart';
-import 'package:lifemesh/models/dashboard_stat_model.dart';
 import 'package:lifemesh/models/onboarding_user_model.dart';
+import 'package:isar/isar.dart';
 
 class NearbyService extends GetxService {
   static const String serviceId = 'com.kangleiinnovations.lifemesh.mesh';
@@ -25,12 +26,10 @@ class NearbyService extends GetxService {
   final Nearby _nearby = Nearby();
   final DatabaseService _db = Get.find<DatabaseService>();
   final CryptoService _cryptoService = Get.find<CryptoService>();
+  final MessageBus _messageBus = Get.find<MessageBus>();
 
   final Rx<MeshConnectionState> globalState = MeshConnectionState.idle.obs;
   final RxBool isScanning = false.obs;
-  final RxList<NearbyUserModel> activeNearbyUsers = <NearbyUserModel>[].obs;
-  final RxList<NearbyUserModel> connectedNodes = <NearbyUserModel>[].obs;
-  final RxDouble avgSignalStrength = 0.0.obs;
 
   final Set<String> _connectedEndpoints = {};
   final Map<String, String> _endpointMeshIds = {};
@@ -40,59 +39,37 @@ class NearbyService extends GetxService {
   String _localEndpointName = '';
 
   Timer? _heartbeatTimer;
-  Timer? _cleanupTimer;
-  static const int heartbeatTimeout = 15;
 
   Future<NearbyService> init() async {
-    print("NearbyService initializing...");
+    print("NearbyService: Initializing Transport Layer...");
     await _cryptoService.init();
     _listenForBleRssi();
     
-    await _clearActiveStates();
-    _setupIsarWatcher();
-
     _heartbeatTimer = Timer.periodic(const Duration(seconds: 5), (_) => _broadcastHeartbeat());
-    _cleanupTimer = Timer.periodic(const Duration(seconds: 5), (_) => _cleanupStaleUsers());
     
-    print("NearbyService initialized.");
+    print("NearbyService: Transport Layer Initialized.");
     return this;
   }
 
   @override
   void onClose() {
     _heartbeatTimer?.cancel();
-    _cleanupTimer?.cancel();
     stopMesh();
     super.onClose();
   }
 
   Future<void> startMesh() async {
-    print("Starting NearbyService mesh discovery...");
+    print("NearbyService: Starting mesh transport...");
     globalState.value = MeshConnectionState.discovering;
     isScanning.value = true;
 
     await _loadLocalIdentity();
 
-    if (Platform.isAndroid) {
-      final status = await _requestPermissions();
-      if (!status) {
-        print("NearbyService: Permissions denied.");
-        globalState.value = MeshConnectionState.failed;
-        isScanning.value = false;
-        
-        // Navigate to permissions screen if critical permissions are missing
-        if (Get.currentRoute != '/permissions') {
-          Get.toNamed('/permissions');
-        }
-        return;
-      }
-    }
-
     try {
       await _startAdvertising();
       await _startDiscovery();
       await _startBleIdentityBeacon();
-      print("NearbyService: Mesh active.");
+      print("NearbyService: Mesh transport active.");
     } catch (e) {
       print("NearbyService: Start error: $e");
       globalState.value = MeshConnectionState.failed;
@@ -101,7 +78,7 @@ class NearbyService extends GetxService {
   }
 
   Future<void> stopMesh() async {
-    print("Stopping NearbyService mesh discovery...");
+    print("NearbyService: Stopping mesh transport...");
     isScanning.value = false;
     globalState.value = MeshConnectionState.idle;
 
@@ -112,48 +89,27 @@ class NearbyService extends GetxService {
 
     _connectedEndpoints.clear();
     _endpointMeshIds.clear();
-    await _clearActiveStates();
   }
 
   Future<void> _loadLocalIdentity() async {
-    final users = await _db.isar.onboardingUserModels.where().findAll();
-    final user = users.isNotEmpty ? users.first : null;
-
-    _localMeshId = user?.meshId ?? const Uuid().v4();
+    final user = await _db.isar.onboardingUserModels.where().findFirst();
+    if (user != null && user.meshId != null) {
+      _localMeshId = user.meshId!;
+    } else {
+      _localMeshId = const Uuid().v4();
+      if (user != null) {
+        await _db.isar.writeTxn(() async {
+          user.meshId = _localMeshId;
+          await _db.isar.onboardingUserModels.put(user);
+        });
+        print("NearbyService: Generated and saved new MeshID: $_localMeshId");
+      }
+    }
+    
     final username = user?.displayName ?? 'LifeMesh User';
     final deviceName = Platform.isAndroid ? await _platform.invokeMethod<String>('getDeviceName') : 'Device';
 
     _localEndpointName = 'LM|$_localMeshId|$username|$deviceName';
-  }
-
-  Future<bool> _requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.location,
-      Permission.bluetooth,
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
-      Permission.bluetoothAdvertise,
-      Permission.nearbyWifiDevices,
-    ].request();
-
-    // Location is always required
-    if (!(statuses[Permission.location]?.isGranted ?? false)) {
-      return false;
-    }
-
-    // Bluetooth permissions: 
-    // On Android 12+, Scan/Connect/Advertise are required.
-    // On Android <12, legacy Bluetooth is required.
-    // permission_handler manages some of this, but let's be safe.
-    bool btScan = statuses[Permission.bluetoothScan]?.isGranted ?? true;
-    bool btConnect = statuses[Permission.bluetoothConnect]?.isGranted ?? true;
-    bool btAdvertise = statuses[Permission.bluetoothAdvertise]?.isGranted ?? true;
-    bool btLegacy = statuses[Permission.bluetooth]?.isGranted ?? true;
-
-    // Nearby WiFi is Android 13+ only
-    // bool wifi = statuses[Permission.nearbyWifiDevices]?.isGranted ?? true;
-
-    return btScan && btConnect && btAdvertise && btLegacy;
   }
 
   Future<void> _startAdvertising() async {
@@ -222,9 +178,8 @@ class NearbyService extends GetxService {
   }
 
   Future<void> _handlePayload(String endpointId, Payload payload) async {
-    if (payload.type != PayloadType.BYTES) return;
+    if (payload.type != PayloadType.BYTES || payload.bytes == null) return;
     
-    // Decrypt the payload
     final decryptedMap = await _cryptoService.decryptMessage(payload.bytes!.toList());
     if (decryptedMap == null) return;
 
@@ -244,19 +199,32 @@ class NearbyService extends GetxService {
       
       await _upsertUser(user);
     } else if (decryptedMap['type'] == 'lifemesh.heartbeat.v1') {
-      final user = NearbyUserModel()
-        ..endpointId = endpointId
-        ..meshId = decryptedMap['meshId']
-        ..isOnline = true
-        ..lastSeen = DateTime.now()
-        ..lastHeartbeat = DateTime.now()
-        ..connectionStatus = MeshConnectionState.connected.name;
-      
-      await _upsertUser(user);
-    } else if (decryptedMap['type'] == 'lifemesh.chat.v1') {
-      // Handle incoming encrypted chat messages here later
-      print("Received secure chat message: ${decryptedMap['text']}");
+      final existing = await _db.isar.nearbyUserModels.filter().meshIdEqualTo(decryptedMap['meshId']).findFirst();
+      if (existing != null) {
+        await _db.isar.writeTxn(() async {
+          existing.isOnline = true;
+          existing.lastHeartbeat = DateTime.now();
+          existing.lastSeen = DateTime.now();
+          existing.connectionStatus = MeshConnectionState.connected.name;
+          await _db.isar.nearbyUserModels.put(existing);
+        });
+      }
+    } else if (decryptedMap['type'] == 'lifemesh.chat.message.v1') {
+      print("NearbyService: Incoming Chat Payload");
+      _messageBus.publishChatMessage(ChatMessagePayload.fromJson(decryptedMap));
+    } else if (decryptedMap['type'] == 'lifemesh.chat.ack.v1') {
+      print("NearbyService: Incoming ACK Payload");
+      _messageBus.publishAck(ChatAckPayload.fromJson(decryptedMap));
+    } else if (decryptedMap['type'] == 'lifemesh.chat.typing.v1') {
+      print("NearbyService: Incoming Typing Payload");
+      _messageBus.publishTyping(ChatTypingPayload.fromJson(decryptedMap));
     }
+  }
+
+  Future<void> sendPayload(String endpointId, Map<String, dynamic> payload) async {
+    print("NearbyService: Transmitting encrypted ${payload['type']}");
+    final encryptedBytes = await _cryptoService.encryptMessage(payload);
+    await _nearby.sendBytesPayload(endpointId, Uint8List.fromList(encryptedBytes));
   }
 
   Future<void> _sendIdentity(String endpointId) async {
@@ -266,9 +234,7 @@ class NearbyService extends GetxService {
       'username': _localEndpointName.split('|')[2],
       'deviceName': _localEndpointName.split('|')[3],
     };
-    
-    final encryptedBytes = await _cryptoService.encryptMessage(payload);
-    await _nearby.sendBytesPayload(endpointId, Uint8List.fromList(encryptedBytes));
+    await sendPayload(endpointId, payload);
   }
 
   Future<void> _broadcastHeartbeat() async {
@@ -285,8 +251,18 @@ class NearbyService extends GetxService {
     }
   }
 
-  void _onUserLost(String endpointId) {
-    // We let the heartbeat cleanup handle Isar status, but we can do immediate local cleanup if desired.
+  void _onUserLost(String endpointId) async {
+    final meshId = _endpointMeshIds[endpointId];
+    if (meshId != null) {
+      final user = await _db.isar.nearbyUserModels.filter().meshIdEqualTo(meshId).findFirst();
+      if (user != null) {
+        await _db.isar.writeTxn(() async {
+          user.isOnline = false;
+          user.connectionStatus = MeshConnectionState.idle.name;
+          await _db.isar.nearbyUserModels.put(user);
+        });
+      }
+    }
   }
 
   Future<void> _upsertUser(NearbyUserModel user) async {
@@ -294,8 +270,6 @@ class NearbyService extends GetxService {
       final existing = await _db.isar.nearbyUserModels
           .filter()
           .meshIdEqualTo(user.meshId)
-          .or()
-          .endpointIdEqualTo(user.endpointId)
           .findFirst();
 
       if (existing != null) {
@@ -303,86 +277,9 @@ class NearbyService extends GetxService {
         user.connectedAt ??= existing.connectedAt;
         user.name ??= existing.name;
         user.deviceName ??= existing.deviceName;
-        user.discoverySource ??= existing.discoverySource;
-        user.connectionType ??= existing.connectionType;
       }
-      
+      user.connectedAt ??= DateTime.now();
       await _db.isar.nearbyUserModels.put(user);
-    });
-  }
-
-  void _setupIsarWatcher() {
-    _db.isar.nearbyUserModels.where().watch().listen((users) {
-      final active = users.where((u) => u.isOnline).toList();
-      activeNearbyUsers.assignAll(active);
-      
-      final connected = active.where((u) => u.connectionStatus == MeshConnectionState.connected.name).toList();
-      connectedNodes.assignAll(connected);
-      
-      _updateStats(active);
-    });
-  }
-
-  Future<void> _clearActiveStates() async {
-    final users = await _db.isar.nearbyUserModels.where().findAll();
-    await _db.isar.writeTxn(() async {
-      for (final user in users) {
-        user.isOnline = false;
-        user.connectionStatus = MeshConnectionState.idle.name;
-      }
-      await _db.isar.nearbyUserModels.putAll(users);
-    });
-  }
-
-  Future<void> _cleanupStaleUsers() async {
-    final now = DateTime.now();
-    final allUsers = await _db.isar.nearbyUserModels.where().findAll();
-    final users = allUsers.where((u) => u.isOnline).toList();
-    final toUpdate = <NearbyUserModel>[];
-
-    for (final user in users) {
-      final lastInteraction = user.lastHeartbeat ?? user.lastSeen ?? user.connectedAt;
-      if (lastInteraction == null || now.difference(lastInteraction).inSeconds > heartbeatTimeout) {
-        user.isOnline = false;
-        user.connectionStatus = MeshConnectionState.idle.name;
-        toUpdate.add(user);
-      }
-    }
-
-    if (toUpdate.isNotEmpty) {
-      await _db.isar.writeTxn(() async {
-        await _db.isar.nearbyUserModels.putAll(toUpdate);
-      });
-    }
-    
-    // Purge very old records (> 24h)
-    final oneDayAgo = now.subtract(const Duration(hours: 24));
-    final toDelete = allUsers.where((u) => (u.lastSeen ?? DateTime(0)).isBefore(oneDayAgo)).map((u) => u.id).toList();
-    if (toDelete.isNotEmpty) {
-      await _db.isar.writeTxn(() async {
-        await _db.isar.nearbyUserModels.deleteAll(toDelete);
-      });
-    }
-  }
-
-  void _updateStats(List<NearbyUserModel> activeUsers) {
-    if (activeUsers.isEmpty) {
-      avgSignalStrength.value = 0.0;
-    } else {
-      final total = activeUsers.fold<double>(0, (sum, u) => sum + (u.signalStrength ?? 0));
-      avgSignalStrength.value = total / activeUsers.length;
-    }
-    unawaited(_syncDashboardStats());
-  }
-
-  Future<void> _syncDashboardStats() async {
-    final stats = await _db.isar.dashboardStatModels.where().findFirst() ?? DashboardStatModel();
-    await _db.isar.writeTxn(() async {
-      stats.isMeshActive = isScanning.value;
-      stats.connectedNodes = connectedNodes.length;
-      stats.signalStrength = (avgSignalStrength.value * 100).round();
-      stats.lastUpdated = DateTime.now();
-      await _db.isar.dashboardStatModels.put(stats);
     });
   }
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:get/get.dart' hide Response;
 import 'package:shelf/shelf.dart';
@@ -9,12 +10,17 @@ import 'package:uuid/uuid.dart';
 import 'package:isar/isar.dart';
 
 import 'package:lifemesh/core/database_service.dart';
+import 'package:lifemesh/core/services/crypto_service.dart';
+import 'package:lifemesh/core/network/message_bus.dart';
+import 'package:lifemesh/core/network/payloads/chat_payloads.dart';
 import 'package:lifemesh/models/onboarding_user_model.dart';
 
 import 'package:network_info_plus/network_info_plus.dart';
 
 class LocalNodeServer extends GetxService {
   final DatabaseService _db = Get.find<DatabaseService>();
+  final CryptoService _cryptoService = Get.find<CryptoService>();
+  final MessageBus _messageBus = Get.find<MessageBus>();
   
   HttpServer? _server;
   int _port = 53317; // Default local port
@@ -70,10 +76,19 @@ class LocalNodeServer extends GetxService {
   }
 
   Future<void> _loadLocalIdentity() async {
-    final users = await _db.isar.onboardingUserModels.where().findAll();
-    final user = users.isNotEmpty ? users.first : null;
-
-    _localMeshId = user?.meshId ?? Uuid().v4();
+    final user = await _db.isar.onboardingUserModels.where().findFirst();
+    if (user != null && user.meshId != null) {
+      _localMeshId = user.meshId!;
+    } else {
+      _localMeshId = const Uuid().v4();
+      if (user != null) {
+        await _db.isar.writeTxn(() async {
+          user.meshId = _localMeshId;
+          await _db.isar.onboardingUserModels.put(user);
+        });
+        print("LocalNodeServer: Generated and saved new MeshID: $_localMeshId");
+      }
+    }
     _username = user?.displayName ?? 'LifeMesh User';
     
     // Simple device name extraction
@@ -103,14 +118,28 @@ class LocalNodeServer extends GetxService {
 
   Future<Response> _handleMessage(Request request) async {
     print("LocalNodeServer: /message called");
-    final body = await request.readAsString();
     try {
-      final data = jsonDecode(body);
-      print("LocalNodeServer received message: $data");
-      // TODO: Handle incoming message (pass to ChatService or MeshNetworkService)
-      return Response.ok(jsonEncode({'status': 'delivered'}), headers: {'content-type': 'application/json'});
+      final bytes = await request.read().expand((chunk) => chunk).toList();
+      final decryptedMap = await _cryptoService.decryptMessage(bytes);
+      
+      if (decryptedMap != null) {
+        print("LocalNodeServer: Decrypted message type: ${decryptedMap['type']}");
+        
+        if (decryptedMap['type'] == 'lifemesh.chat.message.v1') {
+          _messageBus.publishChatMessage(ChatMessagePayload.fromJson(decryptedMap));
+        } else if (decryptedMap['type'] == 'lifemesh.chat.ack.v1') {
+          _messageBus.publishAck(ChatAckPayload.fromJson(decryptedMap));
+        } else if (decryptedMap['type'] == 'lifemesh.chat.typing.v1') {
+          _messageBus.publishTyping(ChatTypingPayload.fromJson(decryptedMap));
+        }
+        
+        return Response.ok(jsonEncode({'status': 'delivered'}), headers: {'content-type': 'application/json'});
+      } else {
+        return Response.forbidden('Decryption failed');
+      }
     } catch (e) {
-      return Response.badRequest(body: 'Invalid JSON');
+      print("LocalNodeServer: Error handling message: $e");
+      return Response.badRequest(body: 'Invalid Request');
     }
   }
 

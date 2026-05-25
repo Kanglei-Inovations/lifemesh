@@ -6,12 +6,18 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 
 import 'package:lifemesh/core/database_service.dart';
+import 'package:lifemesh/core/services/crypto_service.dart';
 import 'package:lifemesh/core/services/nearby_service.dart';
 import 'package:lifemesh/core/network/lan_discovery_service.dart';
 import 'package:lifemesh/core/network/local_node_server.dart';
+import 'package:lifemesh/core/network/message_bus.dart';
+import 'package:lifemesh/core/network/payloads/chat_payloads.dart';
 import 'package:lifemesh/core/constants/mesh_states.dart';
 import 'package:lifemesh/models/nearby_user_model.dart';
 import 'package:lifemesh/models/dashboard_stat_model.dart';
+import 'package:lifemesh/models/chat_message_model.dart';
+import 'package:lifemesh/models/chat_room_model.dart';
+import 'package:lifemesh/models/onboarding_user_model.dart';
 
 class MeshNetworkService extends GetxService {
   final DatabaseService _db = Get.find<DatabaseService>();
@@ -19,6 +25,7 @@ class MeshNetworkService extends GetxService {
   late final NearbyService _nearbyService;
   late final LanDiscoveryService _lanService;
   late final LocalNodeServer _nodeServer;
+  late final MessageBus _messageBus;
 
   final Rx<MeshConnectionState> globalState = MeshConnectionState.idle.obs;
   final RxBool isScanning = false.obs;
@@ -32,12 +39,15 @@ class MeshNetworkService extends GetxService {
   
   static const int heartbeatTimeout = 15; // 15 seconds
 
+  final List<StreamSubscription> _busSubscriptions = [];
+
   Future<MeshNetworkService> init() async {
     print("MeshNetworkService: Initializing...");
     
     _nearbyService = Get.find<NearbyService>();
     _lanService = Get.find<LanDiscoveryService>();
     _nodeServer = Get.find<LocalNodeServer>();
+    _messageBus = Get.find<MessageBus>();
     
     // Pass local node port to LAN service
     _lanService.setNodePort(_nodeServer.port);
@@ -45,6 +55,7 @@ class MeshNetworkService extends GetxService {
     _lanService.onPeerDiscovered = _handleLanPeerDiscovered;
 
     _setupIsarWatcher();
+    _setupMessageBusListeners();
     
     _heartbeatPollerTimer = Timer.periodic(const Duration(seconds: 5), (_) => _pollLanHeartbeats());
     _cleanupTimer = Timer.periodic(const Duration(seconds: 5), (_) => _cleanupStaleUsers());
@@ -52,13 +63,169 @@ class MeshNetworkService extends GetxService {
     print("MeshNetworkService: Initialized.");
     return this;
   }
+
+  String? getEndpointForMeshId(String meshId) {
+    // 1. Check active nearby users (reactive list)
+    final activeUser = activeNearbyUsers.firstWhereOrNull((u) => u.meshId == meshId);
+    if (activeUser?.endpointId != null) return activeUser!.endpointId;
+
+    // 2. Check nearby service internal state (if needed, but usually isar is source of truth)
+    // For now, Isar is our source of truth for all users.
+    return null;
+  }
   
   @override
   void onClose() {
     _heartbeatPollerTimer?.cancel();
     _cleanupTimer?.cancel();
+    for (var sub in _busSubscriptions) {
+      sub.cancel();
+    }
     stopMesh();
     super.onClose();
+  }
+
+  void _setupMessageBusListeners() {
+    _busSubscriptions.add(_messageBus.incomingChatMessages.listen(_handleIncomingChatMessage));
+    _busSubscriptions.add(_messageBus.incomingAcks.listen(_handleIncomingAck));
+    _busSubscriptions.add(_messageBus.incomingTypingEvents.listen(_handleIncomingTyping));
+  }
+
+  Future<void> sendChatMessage({
+    String? endpointId,
+    required ChatMessagePayload payload,
+  }) async {
+    print("MeshNetworkService: Attempting to send chat message to ${payload.receiverMeshId}");
+    
+    // Resolve endpoint if not provided
+    final targetEndpointId = endpointId ?? getEndpointForMeshId(payload.receiverMeshId);
+    print("MeshNetworkService: Resolved endpoint ID: $targetEndpointId");
+
+    // 1. Try Nearby Connections (P2P)
+    if (targetEndpointId != null && targetEndpointId.isNotEmpty) {
+      try {
+        await _nearbyService.sendPayload(targetEndpointId, payload.toJson());
+        await _updateMessageStatus(payload.messageId, DeliveryStatus.sent);
+        print("MeshNetworkService: Message sent via Nearby Connections to $targetEndpointId");
+        return;
+      } catch (e) {
+        print("MeshNetworkService: Nearby transmission failed: $e");
+      }
+    } else {
+      print("MeshNetworkService: No Nearby endpoint found for ${payload.receiverMeshId}, trying LAN fallback...");
+    }
+
+    // 2. Try LAN Fallback (HTTP)
+    final peer = await _db.isar.nearbyUserModels.filter().meshIdEqualTo(payload.receiverMeshId).findFirst();
+    if (peer != null && peer.ipAddress != null && peer.port != null) {
+      try {
+        print("MeshNetworkService: Attempting LAN fallback to ${peer.ipAddress}:${peer.port}");
+        final client = HttpClient();
+        client.connectionTimeout = const Duration(seconds: 5);
+        final request = await client.postUrl(Uri.parse('http://${peer.ipAddress}:${peer.port}/message'));
+        request.headers.contentType = ContentType.json;
+        
+        final encryptedPayload = await Get.find<CryptoService>().encryptMessage(payload.toJson());
+        request.add(encryptedPayload);
+        
+        final response = await request.close();
+        if (response.statusCode == 200) {
+          await _updateMessageStatus(payload.messageId, DeliveryStatus.sent);
+          print("MeshNetworkService: Message sent via LAN HTTP.");
+          return;
+        } else {
+          print("MeshNetworkService: LAN HTTP failed with status ${response.statusCode}");
+        }
+      } catch (e) {
+        print("MeshNetworkService: LAN transmission failed: $e");
+      }
+    }
+
+    print("MeshNetworkService: All transport paths failed for message ${payload.messageId}");
+    await _updateMessageStatus(payload.messageId, DeliveryStatus.failed);
+  }
+
+  Future<void> sendAck(String endpointId, ChatAckPayload payload) async {
+    try {
+      await _nearbyService.sendPayload(endpointId, payload.toJson());
+    } catch (e) {
+      print("MeshNetworkService: Failed to send ACK: $e");
+    }
+  }
+
+  Future<void> _handleIncomingChatMessage(ChatMessagePayload payload) async {
+    print("MeshNetworkService: Processing incoming chat message: ${payload.messageId}");
+    
+    await _db.isar.writeTxn(() async {
+      // 1. Save the message
+      final model = ChatMessageModel()
+        ..messageId = payload.messageId
+        ..roomId = payload.roomId
+        ..senderMeshId = payload.senderMeshId
+        ..receiverMeshId = payload.receiverMeshId
+        ..text = payload.message
+        ..timestamp = payload.timestamp
+        ..deliveryStatus = DeliveryStatus.delivered
+        ..messageType = MessageType.values.firstWhere((e) => e.name == payload.messageType, orElse: () => MessageType.text)
+        ..isMine = false
+        ..isRead = false
+        ..isDelivered = true;
+      
+      await _db.isar.chatMessageModels.put(model);
+
+      // 2. Update/Create Room
+      var room = await _db.isar.chatRoomModels.filter().roomIdEqualTo(payload.roomId).findFirst();
+      if (room == null) {
+        room = ChatRoomModel()
+          ..roomId = payload.roomId
+          ..participantMeshIds = [payload.senderMeshId, payload.receiverMeshId]
+          ..createdAt = DateTime.now();
+      }
+      room.lastMessage = payload.message;
+      room.lastMessageTime = payload.timestamp;
+      room.unreadCount += 1;
+      await _db.isar.chatRoomModels.put(room);
+    });
+
+    // 3. Send ACK back
+    final ackTargetEndpointId = getEndpointForMeshId(payload.senderMeshId);
+    if (ackTargetEndpointId != null) {
+      final localUser = await _db.isar.onboardingUserModels.where().findFirst();
+      final ack = ChatAckPayload(
+        messageId: payload.messageId,
+        roomId: payload.roomId,
+        senderMeshId: localUser?.meshId ?? 'unknown',
+      );
+      await sendAck(ackTargetEndpointId, ack);
+      print("MeshNetworkService: ACK sent to $ackTargetEndpointId");
+    } else {
+      print("MeshNetworkService: Could not send ACK, no active endpoint for ${payload.senderMeshId}");
+    }
+    
+    print("MeshNetworkService: Incoming message saved and processed.");
+  }
+
+  Future<void> _handleIncomingAck(ChatAckPayload payload) async {
+    print("MeshNetworkService: Received ACK for message ${payload.messageId}");
+    await _updateMessageStatus(payload.messageId, DeliveryStatus.delivered);
+  }
+
+  void _handleIncomingTyping(ChatTypingPayload payload) {
+    print("MeshNetworkService: Typing event from ${payload.senderMeshId}: ${payload.isTyping}");
+    // TODO: Publish to a reactive state for UI
+  }
+
+  Future<void> _updateMessageStatus(String messageId, DeliveryStatus status) async {
+    await _db.isar.writeTxn(() async {
+      final msg = await _db.isar.chatMessageModels.filter().messageIdEqualTo(messageId).findFirst();
+      if (msg != null) {
+        msg.deliveryStatus = status;
+        if (status == DeliveryStatus.delivered) {
+          msg.isDelivered = true;
+        }
+        await _db.isar.chatMessageModels.put(msg);
+      }
+    });
   }
 
   Future<void> startMesh() async {

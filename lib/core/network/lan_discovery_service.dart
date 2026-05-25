@@ -91,10 +91,19 @@ class LanDiscoveryService extends GetxService {
   }
 
   Future<void> _loadLocalIdentity() async {
-    final users = await _db.isar.onboardingUserModels.where().findAll();
-    final user = users.isNotEmpty ? users.first : null;
-
-    _localMeshId = user?.meshId ?? Uuid().v4();
+    final user = await _db.isar.onboardingUserModels.where().findFirst();
+    if (user != null && user.meshId != null) {
+      _localMeshId = user.meshId!;
+    } else {
+      _localMeshId = const Uuid().v4();
+      if (user != null) {
+        await _db.isar.writeTxn(() async {
+          user.meshId = _localMeshId;
+          await _db.isar.onboardingUserModels.put(user);
+        });
+        print("LanDiscoveryService: Generated and saved new MeshID: $_localMeshId");
+      }
+    }
     _username = user?.displayName ?? 'LifeMesh User';
     _deviceName = Platform.operatingSystem;
   }

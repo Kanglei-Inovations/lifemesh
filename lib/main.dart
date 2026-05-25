@@ -22,6 +22,7 @@ import 'package:lifemesh/core/services/background_mesh_service.dart';
 import 'package:lifemesh/core/services/nearby_service.dart';
 import 'package:lifemesh/core/network/local_node_server.dart';
 import 'package:lifemesh/core/network/lan_discovery_service.dart';
+import 'package:lifemesh/core/network/message_bus.dart';
 import 'package:lifemesh/core/services/mesh_network_service.dart';
 
 import 'features/settings/presentation/pages/settings_screen.dart';
@@ -30,6 +31,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => DatabaseService().init());
   Get.put(CryptoService());
+  Get.put(MessageBus());
   Get.put(BackgroundMeshService());
   
   // Register Hybrid Discovery Services

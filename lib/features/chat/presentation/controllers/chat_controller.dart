@@ -1,29 +1,52 @@
+import 'dart:async';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
+import '../../../../core/database_service.dart';
+import '../../../../core/services/mesh_network_service.dart';
+import '../../../../models/chat_room_model.dart';
+import '../../../../models/nearby_user_model.dart';
 
 class ChatController extends GetxController {
-  var chats = <ChatSummary>[].obs;
+  final DatabaseService _db = Get.find<DatabaseService>();
+  final MeshNetworkService _meshService = Get.find<MeshNetworkService>();
+
+  var chats = <ChatRoomModel>[].obs;
   var groups = <GroupSummary>[].obs;
-  var nearbyUsers = <NearbyMeshUser>[].obs;
+  var nearbyUsers = <NearbyUserModel>[].obs;
   var selectedTab = 0.obs;
+
+  StreamSubscription? _chatSubscription;
+  StreamSubscription? _nearbySubscription;
 
   @override
   void onInit() {
     super.onInit();
-    loadMockChats();
-    loadMockGroups();
-    loadMockNearby();
+    _setupWatchers();
   }
 
-  void loadMockChats() {
-    chats.value = [];
+  @override
+  void onClose() {
+    _chatSubscription?.cancel();
+    _nearbySubscription?.cancel();
+    super.onClose();
   }
 
-  void loadMockGroups() {
-    groups.value = [];
-  }
+  void _setupWatchers() {
+    _chatSubscription = _db.isar.chatRoomModels
+        .where()
+        .sortByLastMessageTimeDesc()
+        .watch(fireImmediately: true)
+        .listen((data) {
+          chats.assignAll(data);
+        });
 
-  void loadMockNearby() {
-    nearbyUsers.value = [];
+    _nearbySubscription = _db.isar.nearbyUserModels
+        .filter()
+        .isOnlineEqualTo(true)
+        .watch(fireImmediately: true)
+        .listen((data) {
+          nearbyUsers.assignAll(data);
+        });
   }
 }
 
